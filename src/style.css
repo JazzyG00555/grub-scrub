@@ -1,0 +1,1022 @@
+/* GLOBAL COLOR PALETTE */
+:root {
+  --burgundy: #591536;
+  --dark-brown: #3E1A2E;
+  --pink: #B85F99;
+  --green: #A3A63E;
+  --red: #D84E4E;
+  --page: #F4F4F4;
+}
+
+/* GLOBAL PAGE LAYOUT */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* GLOBAL AR SCENE, CANVAS, AND STRUCTURE OF SCREENS */
+a-scene {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  z-index: 0 !important;
+}
+
+.a-canvas {
+  pointer-events: none !important;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 20;
+  pointer-events: none;
+}
+
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.screen.active {
+  display: block;
+  pointer-events: auto;
+}
+
+.normal-screen {
+  background: var(--page);
+}
+
+/* GLOBAL BUTTON STYLING */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+
+
+
+/* SCREEN 1: TITLE SECTION */
+
+/* Title-Logo-Taglines Format */
+.title-content {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--burgundy);
+  color: white;
+  margin-bottom: 22px;
+}
+
+.logo-circle i {
+  font-size: 35px;
+}
+
+
+/* SCREEN 1: TITLE FONT */
+
+.grub-title {
+  margin: 0;
+  text-align: center;
+  color: var(--burgundy);
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(65px, 19vw, 96px);
+  line-height: 0.95;
+  letter-spacing: 2px;
+}
+
+
+.tagline {
+  margin: 25px 0 38px;
+  color: var(--burgundy);
+  font-size: 14px;
+}
+
+/* Primary Button Format */
+.primary-button {
+  border: none;
+  padding: 16px 27px;
+  background: #B56095;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.primary-button:disabled {
+  opacity: 0.4;
+}
+
+
+
+
+
+/* SCREEN 2: FOOD PROFILE SELECTION SECTION */
+
+.page {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  padding:
+    max(55px, env(safe-area-inset-top))
+    22px
+    max(25px, env(safe-area-inset-bottom));
+}
+
+.page-title {
+  margin: 0 0 7px;
+  color: #111;
+  font-size: 23px;
+  font-weight: 600;
+}
+
+.small-intro {
+  margin: 0 0 12px;
+  color: #555;
+  font-size: 13px;
+}
+
+/* Select all Or Unselect Button Format */
+.select-all-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.add-all-button,
+.add-all-button.all-selected {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--burgundy);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* User Food Profile Cards */
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.user-card {
+  min-height: 76px;
+  padding: 8px 13px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--burgundy);
+  color: white;
+}
+
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-photo {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border: 2px solid rgba(255,255,255,0.75);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #DDD;
+}
+
+.profile-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.user-restrictions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.restriction-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: white;
+}
+
+.user-add-button {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-add-button.selected {
+  background: var(--green);
+  color: white;
+}
+
+.user-add-button i {
+  font-size: 24px;
+}
+
+.scan-button {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  padding: 18px 15px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+
+
+
+/* SCREEN 3: CAMERA LOGO SCANNING SECTION */
+
+.camera-screen {
+  position: relative;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+.camera-screen.active {
+  display: block;
+  pointer-events: none !important;
+}
+
+.camera-header {
+  position: absolute;
+  top: max(22px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 44px);
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.66);
+  color: white;
+  text-align: center;
+}
+
+.camera-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.camera-subtitle,
+.scan-frame,
+.corner,
+.demo-controls {
+  display: none !important;
+}
+
+.tracking-status {
+  position: absolute;
+  left: 50%;
+  bottom: max(38px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 10px 17px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.68);
+  color: white;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+
+
+/* SCREEN 4 & 5: LOADING & MATCH RESULTS SECTION */
+
+.center-screen {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.center-screen.active {
+  display: flex;
+}
+
+#screen-loading {
+  background: #EFBA2D;
+}
+
+#screen-result {
+  background: #CCD85B;
+}
+
+#screen-result.no-match {
+  background: #DF776E;
+}
+
+.loading-card,
+.result-card {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.loading-card {
+  color: var(--burgundy);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.result-icon {
+  color: var(--burgundy);
+  font-size: clamp(80px, 23vw, 136px);
+  line-height: 1;
+  margin-bottom: 24px;
+}
+
+.result-title {
+  color: var(--burgundy);
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 800;
+}
+
+.result-subtitle {
+  margin: 14px 0 0;
+  color: var(--burgundy);
+  font-size: clamp(14px, 3.5vw, 18px);
+  line-height: 1.5;
+}
+
+
+/* SCREEN 6: RESTAURANT MENU SECTION */
+
+.menu-page {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.restaurant-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 18px;
+  background: var(--page);
+}
+
+.restaurant-name {
+  margin: 0;
+  color: #111;
+  font-size: 13px;
+}
+
+/* Scan Again Button */
+.scan-again-button {
+  border: none;
+  background: transparent;
+  color: var(--burgundy);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Burgundy Header Rectangle */
+.menu-user-header {
+  background: var(--burgundy);
+  padding: 18px 16px 22px;
+  margin: 0;
+  border-radius: 0;
+}
+
+.menu-user-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.active-user-name {
+  margin: 0;
+  color: white;
+  font-size: 27px;
+}
+
+.active-user-restrictions {
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.menu-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 16px;
+  color: white;
+}
+
+.menu-summary strong {
+  font-size: 23px;
+  color: white;
+}
+
+.menu-summary #optionsMessage {
+  font-size: 13px;
+  color: white;
+}
+
+.wine-line {
+  height: 3px;
+  margin: 0 0 18px;
+  background: var(--burgundy);
+  border: none;
+}
+
+/* 3D Menu Grid Cards */
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-bottom: 110px;
+}
+
+.meal-card {
+  position: relative;
+  background: white;
+  color: #111;
+  overflow: hidden;
+}
+
+.meal-picture {
+  height: 138px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #E8E8E8;
+}
+
+.meal-picture model-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #E8E8E8;
+  --poster-color: #E8E8E8;
+  touch-action: pan-y;
+}
+
+.meal-name {
+  min-height: 42px;
+  padding: 8px;
+  box-sizing: border-box;
+  font-size: 12px;
+}
+
+/* House Salad Information Button */
+.ar-label {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 5;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #B85F99;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ar-label i {
+  font-size: 22px;
+}
+
+
+
+/* SCREEN 6: RESTAURANT MENU & DISC NAVIGATION SECTION */
+
+/* Bottom-Right Disc Navigation */
+.profile-disc {
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  width: 86px;
+  height: 86px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.profile-disc.open {
+  width: 190px;
+  height: 170px;
+}
+
+.profile-arc {
+  position: absolute;
+  inset: 0;
+  width: 190px;
+  height: 170px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.profile-disc.open .profile-arc {
+  opacity: 1;
+  visibility: visible;
+}
+
+.profile-arc path {
+  fill: none;
+  stroke: var(--dark-brown);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile-buttons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.profile-button {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #51102F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.profile-disc:not(.open) .profile-button {
+  display: none;
+}
+
+.profile-disc:not(.open) .profile-button.current {
+  display: flex;
+  background: var(--pink);
+}
+
+.profile-disc.open .profile-button {
+  background: #51102F;
+}
+
+.profile-disc.open .profile-button.active {
+  background: var(--pink);
+}
+
+.profile-button.small {
+  width: 62px;
+  height: 62px;
+}
+
+.profile-button.active {
+  width: 94px;
+  height: 94px;
+  z-index: 6;
+}
+
+.profile-disc:not(.open) .profile-button.active {
+  width: 70px;
+  height: 70px;
+}
+
+.profile-main-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.profile-button.small .profile-main-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.profile-button.active .profile-main-icon {
+  width: 76px;
+  height: 76px;
+}
+
+.profile-disc:not(.open)
+.profile-button.active .profile-main-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.profile-nav-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  box-sizing: border-box;
+}
+
+.profile-has-options .profile-nav-image {
+  border-color: var(--green);
+}
+
+.profile-no-options .profile-nav-image {
+  border-color: var(--red);
+}
+
+.profile-status-icon {
+  position: absolute;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.profile-status-icon i {
+  color: white;
+  font-size: 15px;
+}
+
+.profile-status-icon.ok {
+  background: var(--green);
+}
+
+.profile-status-icon.bad {
+  background: var(--red);
+}
+
+.profile-button.small .profile-status-icon {
+  right: 1px;
+  bottom: 3px;
+  width: 23px;
+  height: 23px;
+}
+
+.profile-button.active .profile-status-icon {
+  right: 3px;
+  bottom: 7px;
+  width: 28px;
+  height: 28px;
+}
+
+.profile-disc:not(.open)
+.profile-button.active .profile-status-icon {
+  right: 2px;
+  bottom: 4px;
+  width: 23px;
+  height: 23px;
+}
+
+.add-profile {
+  position: absolute;
+  right: 3px;
+  bottom: 4px;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 7;
+}
+
+.profile-disc.open .add-profile {
+  display: flex;
+}
+
+.add-profile i {
+  font-size: 40px;
+}
+
+
+
+/* SCREEN 7: HOUSE SALAD 3D VIEW SECTION */
+
+.dish-screen {
+  position: relative;
+  padding:
+    max(45px, env(safe-area-inset-top))
+    20px
+    20px;
+  background: transparent;
+}
+
+.dish-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(245,245,245,0.95);
+}
+
+.back-button {
+  border: none;
+  background: transparent;
+  color: var(--burgundy);
+  font-size: 24px;
+}
+
+.dish-restaurant {
+  font-size: 11px;
+}
+
+.dish-name {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.dish-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 15px;
+  border-radius: 18px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.dish-loading[hidden] {
+  display: none;
+}
+
+.salad-detail-stage {
+  position: absolute;
+  top: 24%;
+  left: 5%;
+  width: 90%;
+  height: 47%;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+#saladDetailViewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  --poster-color: transparent;
+  --min-hotspot-opacity: 0.9;
+}
+
+.ingredients-panel {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  padding: 16px 13px;
+  background: rgba(245,245,245,0.96);
+  z-index: 5;
+}
+
+.ingredients-panel h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.ingredient-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ingredient-button {
+  border: none;
+  background: var(--burgundy);
+  color: white;
+  padding: 9px 12px;
+  font-size: 11px;
+}
+
+.ingredient-button.active {
+  background: #8B315D;
+  outline: 2px solid var(--burgundy);
+  outline-offset: 2px;
+}
+
+/* Inredient Hotspots */
+.ingredient-hotspot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  transform: translate(-7px, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.25));
+}
+
+.ingredient-hotspot.is-hidden {
+  display: none !important;
+}
+
+.ingredient-hotspot.label-left {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 23px), -50%);
+}
+
+/* Ingredient Hotspot Information Icon */
+.hotspot-icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--dark-brown);
+  border: 2px solid #FFFFFF;
+  box-sizing: border-box;
+  color: #FFFFFF;
+}
+
+.hotspot-icon i {
+  font-size: 21px;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+/* House Salad Ingredient Label Border Styling */
+.hotspot-label {
+  display: block;
+  padding: 9px 13px;
+  background: #FFFFFF;
+  color: var(--dark-brown);
+  border: 2px solid var(--dark-brown);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+
+/* GLOBAL SPACING FIXES & ADJUSTMENTS */
+.camera-title,
+.tracking-status,
+.loading-card,
+.result-title,
+.restaurant-name,
+.active-user-restrictions,
+#optionsMessage,
+.dish-restaurant,
+.dish-name,
+.dish-loading {
+  margin: 0;
+}
+
+.result-subtitle {
+  margin-top: 14px;
+}
+
+.menu-summary p {
+  margin: 0;
+}
+
+.loading-card {
+  justify-content: center;
+}
+
+
+/* GLOBAL: CHEESBURGER FONT STYLING */
+
+/* Regular Font for All Text and Buttons */
+html,
+body,
+button {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* The Grub Scrub Title Burger */
+.grub-title {
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+
+/* Food Profile Selection Title Burger */
+
+/* Who's Here & What Can They Munch On? */
+.page-title {
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-size: clamp(32px, 5.5vw, 38px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 1px;
+}
+
+/* Camera Scanning Title Burger */
+
+/* Scan Restaurant Logo */
+.camera-title {
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 1px;
+}
+
+
+/* Match Results Burger */
+
+/* It is... */
+.loading-card {
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-size: clamp(64px, 12vw, 90px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* A MATCH! and NOT A MATCH */
+.result-title {
+  font-family: 'Cheeseburger', Arial, sans-serif;
+  font-size: clamp(64px, 10vw, 72px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 2px;
+  text-align: center;
+}
