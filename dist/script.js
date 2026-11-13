@@ -127,6 +127,7 @@ window.addEventListener("load", function () {
       image: BASE + "Jamie.jpg",
       restrictions: ["Vegan"],
       filters: ["vegan"],
+      minMeals: 5,
       selected: false
     },
     {
@@ -134,6 +135,7 @@ window.addEventListener("load", function () {
       image: BASE + "Gus.jpg",
       restrictions: ["Nut Allergy"],
       filters: ["nutSafe"],
+      minMeals: 3,
       selected: false
     },
     {
@@ -141,6 +143,7 @@ window.addEventListener("load", function () {
       image: BASE + "Brad.jpg",
       restrictions: ["Gluten Free", "Seafood Allergy"],
       filters: ["glutenFree", "seafoodSafe"],
+      minMeals: 3,
       selected: false
     }
   ];
@@ -365,32 +368,35 @@ window.addEventListener("load", function () {
     );
   }
 
+  // A full group match requires every selected person
+  // to have at least their own minimum number of meals.
+
   function groupMatch(restaurant) {
     const selected = selectedUsers();
 
     return (
       selected.length > 0 &&
       selected.every(user =>
-        available(restaurant, user).length > 0
+        available(restaurant, user).length >= user.minMeals
       )
     );
   }
 
-  // NEW: Calculate one percentage for the entire group.
-  // Each selected person counts as accommodated when
-  // the prototype identifies at least one matching meal.
+  // Group compatibility percentage:
+  // Number of selected people whose minimum meal
+  // requirements are met, divided by group size.
 
   function groupCompatibility(restaurant) {
     const selected = selectedUsers();
 
     if (selected.length === 0) return 0;
 
-    const peopleWithOptions = selected.filter(user =>
-      available(restaurant, user).length > 0
+    const peopleMeetingMinimum = selected.filter(user =>
+      available(restaurant, user).length >= user.minMeals
     ).length;
 
     return Math.round(
-      (peopleWithOptions / selected.length) * 100
+      (peopleMeetingMinimum / selected.length) * 100
     );
   }
 
@@ -642,8 +648,8 @@ window.addEventListener("load", function () {
     resultTitle.textContent = `${percentage}% MATCH`;
 
     resultSubtitle.textContent = matched
-      ? "Everyone has meal options here!"
-      : "Not everyone has meal options here.";
+      ? "Everyone meets their minimum meal requirement!"
+      : "Not everyone has enough meal options here.";
 
     screens.result.classList.toggle(
       "no-match",
@@ -791,8 +797,9 @@ window.addEventListener("load", function () {
         .map(text => `<span>${text}</span>`)
         .join("<span> • </span>");
 
-    // Keep individual meal counts on the menu screen.
+    // Individual meal counts remain on the menu screen.
     // The group percentage appears on the match screen.
+
     availabilityCount.textContent =
       `${meals.length}/${restaurant.meals.length}`;
 
