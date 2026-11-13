@@ -1,23 +1,19 @@
+
 window.addEventListener("load", function () {
   "use strict";
 
   /* == GLOBAL: ASSETS & AUDIO GITHUB == */
+
   const BASE =
     "https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/";
 
-  const SALAD_URL =
-    BASE + "salad%20%281%29.glb";
+  const SALAD_URL = BASE + "salad%20%281%29.glb";
 
   const SOUNDS = {
-    click:
-      BASE +
-      "683099__florianreichelt__computer-mouse-click.mp3",
-    profile:
-      BASE + "320549__debsound__pop-19.wav",
-    bell:
-      BASE + "restaurantbellisamatch.mp3",
-    crunch:
-      BASE + "crunchnotamatch.wav"
+    click: BASE + "683099__florianreichelt__computer-mouse-click.mp3",
+    profile: BASE + "320549__debsound__pop-19.wav",
+    bell: BASE + "restaurantbellisamatch.mp3",
+    crunch: BASE + "crunchnotamatch.wav"
   };
 
   const AudioClass =
@@ -54,12 +50,8 @@ window.addEventListener("load", function () {
     audioContext.resume().catch(console.warn);
 
     try {
-      const buffer =
-        audioContext.createBuffer(1, 1, 22050);
-
-      const source =
-        audioContext.createBufferSource();
-
+      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
       source.buffer = buffer;
       source.connect(audioContext.destination);
       source.start();
@@ -87,16 +79,11 @@ window.addEventListener("load", function () {
     const play = () => {
       if (!soundBuffers[name]) return;
 
-      const source =
-        audioContext.createBufferSource();
-
-      const gain =
-        audioContext.createGain();
+      const source = audioContext.createBufferSource();
+      const gain = audioContext.createGain();
 
       source.buffer = soundBuffers[name];
-
-      gain.gain.value =
-        name === "click" ? 0.9 : 0.75;
+      gain.gain.value = name === "click" ? 0.9 : 0.75;
 
       source.connect(gain);
       gain.connect(audioContext.destination);
@@ -128,13 +115,12 @@ window.addEventListener("load", function () {
       button.classList.contains("user-add-button") ||
       button.id === "addAllButton";
 
-    playSound(
-      profileSelection ? "profile" : "click"
-    );
+    playSound(profileSelection ? "profile" : "click");
   }, true);
 
 
   /* == GLOBAL: USER FOOD PROFILES & JPGS == */
+
   const users = [
     {
       name: "Jamie",
@@ -153,20 +139,18 @@ window.addEventListener("load", function () {
     {
       name: "Brad",
       image: BASE + "Brad.jpg",
-      restrictions: [
-        "Gluten Free",
-        "Seafood Allergy"
-      ],
-      filters: [
-        "glutenFree",
-        "seafoodSafe"
-      ],
+      restrictions: ["Gluten Free", "Seafood Allergy"],
+      filters: ["glutenFree", "seafoodSafe"],
       selected: false
     }
   ];
 
 
   /* == GLOBAL: RESTAURANT MENUS & DIETARY DATA == */
+
+  // Prototype dietary flags only.
+  // These do not constitute verified allergy-safety information.
+
   const restaurants = [
     {
       name: "P.S. Kitchen",
@@ -197,8 +181,7 @@ window.addEventListener("load", function () {
         },
         {
           name: "Salmon & Brussels Sprouts",
-          model:
-            BASE + "salmon_and_brussel_sprouts.glb",
+          model: BASE + "salmon_and_brussel_sprouts.glb",
           vegan: false,
           nutSafe: true,
           glutenFree: true,
@@ -206,8 +189,7 @@ window.addEventListener("load", function () {
         },
         {
           name: "Mac and Cheese",
-          model:
-            BASE + "mac_and_cheese_bowl.glb",
+          model: BASE + "mac_and_cheese_bowl.glb",
           vegan: true,
           nutSafe: false,
           glutenFree: false,
@@ -220,8 +202,7 @@ window.addEventListener("load", function () {
       meals: [
         {
           name: "Pork Belly Tonkotsu Ramen",
-          model:
-            BASE + "pork_belly_tonkotsu_ramen.glb",
+          model: BASE + "pork_belly_tonkotsu_ramen.glb",
           vegan: false,
           nutSafe: true,
           glutenFree: false,
@@ -263,6 +244,7 @@ window.addEventListener("load", function () {
 
 
   /* == GLOBAL: APPLICATION SCAN STATE == */
+
   const state = {
     screen: "title",
     restaurant: 0,
@@ -275,8 +257,7 @@ window.addEventListener("load", function () {
     menuVersion: 0
   };
 
-  const $ = selector =>
-    document.querySelector(selector);
+  const $ = selector => document.querySelector(selector);
 
   const mobile = () =>
     window.matchMedia("(max-width:767px)").matches ||
@@ -284,6 +265,7 @@ window.addEventListener("load", function () {
 
 
   /* == GLOBAL: HTML ELEMENT REFERENCES & LINGO == */
+
   const screens = {
     title: $("#screen-title"),
     users: $("#screen-users"),
@@ -307,9 +289,7 @@ window.addEventListener("load", function () {
 
   const restaurantName = $("#restaurantName");
   const activeUserName = $("#activeUserName");
-  const activeUserRestrictions =
-    $("#activeUserRestrictions");
-
+  const activeUserRestrictions = $("#activeUserRestrictions");
   const availabilityCount = $("#availabilityCount");
   const optionsMessage = $("#optionsMessage");
   const menuGrid = $("#menuGrid");
@@ -356,6 +336,7 @@ window.addEventListener("load", function () {
 
 
   /* == GLOBAL: FOOD DIETARY MATCHING LOGIC == */
+
   function selectedUsers() {
     return users.filter(user => user.selected);
   }
@@ -395,8 +376,27 @@ window.addEventListener("load", function () {
     );
   }
 
+  // NEW: Calculate one percentage for the entire group.
+  // Each selected person counts as accommodated when
+  // the prototype identifies at least one matching meal.
+
+  function groupCompatibility(restaurant) {
+    const selected = selectedUsers();
+
+    if (selected.length === 0) return 0;
+
+    const peopleWithOptions = selected.filter(user =>
+      available(restaurant, user).length > 0
+    ).length;
+
+    return Math.round(
+      (peopleWithOptions / selected.length) * 100
+    );
+  }
+
 
   /* == SCREEN 1: TITLE SCREEN START BUTTON == */
+
   startButton.addEventListener("click", () => {
     renderUsers();
     showScreen("users");
@@ -404,6 +404,7 @@ window.addEventListener("load", function () {
 
 
   /* == SCREEN 2: FOOD PROFILE SELECTION == */
+
   function renderUsers() {
     userList.innerHTML = "";
 
@@ -421,7 +422,6 @@ window.addEventListener("load", function () {
 
         <div class="user-text">
           <div class="user-name">${user.name}</div>
-
           <div class="user-restrictions">
             ${user.restrictions.map(
               text => `<span>${text}</span>`
@@ -489,6 +489,7 @@ window.addEventListener("load", function () {
 
 
   /* == SCREEN 2: LET'S GET SCANNING BUTTON == */
+
   scanButton.addEventListener("click", async () => {
     if (!selectedUsers().length) return;
 
@@ -497,16 +498,15 @@ window.addEventListener("load", function () {
     state.profileMenuOpen = false;
     state.flowVersion++;
 
-    trackingStatus.textContent =
-      "Looking for logo...";
+    trackingStatus.textContent = "Looking for logo...";
 
     showScreen("camera");
-
     await startAR();
   });
 
 
   /* == SCREEN 3: AR CAMERA MANAGEMENT == */
+
   async function waitForScene() {
     if (scene.hasLoaded) return;
 
@@ -534,8 +534,7 @@ window.addEventListener("load", function () {
         scene.systems["mindar-image-system"];
 
       if (!system) {
-        trackingStatus.textContent =
-          "Scanner not ready";
+        trackingStatus.textContent = "Scanner not ready";
         return;
       }
 
@@ -547,18 +546,12 @@ window.addEventListener("load", function () {
         state.screen === "camera" &&
         !state.scanComplete
       ) {
-        trackingStatus.textContent =
-          "Looking for logo...";
+        trackingStatus.textContent = "Looking for logo...";
       }
 
     } catch (error) {
-      console.error(
-        "MindAR camera error:",
-        error
-      );
-
-      trackingStatus.textContent =
-        "Camera could not start";
+      console.error("MindAR camera error:", error);
+      trackingStatus.textContent = "Camera could not start";
 
     } finally {
       state.mindARStarting = false;
@@ -575,10 +568,7 @@ window.addEventListener("load", function () {
       try {
         await system.stop();
       } catch (error) {
-        console.warn(
-          "Camera stop error:",
-          error
-        );
+        console.warn("Camera stop error:", error);
       }
 
       state.mindARStarted = false;
@@ -601,7 +591,6 @@ window.addEventListener("load", function () {
     state.profileMenuOpen = false;
 
     const version = ++state.flowVersion;
-
     trackingStatus.textContent = "Logo found";
 
     setTimeout(() => {
@@ -620,9 +609,11 @@ window.addEventListener("load", function () {
 
           showScreen("menu");
           renderMenu();
-        }, 1200);
+
+        }, 3500);
 
       }, 850);
+
     }, 250);
   }
 
@@ -639,18 +630,20 @@ window.addEventListener("load", function () {
   });
 
 
-  /* == SCREENS 4 & 5: LOADING & MATCH RESULTS == */
+  /* == SCREENS 4 & 5: LOADING & GROUP MATCH RESULTS == */
 
   function renderResult() {
-    const matched =
-      groupMatch(restaurants[state.restaurant]);
+    const restaurant = restaurants[state.restaurant];
 
-    resultTitle.textContent =
-      matched ? "A MATCH!" : "NOT A MATCH";
+    const percentage = groupCompatibility(restaurant);
+    const matched = groupMatch(restaurant);
+
+    // Show the group percentage on the MATCH screen.
+    resultTitle.textContent = `${percentage}% MATCH`;
 
     resultSubtitle.textContent = matched
-      ? "Everyone can eat here!"
-      : "Whoops! Not everyone can eat here!";
+      ? "Everyone has meal options here!"
+      : "Not everyone has meal options here.";
 
     screens.result.classList.toggle(
       "no-match",
@@ -673,6 +666,7 @@ window.addEventListener("load", function () {
 
 
   /* == SCREEN 6: 3D MENU MODEL LOADING ALERT == */
+
   function createViewer(meal) {
     const viewer =
       document.createElement("model-viewer");
@@ -747,9 +741,7 @@ window.addEventListener("load", function () {
       }
 
       const onLoad = () => finish(true);
-
-      const onError = event =>
-        finish(false, event);
+      const onError = event => finish(false, event);
 
       status.textContent = "Loading 3D food...";
 
@@ -780,9 +772,7 @@ window.addEventListener("load", function () {
   /* == SCREEN 6: RESTAURANT MENU GRID GENERATION == */
 
   function renderMenu() {
-    const restaurant =
-      restaurants[state.restaurant];
-
+    const restaurant = restaurants[state.restaurant];
     const user = activeUser();
 
     if (!user) {
@@ -797,10 +787,12 @@ window.addEventListener("load", function () {
     activeUserName.textContent = user.name;
 
     activeUserRestrictions.innerHTML =
-      user.restrictions.map(
-        text => `<span>${text}</span>`
-      ).join("<span> • </span>");
+      user.restrictions
+        .map(text => `<span>${text}</span>`)
+        .join("<span> • </span>");
 
+    // Keep individual meal counts on the menu screen.
+    // The group percentage appears on the match screen.
     availabilityCount.textContent =
       `${meals.length}/${restaurant.meals.length}`;
 
@@ -859,7 +851,7 @@ window.addEventListener("load", function () {
         });
       }
 
- /* == INFORMATION ICON ONLY USED ON HOUSE SALAD MENU OPTION == */
+      /* == INFORMATION ICON FOR HOUSE SALAD == */
 
       if (meal.heroAR) {
         const infoButton =
@@ -897,9 +889,10 @@ window.addEventListener("load", function () {
       );
     }
   }
-  
-  
-    /* == SCREEN 6: BOTTOM-RIGHT DISC PROFILE NAVIGATION == */
+
+
+  /* == SCREEN 6: PROFILE DISC NAVIGATION == */
+
   function renderProfileDisc() {
     profileButtons.innerHTML = "";
 
@@ -908,8 +901,7 @@ window.addEventListener("load", function () {
       state.profileMenuOpen
     );
 
-    const restaurant =
-      restaurants[state.restaurant];
+    const restaurant = restaurants[state.restaurant];
 
     const ordered = selectedUsers().map(
       (user, index) => ({
@@ -926,8 +918,6 @@ window.addEventListener("load", function () {
         item => item.index !== state.activeUser
       )
     ].filter(Boolean);
-
-    /* PROFILE CIRCLE POSITIONS */
 
     const slots = [
       { left: "25px", top: "11px" },
@@ -1011,13 +1001,13 @@ window.addEventListener("load", function () {
 
   addProfileButton.addEventListener("click", () => {
     state.profileMenuOpen = false;
-
     renderUsers();
     showScreen("users");
   });
 
 
   /* == SCREEN 6: SCAN AGAIN BUTTON == */
+
   scanAgainButton.addEventListener(
     "click",
     async event => {
@@ -1031,7 +1021,6 @@ window.addEventListener("load", function () {
         "Looking for logo...";
 
       showScreen("camera");
-
       await restartAR();
     }
   );
@@ -1049,26 +1038,17 @@ window.addEventListener("load", function () {
     cucumber: "Cucumbers"
   };
 
-  /*
-    Current hotspot ingredient positions.
-     1. Tomatoes
-     2. Cucumbers
-     3. Lettuce
-  */
-
   const HOTSPOT_DEFAULTS = {
     lettuce: {
       x: -0.24,
       y: 0.26,
       z: 0.08
     },
-
     tomato: {
       x: -0.10,
       y: 0.05,
       z: 0.36
     },
-
     cucumber: {
       x: 0.34,
       y: -0.08,
@@ -1148,7 +1128,8 @@ window.addEventListener("load", function () {
   }
 
 
-  /* == SCREEN 7: HOTSPOT LABEL POSITIONING & DIRECTION == */
+  /* == SCREEN 7: HOTSPOT LABEL POSITIONING == */
+
   function showIngredientHotspot(part) {
     selectedIngredient = part;
 
@@ -1186,6 +1167,7 @@ window.addEventListener("load", function () {
         "Hotspot positioning error:",
         error
       );
+
       hideHotspot();
     }
   }
@@ -1215,7 +1197,6 @@ window.addEventListener("load", function () {
       });
 
     detailViewer.removeAttribute("auto-rotate");
-
     showIngredientHotspot(part);
   }
 
@@ -1246,7 +1227,7 @@ window.addEventListener("load", function () {
   });
 
 
-  /* == SCREEN 7: HOUSE SALAD 3D DETAILS & INGREDIENT LABELS== */
+  /* == SCREEN 7: HOUSE SALAD DETAILS == */
 
   function openHeroDish(meal) {
     if (
@@ -1270,6 +1251,7 @@ window.addEventListener("load", function () {
 
       button.type = "button";
       button.className = "ingredient-button";
+
       button.textContent = ingredient.name;
       button.dataset.part = ingredient.part;
 
@@ -1298,9 +1280,11 @@ window.addEventListener("load", function () {
   }
 
 
-  /* == SCREEN 7: BACK TO MENU BUTTON == */
+  /* == SCREEN 7: BACK TO MENU == */
+
   backToMenu.addEventListener("click", () => {
     state.profileMenuOpen = false;
+
     hideHotspot();
 
     showScreen("menu");
@@ -1309,5 +1293,7 @@ window.addEventListener("load", function () {
 
 
   /* == GLOBAL: INITIALIZATION == */
+
   renderUsers();
+
 });
