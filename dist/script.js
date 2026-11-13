@@ -260,6 +260,48 @@ window.addEventListener("load", function () {
     menuVersion: 0
   };
 
+
+/* == RESTAURANT RECALL LIST: LOCAL STORAGE == */
+
+const RECALL_STORAGE_KEY = "grub-scrub-recall-v1";
+
+function getRecallList() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(RECALL_STORAGE_KEY) || "[]"
+    );
+
+    if (!Array.isArray(saved)) return [];
+
+    return saved.filter(index =>
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < restaurants.length
+    );
+  } catch (error) {
+    console.warn("Could not load recall list:", error);
+    return [];
+  }
+}
+
+function saveRestaurantToRecall(index) {
+  try {
+    const existing = getRecallList();
+
+    const updated = [
+      index,
+      ...existing.filter(savedIndex => savedIndex !== index)
+    ];
+
+    localStorage.setItem(
+      RECALL_STORAGE_KEY,
+      JSON.stringify(updated)
+    );
+  } catch (error) {
+    console.warn("Could not save restaurant:", error);
+  }
+}
+
   const $ = selector => document.querySelector(selector);
 
   const mobile = () =>
@@ -269,15 +311,18 @@ window.addEventListener("load", function () {
 
   /* == GLOBAL: HTML ELEMENT REFERENCES & LINGO == */
 
+
   const screens = {
     title: $("#screen-title"),
     users: $("#screen-users"),
     camera: $("#screen-camera"),
     loading: $("#screen-loading"),
     result: $("#screen-result"),
+    recall: $("#screen-recall"),
     menu: $("#screen-menu"),
     dish: $("#screen-dish")
   };
+  
 
   const startButton = $("#startButton");
   const scanButton = $("#scanButton");
@@ -301,6 +346,12 @@ window.addEventListener("load", function () {
   const profileButtons = $("#profileButtons");
   const addProfileButton = $("#addProfileButton");
   const scanAgainButton = $("#scanAgainButton");
+
+const recallBackButton = $("#recallBackButton");
+const recallList = $("#recallList");
+const openRecallButton = $("#openRecallButton");
+const recallEmpty = $("#recallEmpty");
+
   const backToMenu = $("#backToMenu");
 
   const dishRestaurant = $("#dishRestaurant");
@@ -595,6 +646,7 @@ window.addEventListener("load", function () {
     state.restaurant = index;
     state.scanComplete = true;
     state.profileMenuOpen = false;
+    saveRestaurantToRecall(index);
 
     const version = ++state.flowVersion;
     trackingStatus.textContent = "Logo found";
@@ -1011,6 +1063,73 @@ window.addEventListener("load", function () {
     renderUsers();
     showScreen("users");
   });
+
+
+/* == RESTAURANT RECALL LIST: DISPLAY == */
+
+function renderRecallList() {
+  const savedRestaurants = getRecallList();
+
+  recallList.innerHTML = "";
+
+  recallEmpty.style.display =
+    savedRestaurants.length === 0 ? "block" : "none";
+
+  // Sort restaurants by their current group compatibility.
+  const sorted = [...savedRestaurants].sort(
+    (a, b) =>
+      groupCompatibility(restaurants[b]) -
+      groupCompatibility(restaurants[a])
+  );
+
+  sorted.forEach(index => {
+    const restaurant = restaurants[index];
+    const percentage = groupCompatibility(restaurant);
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "recall-card";
+
+    const name = document.createElement("span");
+    name.className = "recall-restaurant-name";
+    name.textContent = restaurant.name;
+
+    const score = document.createElement("span");
+    score.className = "recall-score";
+    score.textContent = `${percentage}% MATCH`;
+
+    card.classList.toggle("full-match", percentage === 100);
+
+    card.append(name, score);
+
+    // Open the restaurant's menu without scanning again.
+    card.addEventListener("click", () => {
+      state.restaurant = index;
+      state.activeUser = 0;
+      state.profileMenuOpen = false;
+
+      showScreen("menu");
+      renderMenu();
+    });
+
+    recallList.appendChild(card);
+  });
+}
+
+
+/* == RESTAURANT RECALL LIST NAVIGATION == */
+
+
+openRecallButton.addEventListener("click", () => {
+  renderRecallList();
+  showScreen("recall");
+});
+
+
+recallBackButton.addEventListener("click", () => {
+  showScreen("menu");
+  renderMenu();
+});
 
 
   /* == SCREEN 6: SCAN AGAIN BUTTON == */

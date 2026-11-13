@@ -153,6 +153,31 @@
   </section>
 
 
+<!-- Restaurant Recall List Screen -->
+<section id="screen-recall" class="screen normal-screen">
+  <div class="page recall-page">
+
+    <header class="recall-header">
+      <button id="recallBackButton" type="button">
+        <i class="ph ph-arrow-left"></i>
+        BACK
+      </button>
+
+      <h1>Restaurant Recall List</h1>
+      <p>Restaurants you've previously scanned</p>
+    </header>
+
+    <div id="recallList" class="recall-list">
+      <!-- Saved restaurants will appear here -->
+    </div>
+
+    <p id="recallEmpty" class="recall-empty">
+      No restaurants saved yet. Scan a restaurant logo to get started!
+    </p>
+
+  </div>
+</section>
+
   <!-- Screen 6: Restaurant Menu -->
 
   <section id="screen-menu" class="screen normal-screen">
@@ -170,6 +195,14 @@
           type="button">
           SCAN AGAIN
         </button>
+
+<button
+id="openRecallButton"
+class="scan-again-button"
+type="button">
+RECALL LIST
+</button>
+
       </header>
 
       <!-- Selected Food Profile Information -->
