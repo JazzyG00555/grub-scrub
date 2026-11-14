@@ -1,47 +1,49 @@
+
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
 
-  <head>
-    <meta charset="UTF-8">
-    <title>JasminGuerrera_Project_2</title>
-    <link rel="stylesheet" href="./style.css">
+  <title>Grub Scrub</title>
 
-  </head>
-    
-  <body>
-  <!-- LINKS AND SCRIPTS -->
+  <link rel="stylesheet"
+        href="./style.css?v=20261114-arflags">
 
-<!-- Phosphor Icon Library -->
-<link rel="stylesheet"
-  href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet"
+        href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
-<!-- A-Frame -->
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <link rel="stylesheet"
+        href="https://fonts.cdnfonts.com/css/cheeseburger">
 
-<!-- MindAR -->
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-<!-- Model Viewer -->
-<script type="module"
-  src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-<!-- Cheeseburger Font -->
-<link href="https://fonts.cdnfonts.com/css/cheeseburger" rel="stylesheet">
+  <script type="module"
+          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-<!-- MAIN APPLICATION CONTAINER -->
+  <!-- Live menu text recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+
+<body>
+
 <main id="app">
 
- 
-<!-- ALL SCREENS--> 
+  <!-- ======================================
+       START SCREEN
+       ====================================== -->
 
- <!-- Screen 1: Title -->
-
-  <section id="screen-title" class="screen normal-screen active">
+  <section id="screen-title"
+           class="screen normal-screen active">
 
     <div class="title-content">
 
       <div class="logo-circle">
-        <i class="ph ph-fork-knife" aria-hidden="true"></i>
+        <i class="ph ph-fork-knife"></i>
       </div>
 
       <h1 class="grub-title">
@@ -54,171 +56,431 @@
         Find meals for everyone at the table!
       </p>
 
-      <button id="startButton" class="primary-button" type="button">
-       START
+      <button id="startButton"
+              class="primary-button"
+              type="button">
+        START
       </button>
+
     </div>
   </section>
 
 
- <!-- Screen 2: Food Profile Selection -->
+  <!-- ======================================
+       TODAY'S PLANS
+       ====================================== -->
 
-  <section id="screen-users" class="screen normal-screen">
+  <section id="screen-plans"
+           class="screen normal-screen">
 
-    <div class="page">
+    <div class="wireframe-choice-page">
+
+      <h2>What are today's plans?</h2>
+
+      <div class="wireframe-choice-buttons">
+
+        <button id="lastMinuteButton"
+                type="button">
+          Last Minute Meal
+        </button>
+
+        <button id="pregatheringButton"
+                type="button">
+          Pregathering Planning
+        </button>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       SCANNER CHOICE
+       ====================================== -->
+
+  <section id="screen-scan-choice"
+           class="screen normal-screen">
+
+    <div class="wireframe-choice-page">
+
+      <h2>
+        Which item would you like to scan?
+      </h2>
+
+      <div class="wireframe-choice-buttons">
+
+        <button id="chooseLogoScanner"
+                type="button">
+          Scan Logo
+        </button>
+
+        <button id="chooseMenuScanner"
+                type="button">
+          Scan Menu
+        </button>
+
+      </div>
+
+      <button id="scannerChoiceBack"
+              class="wireframe-back-button"
+              type="button">
+        BACK
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       FOOD PROFILES
+       ====================================== -->
+
+  <section id="screen-users"
+           class="screen normal-screen">
+
+    <div class="page profiles-page">
 
       <h2 class="page-title">
         Who's Here &amp; What Can They Munch On?
       </h2>
 
       <p class="small-intro">
-        Add the food profiles of the people who are joining today.
+        Add the food profiles of the people joining today.
       </p>
 
-      <!-- Select All or Unselect Button -->
       <div class="select-all-row">
-
-        <button id="addAllButton" class="add-all-button"
-          type="button">
+        <button id="addAllButton"
+                class="add-all-button"
+                type="button">
           SELECT ALL
         </button>
       </div>
 
-      <!-- Profiles Generated by Javascript -->
-      <div id="userList" class="user-list"></div>
+      <div id="userList"
+           class="user-list">
+      </div>
 
-      <!-- Let's Get Scanning Button -->
       <button id="scanButton"
-        class="primary-button scan-button"
-        type="button" disabled>
+              class="primary-button scan-button"
+              type="button"
+              disabled>
         LET'S GET SCANNING!
       </button>
+
     </div>
   </section>
 
 
-  <!-- Screen 3: Camera Logo Scanning -->
+  <!-- ======================================
+       LIVE MENU SCANNER WITH AR FLAGS
+       ====================================== -->
 
-  <section id="screen-camera" class="screen camera-screen">
-    
+  <section id="screen-menu-scanner"
+           class="screen camera-screen">
+
+    <div class="menu-scanner-page">
+
+      <header class="menu-scanner-header">
+
+        <button id="menuScannerBack"
+                type="button"
+                aria-label="Go back">
+          <i class="ph ph-arrow-left"></i>
+        </button>
+
+        <h2>Scan Restaurant Menu</h2>
+
+      </header>
+
+      <div class="menu-camera-container">
+
+        <video id="menuCameraVideo"
+               autoplay
+               playsinline
+               muted>
+        </video>
+
+        <canvas id="menuCaptureCanvas"
+                hidden>
+        </canvas>
+
+        <!-- FLOATING AR DIETARY FLAGS -->
+        <div id="menuARFlagLayer"
+             class="menu-ar-flag-layer"
+             aria-label="Potential dietary conflict markers">
+        </div>
+
+        <!-- CAMERA SCANNING GUIDE -->
+        <div class="menu-camera-guide"
+             aria-hidden="true">
+
+          <div class="menu-camera-frame"></div>
+
+        </div>
+
+        <p id="menuCameraStatus"
+           role="status"
+           aria-live="polite">
+          Point your camera at the restaurant menu to scan.
+        </p>
+
+      </div>
+
+      <div class="menu-scanner-controls">
+
+        <button id="captureMenuButton"
+                type="button"
+                disabled>
+          SAVE MENU RESULTS
+        </button>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       SAVED SCANNED MENU RESULTS
+       ====================================== -->
+
+  <section id="screen-menu-results"
+           class="screen normal-screen">
+
+    <div class="menu-results-page">
+
+      <header class="menu-results-header">
+
+        <button id="menuResultsBack"
+                type="button"
+                aria-label="Back">
+          <i class="ph ph-arrow-left"></i>
+        </button>
+
+        <button id="filterFlagsButton"
+                class="filter-flags-button"
+                type="button">
+          Filter Flags
+        </button>
+
+      </header>
+
+      <div class="menu-results-score">
+
+        <p id="menuResultsMatchLabel">
+          Analysis pending
+        </p>
+
+        <div id="menuResultsProgress"
+             class="menu-results-progress"
+             role="progressbar"
+             aria-label="Menu compatibility analysis"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuetext="Not analyzed">
+
+          <div id="menuResultsProgressFill"></div>
+
+        </div>
+
+      </div>
+
+      <div class="menu-results-photo-area">
+
+        <img id="menuResultsPhoto"
+             alt="Saved restaurant menu photograph">
+
+      </div>
+
+      <p id="menuFlagsMessage"
+         class="menu-flags-message"
+         hidden>
+        Red flags indicate possible dietary conflicts
+        detected from visible menu text.
+        Ingredients and cross-contact still need verification.
+      </p>
+
+      <p class="menu-results-disclaimer">
+        Saved for review. A missing warning does not mean
+        a dish is safe. Always verify ingredients and
+        allergens with the restaurant.
+      </p>
+
+      <div class="menu-results-actions">
+
+        <button id="retakeMenuResultsButton"
+                class="menu-results-retake"
+                type="button">
+          Retake Photo
+        </button>
+
+        <button id="saveMenuResultsButton"
+                class="save-menu-results-button"
+                type="button">
+          Save Menu Results
+        </button>
+
+        <p id="menuSaveStatus"
+           class="menu-save-status"
+           role="status">
+        </p>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       EXISTING LOGO SCANNER
+       ====================================== -->
+
+  <section id="screen-camera"
+           class="screen camera-screen">
+
     <header class="camera-header">
       <h2 class="camera-title">
-        Scan Restaurant Logo
+        SCAN RESTAURANT LOGO
       </h2>
     </header>
 
     <p id="trackingStatus"
-      class="tracking-status"
-      role="status"
-      aria-live="polite">
-      Looking for Restaurant logo...
+       class="tracking-status"
+       role="status"
+       aria-live="polite">
+      Looking for logo...
     </p>
+
   </section>
 
 
-  <!-- Screen 4: Loading the Match -->
+  <!-- ======================================
+       LOADING SCREEN
+       ====================================== -->
 
   <section id="screen-loading"
-    class="screen normal-screen center-screen">
+           class="screen normal-screen center-screen">
 
-    <p class="loading-card" role="status">
+    <p class="loading-card">
       IT IS...
     </p>
 
   </section>
 
 
-  <!-- Screen 5: Match Results -->
+  <!-- ======================================
+       LOGO COMPATIBILITY RESULT
+       ====================================== -->
 
   <section id="screen-result"
-    class="screen normal-screen center-screen">
+           class="screen normal-screen center-screen">
 
-    <div id="resultCard" class="result-card">
+    <div id="resultCard"
+         class="result-card">
 
-      <!-- Match Or Not a Match Icons -->
       <i id="resultIcon"
-        class="ph ph-check-circle result-icon"
-        aria-hidden="true"></i>
+         class="ph ph-check-circle result-icon">
+      </i>
 
-      <!-- Result Title -->
-      <h2 id="resultTitle" class="result-title">
+      <h2 id="resultTitle"
+          class="result-title">
         A MATCH!
       </h2>
 
-      <!-- Result Subtitle -->
-      <p id="resultSubtitle" class="result-subtitle">
+      <p id="resultSubtitle"
+         class="result-subtitle">
         Everyone can eat here!
       </p>
+
     </div>
   </section>
 
 
-<!-- Restaurant Recall List Screen -->
-<section id="screen-recall" class="screen normal-screen">
-  <div class="page recall-page">
+  <!-- ======================================
+       RESTAURANT RECALL LIST
+       ====================================== -->
 
-    <header class="recall-header">
-      <button id="recallBackButton" type="button">
-        <i class="ph ph-arrow-left"></i>
-        BACK
-      </button>
+  <section id="screen-recall"
+           class="screen normal-screen">
 
-      <h1>Restaurant Recall List</h1>
-      <p>Restaurants you've previously scanned</p>
-    </header>
+    <div class="page recall-page">
 
-    <div id="recallList" class="recall-list">
-      <!-- Saved restaurants will appear here -->
-    </div>
+      <header class="recall-header">
 
-    <p id="recallEmpty" class="recall-empty">
-      No restaurants saved yet. Scan a restaurant logo to get started!
-    </p>
-
-  </div>
-</section>
-
-  <!-- Screen 6: Restaurant Menu -->
-
-  <section id="screen-menu" class="screen normal-screen">
-    <div class="page menu-page">
-
-      <!-- Restaurant Name -->
-      <header class="restaurant-top-row">
-        <h2 id="restaurantName" class="restaurant-name">
-          P.S. Kitchen
-        </h2>
-        
-      <!-- Scan Again Button -->
-        <button id="scanAgainButton"
-          class="scan-again-button"
-          type="button">
-          SCAN AGAIN
+        <button id="recallBackButton"
+                type="button">
+          <i class="ph ph-arrow-left"></i>
+          BACK
         </button>
 
-<button
-id="openRecallButton"
-class="scan-again-button"
-type="button">
-RECALL LIST
-</button>
+        <h1>Restaurant Recall List</h1>
+
+        <p>
+          Previously scanned restaurants and menus
+        </p>
 
       </header>
 
-      <!-- Selected Food Profile Information -->
+      <div id="recallList"
+           class="recall-list">
+      </div>
+
+      <p id="recallEmpty"
+         class="recall-empty">
+        No restaurants or menus saved yet.
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================
+       RESTAURANT MENU
+       ====================================== -->
+
+  <section id="screen-menu"
+           class="screen normal-screen">
+
+    <div class="page menu-page">
+
+      <header class="restaurant-top-row">
+
+        <h2 id="restaurantName"
+            class="restaurant-name">
+          P.S. Kitchen
+        </h2>
+
+        <button id="scanAgainButton"
+                class="scan-again-button"
+                type="button">
+          SCAN AGAIN
+        </button>
+
+        <button id="openRecallButton"
+                class="scan-again-button"
+                type="button">
+          RECALL LIST
+        </button>
+
+      </header>
+
       <div class="menu-user-header">
+
         <div class="menu-user-row">
-          <h3 id="activeUserName" class="active-user-name">
+
+          <h3 id="activeUserName"
+              class="active-user-name">
             Jamie
           </h3>
 
           <p id="activeUserRestrictions"
-            class="active-user-restrictions">
+             class="active-user-restrictions">
             Vegan
           </p>
+
         </div>
 
-        <!-- Food Profile Menu Results -->
         <div class="menu-summary">
 
           <strong id="availabilityCount">
@@ -228,176 +490,182 @@ RECALL LIST
           <p id="optionsMessage">
             meal options available
           </p>
+
         </div>
-       </div>
-
-      <!-- Menu Divider -->
-      <div class="wine-line" aria-hidden="true"></div>
-
-      <!-- 3D Meal Sketchfab Models -->
-      <div id="menuGrid" class="menu-grid"></div>
       </div>
 
-      <!-- Bottom-Right Disc Navigation -->
-      <nav id="profileDisc"
-      class="profile-disc"
-      aria-label="Food profile navigation">
-     
-        <!-- Disc Profile Arc-->
-        <svg class="profile-arc"
-        viewBox="0 0 190 170"
-        aria-hidden="true">
-        <path
-          d="M 34 158 C 5 87, 39 23, 110 20 C 137 20, 157 29, 178 37">
-        </path>
-        </svg>
+      <div class="wine-line"
+           aria-hidden="true">
+      </div>
 
-      <!-- Disc Profile Buttons-->
-      <div id="profileButtons" class="profile-buttons">         </div>
+      <div id="menuGrid"
+           class="menu-grid">
+      </div>
+
+    </div>
 
 
-      <!-- Add More to the Disc Profiles Button -->
+    <!-- FOOD PROFILE DISC -->
+    <nav id="profileDisc"
+         class="profile-disc"
+         aria-label="Food profile navigation">
+
+      <svg class="profile-arc"
+           viewBox="0 0 190 170"
+           aria-hidden="true">
+
+        <path d="M 34 158 C 5 87, 39 23, 110 20 C 137 20, 157 29, 178 37"></path>
+
+      </svg>
+
+      <div id="profileButtons"
+           class="profile-buttons">
+      </div>
+
       <button id="addProfileButton"
-        class="add-profile"
-        type="button"
-        aria-label="Edit food profiles">
-
-        <i class="ph ph-plus" aria-hidden="true"></i>
+              class="add-profile"
+              type="button"
+              aria-label="Edit food profiles">
+        <i class="ph ph-plus"></i>
       </button>
+
     </nav>
+
   </section>
 
 
- <!-- Screen 7: House Salad 3D Label View -->
+  <!-- ======================================
+       3D HOUSE SALAD DETAILS
+       ====================================== -->
 
-   <section id="screen-dish" class="screen dish-screen">
+  <section id="screen-dish"
+           class="screen dish-screen">
 
-    <!-- House Salad Header -->
     <header class="dish-header">
 
       <button id="backToMenu"
-        class="back-button"
-        type="button"
-        aria-label="Back to menu">
-
-        <i class="ph ph-arrow-left" aria-hidden="true"></i>
+              class="back-button"
+              type="button"
+              aria-label="Back to menu">
+        <i class="ph ph-arrow-left"></i>
       </button>
+
       <div>
 
-        <p id="dishRestaurant" class="dish-restaurant">
+        <p id="dishRestaurant"
+           class="dish-restaurant">
           P.S. Kitchen
         </p>
 
-        <h2 id="dishName" class="dish-name">
+        <h2 id="dishName"
+            class="dish-name">
           House Salad
         </h2>
 
       </div>
+
     </header>
 
-
-    <!-- 3D Model Loading Status - Because it's long-->
     <p id="dishLoading"
-      class="dish-loading"
-      role="status"
-      aria-live="polite"
-      hidden>
+       class="dish-loading"
+       role="status"
+       hidden>
       Loading House Salad...
     </p>
 
+    <div id="saladDetailStage"
+         class="salad-detail-stage">
 
-    <!-- 3D Sketchfab Model -->
-    <div id="saladDetailStage" class="salad-detail-stage">
+      <model-viewer id="saladDetailViewer"
+                    alt="Interactive 3D House Salad"
+                    camera-controls
+                    auto-rotate
+                    rotation-per-second="12deg"
+                    interaction-prompt="none"
+                    camera-orbit="0deg 65deg auto"
+                    field-of-view="35deg"
+                    shadow-intensity="0.6"
+                    exposure="1"
+                    loading="eager">
 
-      <model-viewer
-        id="saladDetailViewer"
-        alt="Interactive 3D House Salad with ingredient labels"
-        camera-controls
-        auto-rotate
-        rotation-per-second="12deg"
-        interaction-prompt="none"
-        camera-orbit="0deg 65deg auto"
-        field-of-view="35deg"
-        shadow-intensity="0.6"
-        exposure="1"
-        loading="eager">
-
-
-        <!-- Ingredient Hotspot Labels -->
         <div id="ingredientHotspot"
-          slot="hotspot-ingredient"
-          data-position="0m 0m 0m"
-          data-normal="0m 1m 0m"
-          class="ingredient-hotspot is-hidden"
-          aria-hidden="true">
+             slot="hotspot-ingredient"
+             data-position="0m 0m 0m"
+             data-normal="0m 1m 0m"
+             class="ingredient-hotspot is-hidden"
+             aria-hidden="true">
 
-         <!-- Circle Icon for Label -->
           <span class="hotspot-icon">
-
-            <i class="ph ph-circle"
-              aria-hidden="true"></i>
+            <i class="ph ph-circle"></i>
           </span>
 
-          <!-- Ingredient Hotspot Label Names -->
-          <span id="hotspotLabel" class="hotspot-label">
+          <span id="hotspotLabel"
+                class="hotspot-label">
             Lettuce
           </span>
+
         </div>
+
       </model-viewer>
+
     </div>
 
+    <div class="ingredients-panel">
 
-      <!-- Ingredient Hotspot Title -->
-      <div class="ingredients-panel">
       <h3>Ingredients</h3>
 
-      <!-- Ingredient Hotspot Selection Buttons -->
       <div id="ingredientButtons"
-        class="ingredient-buttons">
+           class="ingredient-buttons">
       </div>
+
     </div>
+
   </section>
+
 </main>
 
 
-<!-- GITHUB LOGO CONNECTIONS-->
+<!-- ========================================
+     MINDAR LOGO TARGETS
+     ======================================== -->
 
-<!-- MINDAR: RESTAURANT LOGO RECOGNITION -->
-<a-scene
-  id="arScene"
-  mindar-image="
-    imageTargetSrc: https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/targets%20(1).mind;
-    autoStart: false;
-    uiLoading: no;
-    uiScanning: no;
-    uiError: no;
-  "
-  color-space="sRGB"
-  renderer="colorManagement: true; alpha: true"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded>
+<a-scene id="arScene"
+         mindar-image="
+           imageTargetSrc: https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/targets%20(1).mind;
+           autoStart: false;
+           uiLoading: no;
+           uiScanning: no;
+           uiError: no;
+         "
+         color-space="sRGB"
+         renderer="colorManagement: true; alpha: true"
+         vr-mode-ui="enabled: false"
+         device-orientation-permission-ui="enabled: false"
+         embedded>
 
-  <!-- AR CAMERA -->
   <a-camera id="arCamera"
-    position="0 0 0"
-    look-controls="enabled: false">
+            position="0 0 0"
+            look-controls="enabled: false">
   </a-camera>
 
-  <!-- P.S. KITCHEN LOGO TARGET -->
   <a-entity id="psTarget"
-    mindar-image-target="targetIndex: 1">
+            mindar-image-target="targetIndex: 1">
   </a-entity>
 
-  <!-- RAMEN DANBO LOGO TARGET -->
   <a-entity id="danboTarget"
-    mindar-image-target="targetIndex: 0">
+            mindar-image-target="targetIndex: 0">
   </a-entity>
 
 </a-scene>
-    <script  src="./script.js"></script>
-    <script type="module" src="./supabase-test.js"></script>
 
-  </body>
-  
+
+<!-- APPLICATION SCRIPT -->
+<script src="./script.js?v=20261114-arflags"></script>
+
+<!-- EXISTING SUPABASE TEST -->
+<script type="module"
+        src="./supabase-test.js">
+</script>
+
+</body>
 </html>

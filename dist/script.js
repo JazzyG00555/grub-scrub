@@ -2,7 +2,10 @@
 window.addEventListener("load", function () {
   "use strict";
 
-  /* == GLOBAL: ASSETS & AUDIO GITHUB == */
+  /* ==========================================
+     GRUB SCRUB V02
+     ASSETS AND AUDIO
+     ========================================== */
 
   const BASE =
     "https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/";
@@ -31,6 +34,7 @@ window.addEventListener("load", function () {
           if (!response.ok) {
             throw new Error("HTTP " + response.status);
           }
+
           return response.arrayBuffer();
         })
         .catch(error => {
@@ -50,11 +54,18 @@ window.addEventListener("load", function () {
     audioContext.resume().catch(console.warn);
 
     try {
-      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const buffer = audioContext.createBuffer(
+        1,
+        1,
+        22050
+      );
+
       const source = audioContext.createBufferSource();
+
       source.buffer = buffer;
       source.connect(audioContext.destination);
       source.start();
+
     } catch (error) {
       console.warn("Audio unlock:", error);
     }
@@ -111,15 +122,17 @@ window.addEventListener("load", function () {
 
     unlockAudio();
 
-    const profileSelection =
+    const profileClick =
       button.classList.contains("user-add-button") ||
       button.id === "addAllButton";
 
-    playSound(profileSelection ? "profile" : "click");
+    playSound(profileClick ? "profile" : "click");
   }, true);
 
 
-  /* == GLOBAL: USER FOOD PROFILES & JPGS == */
+  /* ==========================================
+     FOOD PROFILES
+     ========================================== */
 
   const users = [
     {
@@ -141,18 +154,27 @@ window.addEventListener("load", function () {
     {
       name: "Brad",
       image: BASE + "Brad.jpg",
-      restrictions: ["Gluten Free", "Seafood Allergy"],
-      filters: ["glutenFree", "seafoodSafe"],
+      restrictions: [
+        "Gluten Free",
+        "Seafood Allergy"
+      ],
+      filters: [
+        "glutenFree",
+        "seafoodSafe"
+      ],
       minMeals: 3,
       selected: false
     }
   ];
 
 
-  /* == GLOBAL: RESTAURANT MENUS & DIETARY DATA == */
+  /* ==========================================
+     PROTOTYPE RESTAURANT DATA
 
-  // Prototype dietary flags only.
-  // These do not constitute verified allergy-safety information.
+     This data is for demonstration.
+     Dietary compatibility has not been
+     verified with the restaurants.
+     ========================================== */
 
   const restaurants = [
     {
@@ -167,9 +189,18 @@ window.addEventListener("load", function () {
           seafoodSafe: true,
           heroAR: true,
           ingredients: [
-            { name: "Lettuce", part: "lettuce" },
-            { name: "Tomatoes", part: "tomato" },
-            { name: "Cucumbers", part: "cucumber" }
+            {
+              name: "Lettuce",
+              part: "lettuce"
+            },
+            {
+              name: "Tomatoes",
+              part: "tomato"
+            },
+            {
+              name: "Cucumbers",
+              part: "cucumber"
+            }
           ]
         },
         {
@@ -184,7 +215,9 @@ window.addEventListener("load", function () {
         },
         {
           name: "Salmon & Brussels Sprouts",
-          model: BASE + "salmon_and_brussel_sprouts.glb",
+          model:
+            BASE +
+            "salmon_and_brussel_sprouts.glb",
           vegan: false,
           nutSafe: true,
           glutenFree: true,
@@ -192,7 +225,9 @@ window.addEventListener("load", function () {
         },
         {
           name: "Mac and Cheese",
-          model: BASE + "mac_and_cheese_bowl.glb",
+          model:
+            BASE +
+            "mac_and_cheese_bowl.glb",
           vegan: true,
           nutSafe: false,
           glutenFree: false,
@@ -205,7 +240,9 @@ window.addEventListener("load", function () {
       meals: [
         {
           name: "Pork Belly Tonkotsu Ramen",
-          model: BASE + "pork_belly_tonkotsu_ramen.glb",
+          model:
+            BASE +
+            "pork_belly_tonkotsu_ramen.glb",
           vegan: false,
           nutSafe: true,
           glutenFree: false,
@@ -246,75 +283,49 @@ window.addEventListener("load", function () {
   ];
 
 
-  /* == GLOBAL: APPLICATION SCAN STATE == */
+  /* ==========================================
+     APP STATE
+     ========================================== */
 
   const state = {
     screen: "title",
     restaurant: 0,
     activeUser: 0,
+    selectedScanType: null,
+
     scanComplete: false,
     mindARStarted: false,
     mindARStarting: false,
+
     profileMenuOpen: false,
     flowVersion: 0,
-    menuVersion: 0
+    menuVersion: 0,
+
+    recallOrigin: "menu",
+    menuResultFromRecall: false
   };
 
 
-/* == RESTAURANT RECALL LIST: LOCAL STORAGE == */
+  /* ==========================================
+     HTML REFERENCES
+     ========================================== */
 
-const RECALL_STORAGE_KEY = "grub-scrub-recall-v1";
-
-function getRecallList() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(RECALL_STORAGE_KEY) || "[]"
-    );
-
-    if (!Array.isArray(saved)) return [];
-
-    return saved.filter(index =>
-      Number.isInteger(index) &&
-      index >= 0 &&
-      index < restaurants.length
-    );
-  } catch (error) {
-    console.warn("Could not load recall list:", error);
-    return [];
-  }
-}
-
-function saveRestaurantToRecall(index) {
-  try {
-    const existing = getRecallList();
-
-    const updated = [
-      index,
-      ...existing.filter(savedIndex => savedIndex !== index)
-    ];
-
-    localStorage.setItem(
-      RECALL_STORAGE_KEY,
-      JSON.stringify(updated)
-    );
-  } catch (error) {
-    console.warn("Could not save restaurant:", error);
-  }
-}
-
-  const $ = selector => document.querySelector(selector);
+  const $ = selector =>
+    document.querySelector(selector);
 
   const mobile = () =>
     window.matchMedia("(max-width:767px)").matches ||
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-
-  /* == GLOBAL: HTML ELEMENT REFERENCES & LINGO == */
-
+    /iPhone|iPad|iPod|Android/i.test(
+      navigator.userAgent
+    );
 
   const screens = {
     title: $("#screen-title"),
+    plans: $("#screen-plans"),
+    scanChoice: $("#screen-scan-choice"),
     users: $("#screen-users"),
+    menuScanner: $("#screen-menu-scanner"),
+    menuResults: $("#screen-menu-results"),
     camera: $("#screen-camera"),
     loading: $("#screen-loading"),
     result: $("#screen-result"),
@@ -322,13 +333,53 @@ function saveRestaurantToRecall(index) {
     menu: $("#screen-menu"),
     dish: $("#screen-dish")
   };
-  
 
   const startButton = $("#startButton");
-  const scanButton = $("#scanButton");
-  const addAllButton = $("#addAllButton");
+  const lastMinuteButton = $("#lastMinuteButton");
+  const pregatheringButton = $("#pregatheringButton");
+
+  const chooseLogoScanner = $("#chooseLogoScanner");
+  const chooseMenuScanner = $("#chooseMenuScanner");
+  const scannerChoiceBack = $("#scannerChoiceBack");
+
   const userList = $("#userList");
+  const addAllButton = $("#addAllButton");
+  const scanButton = $("#scanButton");
+
+  const menuScannerBack = $("#menuScannerBack");
+  const menuCameraVideo = $("#menuCameraVideo");
+  const menuCameraStatus = $("#menuCameraStatus");
+  const captureMenuButton = $("#captureMenuButton");
+  const menuCaptureCanvas = $("#menuCaptureCanvas");
+  const menuARFlagLayer = $("#menuARFlagLayer");
+
+  const menuResultsPhoto = $("#menuResultsPhoto");
+  const menuResultsBack = $("#menuResultsBack");
+
+  const menuResultsMatchLabel =
+    $("#menuResultsMatchLabel");
+
+  const menuResultsProgress =
+    $("#menuResultsProgress");
+
+  const menuResultsProgressFill =
+    $("#menuResultsProgressFill");
+
+  const filterFlagsButton = $("#filterFlagsButton");
+  const menuFlagsMessage = $("#menuFlagsMessage");
+
+  const retakeMenuResultsButton =
+    $("#retakeMenuResultsButton");
+
+  const saveMenuResultsButton =
+    $("#saveMenuResultsButton");
+
+  const menuSaveStatus = $("#menuSaveStatus");
+
   const trackingStatus = $("#trackingStatus");
+  const scene = $("#arScene");
+  const psTarget = $("#psTarget");
+  const danboTarget = $("#danboTarget");
 
   const resultCard = $("#resultCard");
   const resultTitle = $("#resultTitle");
@@ -337,7 +388,10 @@ function saveRestaurantToRecall(index) {
 
   const restaurantName = $("#restaurantName");
   const activeUserName = $("#activeUserName");
-  const activeUserRestrictions = $("#activeUserRestrictions");
+
+  const activeUserRestrictions =
+    $("#activeUserRestrictions");
+
   const availabilityCount = $("#availabilityCount");
   const optionsMessage = $("#optionsMessage");
   const menuGrid = $("#menuGrid");
@@ -347,13 +401,12 @@ function saveRestaurantToRecall(index) {
   const addProfileButton = $("#addProfileButton");
   const scanAgainButton = $("#scanAgainButton");
 
-const recallBackButton = $("#recallBackButton");
-const recallList = $("#recallList");
-const openRecallButton = $("#openRecallButton");
-const recallEmpty = $("#recallEmpty");
+  const recallBackButton = $("#recallBackButton");
+  const recallList = $("#recallList");
+  const openRecallButton = $("#openRecallButton");
+  const recallEmpty = $("#recallEmpty");
 
   const backToMenu = $("#backToMenu");
-
   const dishRestaurant = $("#dishRestaurant");
   const dishName = $("#dishName");
   const dishLoading = $("#dishLoading");
@@ -363,19 +416,42 @@ const recallEmpty = $("#recallEmpty");
   const hotspot = $("#ingredientHotspot");
   const hotspotLabel = $("#hotspotLabel");
 
-  const scene = $("#arScene");
-  const psTarget = $("#psTarget");
-  const danboTarget = $("#danboTarget");
+
+  /* ==========================================
+     CAMERA AND OCR STATE
+     ========================================== */
+
+  let menuCameraStream = null;
+  let menuCameraRequest = 0;
+
+  let menuPhotoCaptured = false;
+  let capturedMenuPhoto = "";
+
+  let lastRecognizedMenuText = "";
+  let lastDetectedMenuWarnings = [];
+
+  let menuOCRGeneration = 0;
+  let menuOCRWorkerPromise = null;
 
 
-  /* == GLOBAL: SCREEN MAIN NAVIGATION == */
+  /* ==========================================
+     SCREEN NAVIGATION
+     ========================================== */
 
   function showScreen(name) {
+    if (!screens[name]) {
+      console.error("Screen missing:", name);
+      return;
+    }
+
     Object.values(screens).forEach(screen => {
-      screen.classList.remove("active");
+      if (screen) {
+        screen.classList.remove("active");
+      }
     });
 
     screens[name].classList.add("active");
+
     state.screen = name;
 
     if (name !== "menu") {
@@ -386,10 +462,16 @@ const recallEmpty = $("#recallEmpty");
     if (name !== "dish") {
       showDishStatus("");
     }
+
+    if (name !== "menuScanner") {
+      stopMenuCamera();
+    }
   }
 
 
-  /* == GLOBAL: FOOD DIETARY MATCHING LOGIC == */
+  /* ==========================================
+     FOOD MATCHING
+     ========================================== */
 
   function selectedUsers() {
     return users.filter(user => user.selected);
@@ -419,48 +501,74 @@ const recallEmpty = $("#recallEmpty");
     );
   }
 
-  // A full group match requires every selected person
-  // to have at least their own minimum number of meals.
-
   function groupMatch(restaurant) {
     const selected = selectedUsers();
 
     return (
       selected.length > 0 &&
       selected.every(user =>
-        available(restaurant, user).length >= user.minMeals
+        available(restaurant, user).length >=
+        user.minMeals
       )
     );
   }
 
-  // Group compatibility percentage:
-  // Number of selected people whose minimum meal
-  // requirements are met, divided by group size.
-
   function groupCompatibility(restaurant) {
     const selected = selectedUsers();
 
-    if (selected.length === 0) return 0;
+    if (!selected.length) return 0;
 
-    const peopleMeetingMinimum = selected.filter(user =>
-      available(restaurant, user).length >= user.minMeals
+    const meetingMinimum = selected.filter(user =>
+      available(restaurant, user).length >=
+      user.minMeals
     ).length;
 
     return Math.round(
-      (peopleMeetingMinimum / selected.length) * 100
+      meetingMinimum / selected.length * 100
     );
   }
 
 
-  /* == SCREEN 1: TITLE SCREEN START BUTTON == */
+  /* ==========================================
+     TITLE AND SCANNER CHOICE
+     ========================================== */
 
   startButton.addEventListener("click", () => {
+    showScreen("plans");
+  });
+
+  lastMinuteButton.addEventListener("click", () => {
+    showScreen("scanChoice");
+  });
+
+  pregatheringButton.addEventListener("click", () => {
+    alert("Pregathering Menu Analyzer coming next!");
+  });
+
+  chooseLogoScanner.addEventListener("click", () => {
+    state.selectedScanType = "logo";
+    state.activeUser = 0;
+
     renderUsers();
     showScreen("users");
   });
 
+  chooseMenuScanner.addEventListener("click", () => {
+    state.selectedScanType = "menu";
+    state.activeUser = 0;
 
-  /* == SCREEN 2: FOOD PROFILE SELECTION == */
+    renderUsers();
+    showScreen("users");
+  });
+
+  scannerChoiceBack.addEventListener("click", () => {
+    showScreen("plans");
+  });
+
+
+  /* ==========================================
+     FOOD PROFILE SELECTION
+     ========================================== */
 
   function renderUsers() {
     userList.innerHTML = "";
@@ -479,6 +587,7 @@ const recallEmpty = $("#recallEmpty");
 
         <div class="user-text">
           <div class="user-name">${user.name}</div>
+
           <div class="user-restrictions">
             ${user.restrictions.map(
               text => `<span>${text}</span>`
@@ -508,7 +617,9 @@ const recallEmpty = $("#recallEmpty");
 
       button.addEventListener("click", () => {
         users[index].selected = !users[index].selected;
+
         state.activeUser = 0;
+
         renderUsers();
       });
 
@@ -541,28 +652,894 @@ const recallEmpty = $("#recallEmpty");
     });
 
     state.activeUser = 0;
+
     renderUsers();
   });
 
 
-  /* == SCREEN 2: LET'S GET SCANNING BUTTON == */
+  /* ==========================================
+     START SELECTED SCANNER
+     ========================================== */
 
   scanButton.addEventListener("click", async () => {
     if (!selectedUsers().length) return;
 
-    state.activeUser = 0;
-    state.scanComplete = false;
-    state.profileMenuOpen = false;
-    state.flowVersion++;
+    if (state.selectedScanType === "logo") {
+      state.activeUser = 0;
+      state.scanComplete = false;
+      state.profileMenuOpen = false;
 
-    trackingStatus.textContent = "Looking for logo...";
+      state.flowVersion++;
 
-    showScreen("camera");
-    await startAR();
+      trackingStatus.textContent =
+        "Looking for logo...";
+
+      showScreen("camera");
+
+      if (state.mindARStarted) {
+        await restartAR();
+      } else {
+        await startAR();
+      }
+
+    } else if (
+      state.selectedScanType === "menu"
+    ) {
+      showScreen("menuScanner");
+      await startMenuCamera();
+
+    } else {
+      showScreen("scanChoice");
+    }
   });
 
 
-  /* == SCREEN 3: AR CAMERA MANAGEMENT == */
+  /* ==========================================
+     LIVE AR DIETARY WARNING RULES
+
+     These detect visible ingredient terms only.
+     They do not verify food safety.
+     ========================================== */
+
+  const dietaryFlagRules = [
+    {
+      profile: "Gus",
+      filter: "nutSafe",
+      label: "Nut warning",
+      pattern:
+        /\b(peanut|peanuts|walnut|walnuts|almond|almonds|cashew|cashews|pistachio|pistachios|pecan|pecans|hazelnut|hazelnuts)\b/i
+    },
+    {
+      profile: "Brad",
+      filter: "seafoodSafe",
+      label: "Seafood warning",
+      pattern:
+        /\b(shrimp|prawn|prawns|crab|lobster|oyster|oysters|mussel|mussels|clam|clams|salmon|tuna|anchovy|anchovies|fish)\b/i
+    },
+    {
+      profile: "Brad",
+      filter: "glutenFree",
+      label: "Gluten warning",
+      pattern:
+        /\b(wheat|barley|rye|semolina|couscous|bulgur)\b/i
+    },
+    {
+      profile: "Jamie",
+      filter: "vegan",
+      label: "Animal ingredient",
+      pattern:
+        /\b(beef|pork|chicken|bacon|ham|milk|butter|cheese|egg|eggs|honey|gelatin|shrimp|salmon|fish)\b/i
+    }
+  ];
+
+
+  /* ==========================================
+     CLEAR AR FLAGS
+     ========================================== */
+
+  function clearMenuARFlags() {
+    if (menuARFlagLayer) {
+      menuARFlagLayer.replaceChildren();
+    }
+  }
+
+
+  /* ==========================================
+     EXTRACT OCR WORDS WITH POSITIONS
+     ========================================== */
+
+  function getOCRWords(data) {
+    if (
+      Array.isArray(data.words) &&
+      data.words.length
+    ) {
+      return data.words;
+    }
+
+    if (!Array.isArray(data.blocks)) {
+      return [];
+    }
+
+    return data.blocks.flatMap(block =>
+      (block.paragraphs || []).flatMap(paragraph =>
+        (paragraph.lines || []).flatMap(line =>
+          line.words || []
+        )
+      )
+    );
+  }
+
+
+  /* ==========================================
+     CAMERA IMAGE → SCREEN COORDINATES
+     ========================================== */
+
+  function getMenuVideoBounds(
+    imageWidth,
+    imageHeight
+  ) {
+    const container =
+      document.querySelector(
+        ".menu-camera-container"
+      );
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    const scale = Math.min(
+      width / imageWidth,
+      height / imageHeight
+    );
+
+    return {
+      scale,
+      left:
+        (width - imageWidth * scale) / 2,
+      top:
+        (height - imageHeight * scale) / 2,
+      width,
+      height
+    };
+  }
+
+
+  /* ==========================================
+     RENDER FLOATING 3D-STYLE AR FLAGS
+     ========================================== */
+
+     function renderMenuARFlags(data, imageWidth, imageHeight) {
+      if (!menuARFlagLayer) return 0;
+    
+      clearMenuARFlags();
+    
+      const words = getOCRWords(data);
+      const selected = selectedUsers();
+      const bounds = getMenuVideoBounds(imageWidth, imageHeight);
+    
+      const warnings = [];
+      const maxFlags = 8;
+      const gap = 18; // space between word and flag
+    
+      let flagsShown = 0;
+    
+      words.forEach((word, index) => {
+        if (flagsShown >= maxFlags) return;
+        if (!word.bbox || !word.text) return;
+    
+        const rawText = word.text.trim();
+        const text = rawText.replace(/[^a-zA-Z]/g, "").toLowerCase();
+    
+        if (!text) return;
+    
+        const confidence = Number(word.confidence ?? 100);
+        if (confidence < 40) return;
+    
+        const conflicts = dietaryFlagRules.filter(rule =>
+          selected.some(user =>
+            user.name === rule.profile &&
+            user.filters.includes(rule.filter)
+          ) &&
+          rule.pattern.test(text)
+        );
+    
+        if (!conflicts.length) return;
+    
+        const bbox = word.bbox;
+    
+        // word box on the displayed camera preview
+        const wordLeft = bounds.left + bbox.x0 * bounds.scale;
+        const wordRight = bounds.left + bbox.x1 * bounds.scale;
+        const wordTop = bounds.top + bbox.y0 * bounds.scale;
+        const wordBottom = bounds.top + bbox.y1 * bounds.scale;
+        const wordCenterY = (wordTop + wordBottom) / 2;
+    
+        const flag = document.createElement("div");
+        flag.className = "menu-ar-warning";
+    
+        const symbol = document.createElement("span");
+        symbol.className = "menu-ar-flag-symbol";
+        symbol.innerHTML = `
+          <span class="menu-ar-flag-pole"></span>
+          <span class="menu-ar-flag-cloth"></span>
+        `;
+    
+        const label = document.createElement("span");
+        label.className = "menu-ar-flag-label";
+        label.textContent = conflicts
+          .map(conflict => `${conflict.profile}: ${conflict.label}`)
+          .join(" / ");
+    
+        flag.append(symbol, label);
+    
+        // temporarily render invisibly so we can measure it
+        flag.style.visibility = "hidden";
+        flag.style.left = "0px";
+        flag.style.top = "0px";
+        menuARFlagLayer.appendChild(flag);
+    
+        const flagWidth = flag.offsetWidth || 170;
+        const flagHeight = flag.offsetHeight || 44;
+    
+        // prefer placing to the RIGHT of the detected word
+        let x = wordRight + gap;
+    
+        // if too close to right edge, place to the LEFT instead
+        if (x + flagWidth > bounds.width - 12) {
+          x = wordLeft - flagWidth - gap;
+        }
+    
+        // if still too far left, clamp
+        if (x < 12) {
+          x = 12;
+        }
+    
+        // center vertically beside the word
+        let y = wordCenterY - flagHeight / 2;
+    
+        // tiny stagger so multiple flags don't sit directly on top of each other
+        y += (flagsShown % 2) * 10;
+    
+        // keep inside visible frame
+        const minY = 12;
+        const maxY = bounds.height - flagHeight - 12;
+    
+        if (y < minY) y = minY;
+        if (y > maxY) y = maxY;
+    
+        flag.style.left = `${x}px`;
+        flag.style.top = `${y}px`;
+        flag.style.visibility = "visible";
+    
+        warnings.push({
+          word: text,
+          profiles: conflicts.map(conflict => conflict.profile),
+          warnings: conflicts.map(conflict => conflict.label)
+        });
+    
+        flagsShown++;
+      });
+    
+      lastDetectedMenuWarnings = warnings;
+      return flagsShown;
+    }
+
+
+  /* ==========================================
+     STOP MENU CAMERA AND OCR
+     ========================================== */
+
+  function stopMenuCamera(
+    invalidate = true
+  ) {
+    menuOCRGeneration++;
+
+    clearMenuARFlags();
+
+    if (invalidate) {
+      menuCameraRequest++;
+    }
+
+    if (menuCameraStream) {
+      menuCameraStream.getTracks().forEach(track => {
+        track.stop();
+      });
+
+      menuCameraStream = null;
+    }
+
+    menuCameraVideo.pause();
+    menuCameraVideo.srcObject = null;
+  }
+
+
+  /* ==========================================
+     START MENU CAMERA
+     ========================================== */
+
+  async function startMenuCamera() {
+    const request = ++menuCameraRequest;
+
+    stopMenuCamera(false);
+
+    menuPhotoCaptured = false;
+    capturedMenuPhoto = "";
+
+    lastRecognizedMenuText = "";
+    lastDetectedMenuWarnings = [];
+
+    menuCaptureCanvas.hidden = true;
+    menuCameraVideo.hidden = false;
+
+    captureMenuButton.disabled = true;
+    captureMenuButton.textContent =
+      "SAVE MENU RESULTS";
+
+    menuCameraStatus.textContent =
+      "Starting camera...";
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      menuCameraStatus.textContent =
+        "Camera unavailable. Use HTTPS or localhost.";
+
+      return;
+    }
+
+    try {
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: {
+              ideal: "environment"
+            }
+          }
+        });
+
+      if (
+        request !== menuCameraRequest ||
+        state.screen !== "menuScanner"
+      ) {
+        stream.getTracks().forEach(track =>
+          track.stop()
+        );
+
+        return;
+      }
+
+      menuCameraStream = stream;
+      menuCameraVideo.srcObject = stream;
+
+      await menuCameraVideo.play();
+
+      if (
+        request !== menuCameraRequest ||
+        state.screen !== "menuScanner"
+      ) {
+        stopMenuCamera();
+        return;
+      }
+
+      captureMenuButton.disabled = false;
+
+      menuCameraStatus.textContent =
+        "Point your camera at the restaurant menu to scan.";
+
+      startLiveMenuOCR();
+
+    } catch (error) {
+      if (request !== menuCameraRequest) return;
+
+      console.error(
+        "Menu camera error:",
+        error
+      );
+
+      stopMenuCamera();
+
+      menuCameraStatus.textContent =
+        "Camera could not start. Check camera permissions.";
+
+      captureMenuButton.disabled = true;
+    }
+  }
+
+
+  /* ==========================================
+     CREATE REUSABLE OCR WORKER
+     ========================================== */
+
+  async function getMenuOCRWorker() {
+    if (!window.Tesseract) {
+      throw new Error(
+        "Tesseract.js did not load"
+      );
+    }
+
+    if (!menuOCRWorkerPromise) {
+      menuOCRWorkerPromise =
+        window.Tesseract.createWorker("eng")
+          .catch(error => {
+            menuOCRWorkerPromise = null;
+            throw error;
+          });
+    }
+
+    return menuOCRWorkerPromise;
+  }
+
+
+  /* ==========================================
+     LIVE OCR WITH AR FLAG POSITIONING
+     ========================================== */
+
+  async function startLiveMenuOCR() {
+    const generation = ++menuOCRGeneration;
+
+    const isActive = () =>
+      generation === menuOCRGeneration &&
+      state.screen === "menuScanner" &&
+      !!menuCameraStream;
+
+    if (!isActive()) return;
+
+    menuCameraStatus.textContent =
+      "Loading menu text recognition...";
+
+    let worker;
+
+    try {
+      worker = await getMenuOCRWorker();
+    } catch (error) {
+      console.error(
+        "OCR initialization error:",
+        error
+      );
+
+      if (isActive()) {
+        menuCameraStatus.textContent =
+          "Text recognition unavailable. You can still save the menu.";
+      }
+
+      return;
+    }
+
+    if (!isActive()) return;
+
+    const ocrCanvas =
+      document.createElement("canvas");
+
+    const context =
+      ocrCanvas.getContext("2d");
+
+    if (!context) return;
+
+    while (isActive()) {
+      try {
+        if (
+          menuCameraVideo.videoWidth &&
+          menuCameraVideo.videoHeight
+        ) {
+          const width = Math.min(
+            1800,
+            menuCameraVideo.videoWidth
+          );
+
+          const scale =
+            width /
+            menuCameraVideo.videoWidth;
+
+          ocrCanvas.width = Math.round(width);
+
+          ocrCanvas.height = Math.round(
+            menuCameraVideo.videoHeight *
+            scale
+          );
+
+          context.drawImage(
+            menuCameraVideo,
+            0,
+            0,
+            ocrCanvas.width,
+            ocrCanvas.height
+          );
+
+          menuCameraStatus.textContent =
+            "Reading restaurant menu...";
+
+          // Request text and word bounding boxes.
+          const result = await worker.recognize(
+            ocrCanvas,
+            {},
+            {
+              text: true,
+              blocks: true
+            }
+          );
+
+          if (!isActive()) return;
+
+          const recognizedText =
+            (result.data.text || "").trim();
+
+          const flagCount = renderMenuARFlags(
+            result.data,
+            ocrCanvas.width,
+            ocrCanvas.height
+          );
+
+          if (recognizedText) {
+            lastRecognizedMenuText =
+              recognizedText;
+
+            const preview = recognizedText
+              .replace(/\s+/g, " ")
+              .slice(0, 95);
+
+            menuCameraStatus.textContent =
+              "Detected: " + preview;
+
+            console.log(
+              "Grub Scrub menu OCR:",
+              recognizedText
+            );
+
+            if (flagCount > 0) {
+              console.log(
+                `Grub Scrub: ${flagCount} potential dietary warnings`
+              );
+            }
+          } else {
+            menuCameraStatus.textContent =
+              "Looking for readable menu text...";
+          }
+        }
+      } catch (error) {
+        console.warn(
+          "OCR frame error:",
+          error
+        );
+
+        if (isActive()) {
+          menuCameraStatus.textContent =
+            "Could not read text. Try brighter lighting.";
+        }
+      }
+
+      // Recognition runs periodically.
+      // This limits mobile processor usage.
+      await new Promise(resolve => {
+        setTimeout(resolve, 2500);
+      });
+    }
+  }
+
+
+  /* ==========================================
+     COMPRESS MENU PHOTOGRAPH
+     ========================================== */
+
+  function createMenuPhotoDataURL(
+    sourceCanvas,
+    maxWidth = 720,
+    quality = 0.65
+  ) {
+    if (
+      !sourceCanvas.width ||
+      !sourceCanvas.height
+    ) {
+      return "";
+    }
+
+    const scale = Math.min(
+      1,
+      maxWidth / sourceCanvas.width
+    );
+
+    const output =
+      document.createElement("canvas");
+
+    output.width = Math.max(
+      1,
+      Math.round(
+        sourceCanvas.width * scale
+      )
+    );
+
+    output.height = Math.max(
+      1,
+      Math.round(
+        sourceCanvas.height * scale
+      )
+    );
+
+    const context =
+      output.getContext("2d");
+
+    if (!context) return "";
+
+    context.drawImage(
+      sourceCanvas,
+      0,
+      0,
+      output.width,
+      output.height
+    );
+
+    return output.toDataURL(
+      "image/jpeg",
+      quality
+    );
+  }
+
+
+  /* ==========================================
+     ONE-TAP SAVE MENU RESULTS
+     ========================================== */
+
+  captureMenuButton.addEventListener(
+    "click",
+    () => {
+      if (
+        !menuCameraStream ||
+        !menuCameraVideo.videoWidth ||
+        !menuCameraVideo.videoHeight
+      ) {
+        menuCameraStatus.textContent =
+          "Camera is not ready yet.";
+
+        return;
+      }
+
+      captureMenuButton.disabled = true;
+
+      const canvas = menuCaptureCanvas;
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        captureMenuButton.disabled = false;
+
+        menuCameraStatus.textContent =
+          "Could not save the menu image.";
+
+        return;
+      }
+
+      canvas.width =
+        menuCameraVideo.videoWidth;
+
+      canvas.height =
+        menuCameraVideo.videoHeight;
+
+      context.drawImage(
+        menuCameraVideo,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      capturedMenuPhoto =
+        createMenuPhotoDataURL(
+          canvas,
+          1100,
+          0.82
+        );
+
+      if (!capturedMenuPhoto) {
+        captureMenuButton.disabled = false;
+
+        menuCameraStatus.textContent =
+          "Could not process this image.";
+
+        return;
+      }
+
+      menuPhotoCaptured = true;
+
+      stopMenuCamera();
+
+      menuCameraVideo.hidden = true;
+      menuCaptureCanvas.hidden = false;
+
+      // Immediately save without a second click.
+      saveMenuResultsButton.click();
+    }
+  );
+
+
+  /* ==========================================
+     MENU SCANNER BACK BUTTON
+     ========================================== */
+
+  menuScannerBack.addEventListener(
+    "click",
+    () => {
+      stopMenuCamera();
+
+      renderUsers();
+      showScreen("users");
+    }
+  );
+
+
+  /* ==========================================
+     SAVED MENU RESULTS SCREEN
+     ========================================== */
+
+  function openMenuResults(
+    photo,
+    fromRecall = false
+  ) {
+    state.menuResultFromRecall = fromRecall;
+
+    menuResultsPhoto.src = photo;
+
+    menuResultsMatchLabel.textContent =
+      "Analysis pending";
+
+    menuResultsProgressFill.style.width =
+      "0%";
+
+    menuResultsProgress.removeAttribute(
+      "aria-valuenow"
+    );
+
+    menuResultsProgress.setAttribute(
+      "aria-valuetext",
+      "Not analyzed"
+    );
+
+    menuFlagsMessage.hidden = true;
+    menuSaveStatus.textContent = "";
+
+    retakeMenuResultsButton.hidden =
+      fromRecall;
+
+    saveMenuResultsButton.hidden =
+      fromRecall;
+
+    showScreen("menuResults");
+  }
+
+  filterFlagsButton.addEventListener(
+    "click",
+    () => {
+      menuFlagsMessage.hidden =
+        !menuFlagsMessage.hidden;
+    }
+  );
+
+  retakeMenuResultsButton.addEventListener(
+    "click",
+    async () => {
+      showScreen("menuScanner");
+      await startMenuCamera();
+    }
+  );
+
+  menuResultsBack.addEventListener(
+    "click",
+    async () => {
+      if (state.menuResultFromRecall) {
+        renderRecallList();
+        showScreen("recall");
+
+      } else {
+        showScreen("menuScanner");
+        await startMenuCamera();
+      }
+    }
+  );
+
+
+  /* ==========================================
+     SAVE SCANNED MENUS
+     ========================================== */
+
+  const MENU_SCAN_STORAGE_KEY =
+    "grub-scrub-menu-scans-v1";
+
+  function getSavedMenuScans() {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(
+          MENU_SCAN_STORAGE_KEY
+        ) || "[]"
+      );
+
+      return Array.isArray(saved)
+        ? saved
+        : [];
+
+    } catch (error) {
+      console.warn(
+        "Saved menus unavailable:",
+        error
+      );
+
+      return [];
+    }
+  }
+
+  saveMenuResultsButton.addEventListener(
+    "click",
+    () => {
+      if (
+        !menuPhotoCaptured ||
+        !menuCaptureCanvas.width
+      ) {
+        menuSaveStatus.textContent =
+          "Please scan a menu first.";
+
+        return;
+      }
+
+      try {
+        const photo =
+          createMenuPhotoDataURL(
+            menuCaptureCanvas,
+            640,
+            0.55
+          );
+
+        if (!photo) {
+          throw new Error(
+            "Photo unavailable"
+          );
+        }
+
+        const existing =
+          getSavedMenuScans();
+
+        const entry = {
+          id: Date.now(),
+          name: "Scanned Menu",
+          photo,
+          savedAt:
+            new Date().toISOString(),
+          recognizedText:
+            lastRecognizedMenuText,
+          potentialWarnings:
+            lastDetectedMenuWarnings,
+          analyzed: false
+        };
+
+        const updated = [
+          entry,
+          ...existing
+        ].slice(0, 5);
+
+        localStorage.setItem(
+          MENU_SCAN_STORAGE_KEY,
+          JSON.stringify(updated)
+        );
+
+        state.recallOrigin = "scanChoice";
+
+        renderRecallList();
+        showScreen("recall");
+
+      } catch (error) {
+        console.error(
+          "Menu save error:",
+          error
+        );
+
+        captureMenuButton.disabled = false;
+
+        menuCameraStatus.textContent =
+          "Could not save the menu. Browser storage may be full.";
+
+        menuSaveStatus.textContent =
+          "Could not save menu.";
+      }
+    }
+  );
+
+
+  /* ==========================================
+     LOGO SCANNER: MINDAR
+     ========================================== */
 
   async function waitForScene() {
     if (scene.hasLoaded) return;
@@ -580,7 +1557,9 @@ const recallEmpty = $("#recallEmpty");
     if (
       state.mindARStarted ||
       state.mindARStarting
-    ) return;
+    ) {
+      return;
+    }
 
     state.mindARStarting = true;
 
@@ -588,10 +1567,14 @@ const recallEmpty = $("#recallEmpty");
       await waitForScene();
 
       const system =
-        scene.systems["mindar-image-system"];
+        scene.systems[
+          "mindar-image-system"
+        ];
 
       if (!system) {
-        trackingStatus.textContent = "Scanner not ready";
+        trackingStatus.textContent =
+          "Scanner not ready";
+
         return;
       }
 
@@ -603,12 +1586,18 @@ const recallEmpty = $("#recallEmpty");
         state.screen === "camera" &&
         !state.scanComplete
       ) {
-        trackingStatus.textContent = "Looking for logo...";
+        trackingStatus.textContent =
+          "Looking for logo...";
       }
 
     } catch (error) {
-      console.error("MindAR camera error:", error);
-      trackingStatus.textContent = "Camera could not start";
+      console.error(
+        "MindAR camera error:",
+        error
+      );
+
+      trackingStatus.textContent =
+        "Camera could not start";
 
     } finally {
       state.mindARStarting = false;
@@ -619,13 +1608,21 @@ const recallEmpty = $("#recallEmpty");
     await waitForScene();
 
     const system =
-      scene.systems["mindar-image-system"];
+      scene.systems[
+        "mindar-image-system"
+      ];
 
-    if (state.mindARStarted && system) {
+    if (
+      state.mindARStarted &&
+      system
+    ) {
       try {
         await system.stop();
       } catch (error) {
-        console.warn("Camera stop error:", error);
+        console.warn(
+          "Camera stop error:",
+          error
+        );
       }
 
       state.mindARStarted = false;
@@ -635,35 +1632,54 @@ const recallEmpty = $("#recallEmpty");
   }
 
 
-  /* == SCREEN 3: RESTAURANT LOGO RECOGNITION == */
+  /* ==========================================
+     LOGO RECOGNITION
+     ========================================== */
 
   function restaurantDetected(index) {
     if (
       state.scanComplete ||
       state.screen !== "camera"
-    ) return;
+    ) {
+      return;
+    }
 
     state.restaurant = index;
     state.scanComplete = true;
     state.profileMenuOpen = false;
+
     saveRestaurantToRecall(index);
 
     const version = ++state.flowVersion;
-    trackingStatus.textContent = "Logo found";
+
+    trackingStatus.textContent =
+      "Logo found";
 
     setTimeout(() => {
-      if (version !== state.flowVersion) return;
+      if (
+        version !== state.flowVersion
+      ) {
+        return;
+      }
 
       showScreen("loading");
 
       setTimeout(() => {
-        if (version !== state.flowVersion) return;
+        if (
+          version !== state.flowVersion
+        ) {
+          return;
+        }
 
         renderResult();
         showScreen("result");
 
         setTimeout(() => {
-          if (version !== state.flowVersion) return;
+          if (
+            version !== state.flowVersion
+          ) {
+            return;
+          }
 
           showScreen("menu");
           renderMenu();
@@ -675,29 +1691,41 @@ const recallEmpty = $("#recallEmpty");
     }, 250);
   }
 
-  psTarget.addEventListener("targetFound", () => {
-    if (state.screen === "camera") {
-      restaurantDetected(0);
+  psTarget.addEventListener(
+    "targetFound",
+    () => {
+      if (state.screen === "camera") {
+        restaurantDetected(0);
+      }
     }
-  });
+  );
 
-  danboTarget.addEventListener("targetFound", () => {
-    if (state.screen === "camera") {
-      restaurantDetected(1);
+  danboTarget.addEventListener(
+    "targetFound",
+    () => {
+      if (state.screen === "camera") {
+        restaurantDetected(1);
+      }
     }
-  });
+  );
 
 
-  /* == SCREENS 4 & 5: LOADING & GROUP MATCH RESULTS == */
+  /* ==========================================
+     LOGO GROUP COMPATIBILITY RESULT
+     ========================================== */
 
   function renderResult() {
-    const restaurant = restaurants[state.restaurant];
+    const restaurant =
+      restaurants[state.restaurant];
 
-    const percentage = groupCompatibility(restaurant);
-    const matched = groupMatch(restaurant);
+    const percentage =
+      groupCompatibility(restaurant);
 
-    // Show the group percentage on the MATCH screen.
-    resultTitle.textContent = `${percentage}% MATCH`;
+    const matched =
+      groupMatch(restaurant);
+
+    resultTitle.textContent =
+      `${percentage}% MATCH`;
 
     resultSubtitle.textContent = matched
       ? "Everyone meets their minimum meal requirement!"
@@ -715,15 +1743,251 @@ const recallEmpty = $("#recallEmpty");
 
     resultIcon.className =
       "ph result-icon " +
-      (matched
-        ? "ph-check-circle"
-        : "ph-x-circle");
+      (
+        matched
+          ? "ph-check-circle"
+          : "ph-x-circle"
+      );
 
-    playSound(matched ? "bell" : "crunch");
+    playSound(
+      matched ? "bell" : "crunch"
+    );
   }
 
 
-  /* == SCREEN 6: 3D MENU MODEL LOADING ALERT == */
+  /* ==========================================
+     RESTAURANT RECALL STORAGE
+     ========================================== */
+
+  const RECALL_STORAGE_KEY =
+    "grub-scrub-recall-v1";
+
+  function getRecallList() {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(
+          RECALL_STORAGE_KEY
+        ) || "[]"
+      );
+
+      if (!Array.isArray(saved)) {
+        return [];
+      }
+
+      return saved.filter(index =>
+        Number.isInteger(index) &&
+        index >= 0 &&
+        index < restaurants.length
+      );
+
+    } catch (error) {
+      console.warn(
+        "Recall unavailable:",
+        error
+      );
+
+      return [];
+    }
+  }
+
+  function saveRestaurantToRecall(index) {
+    try {
+      const existing =
+        getRecallList();
+
+      const updated = [
+        index,
+        ...existing.filter(
+          savedIndex =>
+            savedIndex !== index
+        )
+      ];
+
+      localStorage.setItem(
+        RECALL_STORAGE_KEY,
+        JSON.stringify(updated)
+      );
+
+    } catch (error) {
+      console.warn(
+        "Could not save restaurant:",
+        error
+      );
+    }
+  }
+
+
+  /* ==========================================
+     COMBINED RECALL LIST
+     ========================================== */
+
+  function renderRecallList() {
+    recallList.innerHTML = "";
+
+    const savedRestaurants =
+      getRecallList();
+
+    const savedMenus =
+      getSavedMenuScans();
+
+    recallEmpty.style.display =
+      savedRestaurants.length ||
+      savedMenus.length
+        ? "none"
+        : "block";
+
+    const sortedRestaurants =
+      [...savedRestaurants].sort(
+        (a, b) =>
+          groupCompatibility(
+            restaurants[b]
+          ) -
+          groupCompatibility(
+            restaurants[a]
+          )
+      );
+
+    sortedRestaurants.forEach(index => {
+      const restaurant =
+        restaurants[index];
+
+      const percentage =
+        groupCompatibility(restaurant);
+
+      const card =
+        document.createElement("button");
+
+      card.type = "button";
+      card.className = "recall-card";
+
+      card.classList.toggle(
+        "full-match",
+        percentage === 100
+      );
+
+      const name =
+        document.createElement("span");
+
+      name.className =
+        "recall-restaurant-name";
+
+      name.textContent =
+        restaurant.name;
+
+      const score =
+        document.createElement("span");
+
+      score.className =
+        "recall-score";
+
+      score.textContent =
+        `${percentage}% MATCH`;
+
+      card.append(name, score);
+
+      card.addEventListener(
+        "click",
+        () => {
+          state.restaurant = index;
+          state.activeUser = 0;
+          state.profileMenuOpen = false;
+
+          showScreen("menu");
+          renderMenu();
+        }
+      );
+
+      recallList.appendChild(card);
+    });
+
+    savedMenus.forEach(item => {
+      if (
+        !item ||
+        !item.photo
+      ) {
+        return;
+      }
+
+      const card =
+        document.createElement("button");
+
+      card.type = "button";
+
+      card.className =
+        "recall-card menu-photo-recall";
+
+      const name =
+        document.createElement("span");
+
+      name.className =
+        "recall-restaurant-name";
+
+      name.textContent =
+        item.name || "Scanned Menu";
+
+      const status =
+        document.createElement("span");
+
+      status.className =
+        "recall-score";
+
+      const warningCount =
+        Array.isArray(
+          item.potentialWarnings
+        )
+          ? item.potentialWarnings.length
+          : 0;
+
+      status.textContent =
+        warningCount
+          ? `${warningCount} possible warning${warningCount === 1 ? "" : "s"}`
+          : "Not analyzed";
+
+      card.append(name, status);
+
+      card.addEventListener(
+        "click",
+        () => {
+          openMenuResults(
+            item.photo,
+            true
+          );
+        }
+      );
+
+      recallList.appendChild(card);
+    });
+  }
+
+  openRecallButton.addEventListener(
+    "click",
+    () => {
+      state.recallOrigin = "menu";
+
+      renderRecallList();
+      showScreen("recall");
+    }
+  );
+
+  recallBackButton.addEventListener(
+    "click",
+    () => {
+      if (
+        state.recallOrigin === "menu"
+      ) {
+        showScreen("menu");
+        renderMenu();
+
+      } else {
+        showScreen("scanChoice");
+      }
+    }
+  );
+
+
+  /* ==========================================
+     3D MEAL VIEWERS
+     ========================================== */
 
   function createViewer(meal) {
     const viewer =
@@ -734,14 +1998,37 @@ const recallEmpty = $("#recallEmpty");
       "3D model of " + meal.name
     );
 
-    viewer.setAttribute("camera-controls", "");
-    viewer.setAttribute("interaction-prompt", "none");
-    viewer.setAttribute("loading", "eager");
-    viewer.setAttribute("shadow-intensity", "0.8");
-    viewer.setAttribute("exposure", "1");
+    viewer.setAttribute(
+      "camera-controls",
+      ""
+    );
+
+    viewer.setAttribute(
+      "interaction-prompt",
+      "none"
+    );
+
+    viewer.setAttribute(
+      "loading",
+      "eager"
+    );
+
+    viewer.setAttribute(
+      "shadow-intensity",
+      "0.8"
+    );
+
+    viewer.setAttribute(
+      "exposure",
+      "1"
+    );
 
     if (!mobile()) {
-      viewer.setAttribute("auto-rotate", "");
+      viewer.setAttribute(
+        "auto-rotate",
+        ""
+      );
+
       viewer.setAttribute(
         "rotation-per-second",
         "15deg"
@@ -751,39 +2038,68 @@ const recallEmpty = $("#recallEmpty");
     return viewer;
   }
 
-  async function loadModel(entry, version) {
+  async function loadModel(
+    entry,
+    version
+  ) {
     if (
       version !== state.menuVersion ||
       state.screen !== "menu"
-    ) return;
+    ) {
+      return;
+    }
 
-    await customElements.whenDefined("model-viewer");
+    await customElements.whenDefined(
+      "model-viewer"
+    );
 
     if (
       version !== state.menuVersion ||
       state.screen !== "menu"
-    ) return;
+    ) {
+      return;
+    }
 
     return new Promise(resolve => {
-      const { viewer, status, meal } = entry;
+      const {
+        viewer,
+        status,
+        meal
+      } = entry;
 
       let finished = false;
       let timeout;
 
-      function finish(success, reason) {
+      function finish(
+        success,
+        reason
+      ) {
         if (finished) return;
 
         finished = true;
+
         clearTimeout(timeout);
 
-        viewer.removeEventListener("load", onLoad);
-        viewer.removeEventListener("error", onError);
+        viewer.removeEventListener(
+          "load",
+          onLoad
+        );
 
-        if (version === state.menuVersion) {
+        viewer.removeEventListener(
+          "error",
+          onError
+        );
+
+        if (
+          version === state.menuVersion
+        ) {
           if (success) {
             status.remove();
           } else {
-            viewer.removeAttribute("src");
+            viewer.removeAttribute(
+              "src"
+            );
+
             status.textContent =
               "3D model unavailable";
 
@@ -798,39 +2114,68 @@ const recallEmpty = $("#recallEmpty");
         resolve();
       }
 
-      const onLoad = () => finish(true);
-      const onError = event => finish(false, event);
+      const onLoad = () =>
+        finish(true);
 
-      status.textContent = "Loading 3D food...";
+      const onError = event =>
+        finish(false, event);
 
-      viewer.addEventListener("load", onLoad);
-      viewer.addEventListener("error", onError);
+      status.textContent =
+        "Loading 3D food...";
+
+      viewer.addEventListener(
+        "load",
+        onLoad
+      );
+
+      viewer.addEventListener(
+        "error",
+        onError
+      );
 
       timeout = setTimeout(
-        () => finish(false, "60-second timeout"),
+        () => finish(
+          false,
+          "60-second timeout"
+        ),
         60000
       );
 
-      viewer.setAttribute("src", meal.model);
+      viewer.setAttribute(
+        "src",
+        meal.model
+      );
     });
   }
 
-  async function loadMobileModels(entries, version) {
+  async function loadMobileModels(
+    entries,
+    version
+  ) {
     for (const entry of entries) {
       if (
         version !== state.menuVersion ||
         state.screen !== "menu"
-      ) return;
+      ) {
+        return;
+      }
 
-      await loadModel(entry, version);
+      await loadModel(
+        entry,
+        version
+      );
     }
   }
 
 
-  /* == SCREEN 6: RESTAURANT MENU GRID GENERATION == */
+  /* ==========================================
+     DISPLAY RESTAURANT MENU
+     ========================================== */
 
   function renderMenu() {
-    const restaurant = restaurants[state.restaurant];
+    const restaurant =
+      restaurants[state.restaurant];
+
     const user = activeUser();
 
     if (!user) {
@@ -839,69 +2184,99 @@ const recallEmpty = $("#recallEmpty");
       return;
     }
 
-    const meals = available(restaurant, user);
+    const meals =
+      available(restaurant, user);
 
-    restaurantName.textContent = restaurant.name;
-    activeUserName.textContent = user.name;
+    restaurantName.textContent =
+      restaurant.name;
+
+    activeUserName.textContent =
+      user.name;
 
     activeUserRestrictions.innerHTML =
       user.restrictions
-        .map(text => `<span>${text}</span>`)
-        .join("<span> • </span>");
-
-    // Individual meal counts remain on the menu screen.
-    // The group percentage appears on the match screen.
+        .map(
+          text =>
+            `<span>${text}</span>`
+        )
+        .join(
+          "<span> • </span>"
+        );
 
     availabilityCount.textContent =
       `${meals.length}/${restaurant.meals.length}`;
 
-    optionsMessage.textContent = meals.length
-      ? "meal options available"
-      : "no meal options available";
+    optionsMessage.textContent =
+      meals.length
+        ? "meal options available"
+        : "no meal options available";
 
-    const version = ++state.menuVersion;
+    const version =
+      ++state.menuVersion;
+
     const entries = [];
 
     menuGrid.innerHTML = "";
 
     meals.forEach(meal => {
-      const card = document.createElement("div");
-      card.className = "meal-card";
+      const card =
+        document.createElement("div");
 
-      const picture = document.createElement("div");
-      picture.className = "meal-picture";
+      card.className =
+        "meal-card";
 
-      const label = document.createElement("div");
-      label.className = "meal-name";
-      label.textContent = meal.name;
+      const picture =
+        document.createElement("div");
+
+      picture.className =
+        "meal-picture";
+
+      const label =
+        document.createElement("div");
+
+      label.className =
+        "meal-name";
+
+      label.textContent =
+        meal.name;
 
       card.append(picture, label);
 
       if (meal.model) {
-        const viewer = createViewer(meal);
-        const status = document.createElement("div");
+        const viewer =
+          createViewer(meal);
 
-        Object.assign(status.style, {
-          position: "absolute",
-          inset: "0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "10px",
-          boxSizing: "border-box",
-          background: "#E8E8E8",
-          color: "#666",
-          fontSize: "12px",
-          textAlign: "center",
-          pointerEvents: "none",
-          zIndex: "1"
-        });
+        const status =
+          document.createElement("div");
 
-        status.textContent = mobile()
-          ? "Waiting to load 3D..."
-          : "Loading 3D food...";
+        Object.assign(
+          status.style,
+          {
+            position: "absolute",
+            inset: "0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "10px",
+            boxSizing: "border-box",
+            background: "#e8e8e8",
+            color: "#666",
+            fontSize: "12px",
+            textAlign: "center",
+            pointerEvents: "none",
+            zIndex: "1"
+          }
+        );
 
-        picture.append(viewer, status);
+        status.textContent =
+          mobile()
+            ? "Waiting to load 3D..."
+            : "Loading 3D food...";
+
+        picture.append(
+          viewer,
+          status
+        );
 
         entries.push({
           viewer,
@@ -909,8 +2284,6 @@ const recallEmpty = $("#recallEmpty");
           meal
         });
       }
-
-      /* == INFORMATION ICON FOR HOUSE SALAD == */
 
       if (meal.heroAR) {
         const infoButton =
@@ -924,24 +2297,34 @@ const recallEmpty = $("#recallEmpty");
 
         infoButton.setAttribute(
           "aria-label",
-          "View detailed 3D House Salad"
+          "View detailed House Salad"
         );
 
-        infoButton.addEventListener("click", event => {
-          event.stopPropagation();
-          openHeroDish(meal);
-        });
+        infoButton.addEventListener(
+          "click",
+          event => {
+            event.stopPropagation();
+            openHeroDish(meal);
+          }
+        );
 
-        card.appendChild(infoButton);
+        card.appendChild(
+          infoButton
+        );
       }
 
-      menuGrid.appendChild(card);
+      menuGrid.appendChild(
+        card
+      );
     });
 
     renderProfileDisc();
 
     if (mobile()) {
-      loadMobileModels(entries, version);
+      loadMobileModels(
+        entries,
+        version
+      );
     } else {
       entries.forEach(entry =>
         loadModel(entry, version)
@@ -950,7 +2333,9 @@ const recallEmpty = $("#recallEmpty");
   }
 
 
-  /* == SCREEN 6: PROFILE DISC NAVIGATION == */
+  /* ==========================================
+     PROFILE DISC NAVIGATION
+     ========================================== */
 
   function renderProfileDisc() {
     profileButtons.innerHTML = "";
@@ -960,202 +2345,191 @@ const recallEmpty = $("#recallEmpty");
       state.profileMenuOpen
     );
 
-    const restaurant = restaurants[state.restaurant];
+    const restaurant =
+      restaurants[state.restaurant];
 
-    const ordered = selectedUsers().map(
-      (user, index) => ({
-        user,
-        index
-      })
-    );
+    const ordered =
+      selectedUsers().map(
+        (user, index) => ({
+          user,
+          index
+        })
+      );
 
-    const active = ordered[state.activeUser];
+    const active =
+      ordered[state.activeUser];
 
     const arranged = [
       active,
       ...ordered.filter(
-        item => item.index !== state.activeUser
+        item =>
+          item.index !== state.activeUser
       )
     ].filter(Boolean);
 
     const slots = [
-      { left: "25px", top: "11px" },
-      { right: "2px", top: "2px" },
-      { left: "2px", bottom: "2px" }
+      {
+        left: "25px",
+        top: "11px"
+      },
+      {
+        right: "2px",
+        top: "2px"
+      },
+      {
+        left: "2px",
+        bottom: "2px"
+      }
     ];
 
-    arranged.forEach((entry, slot) => {
-      const user = entry.user;
+    arranged.forEach(
+      (entry, slot) => {
+        const user =
+          entry.user;
 
-      const isActive =
-        entry.index === state.activeUser;
+        const isActive =
+          entry.index === state.activeUser;
 
-      const compatible =
-        available(restaurant, user).length > 0;
+        const compatible =
+          available(
+            restaurant,
+            user
+          ).length > 0;
 
-      const button =
-        document.createElement("button");
+        const button =
+          document.createElement("button");
 
-      button.type = "button";
+        button.type = "button";
 
-      button.className = isActive
-        ? "profile-button active current"
-        : "profile-button small";
+        button.className = isActive
+          ? "profile-button active current"
+          : "profile-button small";
 
-      if (state.profileMenuOpen) {
-        Object.assign(button.style, slots[slot]);
-      } else if (isActive) {
-        button.style.right = "4px";
-        button.style.bottom = "4px";
-      }
+        if (state.profileMenuOpen) {
+          Object.assign(
+            button.style,
+            slots[slot]
+          );
+        } else if (isActive) {
+          button.style.right =
+            "4px";
 
-      button.setAttribute(
-        "aria-label",
-        user.name +
-        (compatible
-          ? ", options available"
-          : ", no options available")
-      );
-
-      button.innerHTML = `
-        <span class="profile-main-icon ${
-          compatible
-            ? "profile-has-options"
-            : "profile-no-options"
-        }">
-          <img
-            class="profile-nav-image"
-            src="${user.image}"
-            alt="${user.name}">
-        </span>
-
-        <span class="profile-status-icon ${
-          compatible ? "ok" : "bad"
-        }">
-          <i class="ph ${
-            compatible ? "ph-check" : "ph-x"
-          }"></i>
-        </span>
-      `;
-
-      button.addEventListener("click", () => {
-        if (!state.profileMenuOpen) {
-          state.profileMenuOpen = true;
-          renderProfileDisc();
-          return;
+          button.style.bottom =
+            "4px";
         }
 
-        state.activeUser = entry.index;
-        state.profileMenuOpen = false;
+        button.setAttribute(
+          "aria-label",
+          user.name +
+          (
+            compatible
+              ? ", options available"
+              : ", no options available"
+          )
+        );
 
-        renderMenu();
-      });
+        button.innerHTML = `
+          <span class="profile-main-icon ${
+            compatible
+              ? "profile-has-options"
+              : "profile-no-options"
+          }">
 
-      profileButtons.appendChild(button);
-    });
+            <img class="profile-nav-image"
+                 src="${user.image}"
+                 alt="${user.name}">
+
+          </span>
+
+          <span class="profile-status-icon ${
+            compatible ? "ok" : "bad"
+          }">
+
+            <i class="ph ${
+              compatible
+                ? "ph-check"
+                : "ph-x"
+            }"></i>
+
+          </span>
+        `;
+
+        button.addEventListener(
+          "click",
+          () => {
+            if (
+              !state.profileMenuOpen
+            ) {
+              state.profileMenuOpen = true;
+              renderProfileDisc();
+              return;
+            }
+
+            state.activeUser =
+              entry.index;
+
+            state.profileMenuOpen =
+              false;
+
+            renderMenu();
+          }
+        );
+
+        profileButtons.appendChild(
+          button
+        );
+      }
+    );
 
     addProfileButton.style.display =
-      state.profileMenuOpen ? "flex" : "none";
+      state.profileMenuOpen
+        ? "flex"
+        : "none";
   }
 
-  addProfileButton.addEventListener("click", () => {
-    state.profileMenuOpen = false;
-    renderUsers();
-    showScreen("users");
-  });
-
-
-/* == RESTAURANT RECALL LIST: DISPLAY == */
-
-function renderRecallList() {
-  const savedRestaurants = getRecallList();
-
-  recallList.innerHTML = "";
-
-  recallEmpty.style.display =
-    savedRestaurants.length === 0 ? "block" : "none";
-
-  // Sort restaurants by their current group compatibility.
-  const sorted = [...savedRestaurants].sort(
-    (a, b) =>
-      groupCompatibility(restaurants[b]) -
-      groupCompatibility(restaurants[a])
-  );
-
-  sorted.forEach(index => {
-    const restaurant = restaurants[index];
-    const percentage = groupCompatibility(restaurant);
-
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "recall-card";
-
-    const name = document.createElement("span");
-    name.className = "recall-restaurant-name";
-    name.textContent = restaurant.name;
-
-    const score = document.createElement("span");
-    score.className = "recall-score";
-    score.textContent = `${percentage}% MATCH`;
-
-    card.classList.toggle("full-match", percentage === 100);
-
-    card.append(name, score);
-
-    // Open the restaurant's menu without scanning again.
-    card.addEventListener("click", () => {
-      state.restaurant = index;
-      state.activeUser = 0;
+  addProfileButton.addEventListener(
+    "click",
+    () => {
       state.profileMenuOpen = false;
 
-      showScreen("menu");
-      renderMenu();
-    });
-
-    recallList.appendChild(card);
-  });
-}
+      renderUsers();
+      showScreen("users");
+    }
+  );
 
 
-/* == RESTAURANT RECALL LIST NAVIGATION == */
-
-
-openRecallButton.addEventListener("click", () => {
-  renderRecallList();
-  showScreen("recall");
-});
-
-
-recallBackButton.addEventListener("click", () => {
-  showScreen("menu");
-  renderMenu();
-});
-
-
-  /* == SCREEN 6: SCAN AGAIN BUTTON == */
+  /* ==========================================
+     SCAN LOGO AGAIN
+     ========================================== */
 
   scanAgainButton.addEventListener(
     "click",
     async event => {
       event.preventDefault();
 
+      state.selectedScanType = "logo";
       state.scanComplete = false;
       state.profileMenuOpen = false;
+
       state.flowVersion++;
 
       trackingStatus.textContent =
         "Looking for logo...";
 
       showScreen("camera");
+
       await restartAR();
     }
   );
 
 
-  /* == SCREEN 7: INGREDIENT HOTSPOTS == */
+  /* ==========================================
+     HOUSE SALAD 3D INGREDIENTS
+     ========================================== */
 
   let detailReady = false;
   let detailFailed = false;
+
   let selectedIngredient = null;
 
   const INGREDIENT_NAMES = {
@@ -1189,24 +2563,42 @@ recallBackButton.addEventListener("click", () => {
 
   try {
     const stored = JSON.parse(
-      localStorage.getItem(HOTSPOT_STORAGE_KEY) || "{}"
+      localStorage.getItem(
+        HOTSPOT_STORAGE_KEY
+      ) || "{}"
     );
 
-    if (stored && typeof stored === "object") {
+    if (
+      stored &&
+      typeof stored === "object"
+    ) {
       savedHotspots = stored;
     }
+
   } catch (error) {
-    console.warn("Hotspot storage unavailable:", error);
+    console.warn(
+      "Hotspot storage unavailable:",
+      error
+    );
   }
 
   function showDishStatus(message) {
-    dishLoading.textContent = message;
-    dishLoading.hidden = !message;
+    dishLoading.textContent =
+      message;
+
+    dishLoading.hidden =
+      !message;
   }
 
   function hideHotspot() {
-    hotspot.classList.add("is-hidden");
-    hotspot.setAttribute("aria-hidden", "true");
+    hotspot.classList.add(
+      "is-hidden"
+    );
+
+    hotspot.setAttribute(
+      "aria-hidden",
+      "true"
+    );
   }
 
   function positionString(point) {
@@ -1218,29 +2610,50 @@ recallBackButton.addEventListener("click", () => {
   }
 
   function getDefaultHotspot(part) {
-    const preset = HOTSPOT_DEFAULTS[part];
+    const preset =
+      HOTSPOT_DEFAULTS[part];
 
-    if (!preset || !detailReady) return null;
+    if (
+      !preset ||
+      !detailReady
+    ) {
+      return null;
+    }
 
-    const dimensions = detailViewer.getDimensions();
-    const center = detailViewer.getBoundingBoxCenter();
+    const dimensions =
+      detailViewer.getDimensions();
 
-    const width = dimensions.x || 1;
-    const height = dimensions.y || 1;
-    const depth = dimensions.z || 1;
+    const center =
+      detailViewer.getBoundingBoxCenter();
+
+    const width =
+      dimensions.x || 1;
+
+    const height =
+      dimensions.y || 1;
+
+    const depth =
+      dimensions.z || 1;
 
     return {
       position: positionString({
-        x: center.x + preset.x * width,
-        y: center.y + preset.y * height,
-        z: center.z + preset.z * depth
+        x:
+          center.x +
+          preset.x * width,
+        y:
+          center.y +
+          preset.y * height,
+        z:
+          center.z +
+          preset.z * depth
       }),
       normal: "0m 1m 0m"
     };
   }
 
   function getHotspotPosition(part) {
-    const stored = savedHotspots[part];
+    const stored =
+      savedHotspots[part];
 
     if (
       stored &&
@@ -1254,24 +2667,31 @@ recallBackButton.addEventListener("click", () => {
   }
 
 
-  /* == SCREEN 7: HOTSPOT LABEL POSITIONING == */
+  /* ==========================================
+     DISPLAY INGREDIENT HOTSPOT
+     ========================================== */
 
   function showIngredientHotspot(part) {
     selectedIngredient = part;
 
-    if (!detailReady || !part) {
+    if (
+      !detailReady ||
+      !part
+    ) {
       hideHotspot();
       return;
     }
 
-    const coordinates = getHotspotPosition(part);
+    const coordinates =
+      getHotspotPosition(part);
 
     if (!coordinates) {
       hideHotspot();
       return;
     }
 
-    hotspotLabel.textContent = INGREDIENT_NAMES[part];
+    hotspotLabel.textContent =
+      INGREDIENT_NAMES[part];
 
     hotspot.classList.toggle(
       "label-left",
@@ -1281,12 +2701,20 @@ recallBackButton.addEventListener("click", () => {
     try {
       detailViewer.updateHotspot({
         name: "hotspot-ingredient",
-        position: coordinates.position,
-        normal: coordinates.normal
+        position:
+          coordinates.position,
+        normal:
+          coordinates.normal
       });
 
-      hotspot.classList.remove("is-hidden");
-      hotspot.setAttribute("aria-hidden", "false");
+      hotspot.classList.remove(
+        "is-hidden"
+      );
+
+      hotspot.setAttribute(
+        "aria-hidden",
+        "false"
+      );
 
     } catch (error) {
       console.error(
@@ -1299,22 +2727,33 @@ recallBackButton.addEventListener("click", () => {
   }
 
   function selectIngredient(part) {
-    if (selectedIngredient === part) {
+    if (
+      selectedIngredient === part
+    ) {
       selectedIngredient = null;
+
       hideHotspot();
 
-      ingredientButtons.querySelectorAll("button")
+      ingredientButtons
+        .querySelectorAll("button")
         .forEach(button => {
-          button.classList.remove("active");
+          button.classList.remove(
+            "active"
+          );
         });
 
-      detailViewer.setAttribute("auto-rotate", "");
+      detailViewer.setAttribute(
+        "auto-rotate",
+        ""
+      );
+
       return;
     }
 
     selectedIngredient = part;
 
-    ingredientButtons.querySelectorAll("button")
+    ingredientButtons
+      .querySelectorAll("button")
       .forEach(button => {
         button.classList.toggle(
           "active",
@@ -1322,71 +2761,105 @@ recallBackButton.addEventListener("click", () => {
         );
       });
 
-    detailViewer.removeAttribute("auto-rotate");
+    detailViewer.removeAttribute(
+      "auto-rotate"
+    );
+
     showIngredientHotspot(part);
   }
 
-  detailViewer.addEventListener("load", () => {
-    detailReady = true;
-    detailFailed = false;
+  detailViewer.addEventListener(
+    "load",
+    () => {
+      detailReady = true;
+      detailFailed = false;
 
-    showDishStatus("");
+      showDishStatus("");
 
-    if (selectedIngredient) {
-      showIngredientHotspot(selectedIngredient);
+      if (selectedIngredient) {
+        showIngredientHotspot(
+          selectedIngredient
+        );
+      }
     }
-  });
+  );
 
-  detailViewer.addEventListener("error", error => {
-    detailReady = false;
-    detailFailed = true;
+  detailViewer.addEventListener(
+    "error",
+    error => {
+      detailReady = false;
+      detailFailed = true;
 
-    hideHotspot();
+      hideHotspot();
 
-    console.error("Salad model error:", error);
-
-    if (state.screen === "dish") {
-      showDishStatus(
-        "House Salad 3D model could not load."
+      console.error(
+        "Salad model error:",
+        error
       );
+
+      if (state.screen === "dish") {
+        showDishStatus(
+          "House Salad 3D model could not load."
+        );
+      }
     }
-  });
+  );
 
 
-  /* == SCREEN 7: HOUSE SALAD DETAILS == */
+  /* ==========================================
+     OPEN HOUSE SALAD DETAILS
+     ========================================== */
 
   function openHeroDish(meal) {
     if (
       state.restaurant !== 0 ||
       !meal.heroAR
-    ) return;
+    ) {
+      return;
+    }
 
     state.profileMenuOpen = false;
 
-    dishRestaurant.textContent = "P.S. Kitchen";
-    dishName.textContent = "House Salad";
+    dishRestaurant.textContent =
+      "P.S. Kitchen";
+
+    dishName.textContent =
+      "House Salad";
 
     ingredientButtons.innerHTML = "";
 
     selectedIngredient = null;
     hideHotspot();
 
-    meal.ingredients.forEach(ingredient => {
-      const button =
-        document.createElement("button");
+    meal.ingredients.forEach(
+      ingredient => {
+        const button =
+          document.createElement("button");
 
-      button.type = "button";
-      button.className = "ingredient-button";
+        button.type = "button";
+        button.className =
+          "ingredient-button";
 
-      button.textContent = ingredient.name;
-      button.dataset.part = ingredient.part;
+        button.textContent =
+          ingredient.name;
 
-      button.addEventListener("click", () => {
-        selectIngredient(ingredient.part);
-      });
+        button.dataset.part =
+          ingredient.part;
 
-      ingredientButtons.appendChild(button);
-    });
+        button.addEventListener(
+          "click",
+          () => {
+            selectIngredient(
+              ingredient.part
+            );
+          }
+        );
+
+        ingredientButtons.appendChild(
+          button
+        );
+      }
+    );
 
     showScreen("dish");
 
@@ -1398,27 +2871,39 @@ recallBackButton.addEventListener("click", () => {
           : "Loading House Salad..."
     );
 
-    detailViewer.setAttribute("auto-rotate", "");
+    detailViewer.setAttribute(
+      "auto-rotate",
+      ""
+    );
 
-    if (!detailViewer.getAttribute("src")) {
-      detailViewer.setAttribute("src", SALAD_URL);
+    if (
+      !detailViewer.getAttribute(
+        "src"
+      )
+    ) {
+      detailViewer.setAttribute(
+        "src",
+        SALAD_URL
+      );
     }
   }
 
+  backToMenu.addEventListener(
+    "click",
+    () => {
+      state.profileMenuOpen = false;
 
-  /* == SCREEN 7: BACK TO MENU == */
+      hideHotspot();
 
-  backToMenu.addEventListener("click", () => {
-    state.profileMenuOpen = false;
-
-    hideHotspot();
-
-    showScreen("menu");
-    renderMenu();
-  });
+      showScreen("menu");
+      renderMenu();
+    }
+  );
 
 
-  /* == GLOBAL: INITIALIZATION == */
+  /* ==========================================
+     INITIALIZATION
+     ========================================== */
 
   renderUsers();
 
