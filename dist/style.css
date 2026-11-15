@@ -1,16 +1,21 @@
 
-/* ==========================================
-   GRUB SCRUB V02
-   COMPLETE MOBILE-FIRST STYLES
-   ========================================== */
+/* =====================================================
+   GRUB SCRUB V02 - COMPLETE STYLESHEET
+   PROJECT 2 PROFILE WHEEL RESTORED
+   ===================================================== */
 
    :root {
     --burgundy: #591536;
-    --dark-brown: #3e1a2e;
     --pink: #b65c91;
     --green: #d2dc65;
     --red: #df726d;
     --page: #f4f4f4;
+  
+    --wheel-burgundy: #51102f;
+    --wheel-arc: #3e1a2e;
+    --wheel-pink: #b85f99;
+    --wheel-green: #a3a63e;
+    --wheel-red: #d84e4e;
   }
   
   * {
@@ -19,33 +24,42 @@
   
   html,
   body {
-    margin: 0;
     width: 100%;
     height: 100%;
+    margin: 0;
     overflow: hidden;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background: #000;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  
+  button,
+  input,
+  select {
+    font-family: inherit;
   }
   
   button {
-    font-family: inherit;
     cursor: pointer;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
   }
   
-  button:focus-visible {
-    outline: 3px solid var(--green);
-    outline-offset: 3px;
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--pink);
+    outline-offset: 2px;
   }
   
   [hidden] {
     display: none !important;
   }
   
-  /* AR stays behind the application */
+  /* =====================================================
+     AR SCENE
+     ===================================================== */
   
-  a-scene {
+  a-scene,
+  #arScene {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -57,11 +71,14 @@
     pointer-events: none !important;
   }
   
+  /* =====================================================
+     APP AND SCREENS
+     ===================================================== */
+  
   #app {
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100vh;
     height: 100dvh;
     z-index: 20;
     pointer-events: none;
@@ -83,9 +100,9 @@
     background: var(--page);
   }
   
-  /* ==========================================
-     TITLE
-     ========================================== */
+  /* =====================================================
+     START SCREEN
+     ===================================================== */
   
   .title-content {
     display: flex;
@@ -105,11 +122,8 @@
     margin-bottom: 22px;
     border-radius: 50%;
     background: var(--burgundy);
-    color: #fff;
-  }
-  
-  .logo-circle i {
-    font-size: 35px;
+    color: white;
+    font-size: 34px;
   }
   
   .grub-title {
@@ -117,8 +131,8 @@
     color: var(--burgundy);
     font-family: "Cheeseburger", Arial, sans-serif;
     font-size: clamp(65px, 19vw, 96px);
+    line-height: 0.95;
     font-weight: 400;
-    line-height: .95;
     letter-spacing: 2px;
     text-align: center;
   }
@@ -131,29 +145,28 @@
   }
   
   .primary-button {
-    border: none;
-    border-radius: 0;
     padding: 16px 27px;
+    border: 0;
+    border-radius: 0;
     background: var(--pink);
-    color: #fff;
+    color: white;
     font-size: 17px;
     font-weight: 700;
-    letter-spacing: 1px;
   }
   
   .primary-button:disabled {
-    opacity: .4;
+    opacity: 0.4;
   }
   
-  /* ==========================================
-     DECISION SCREENS
-     ========================================== */
+  /* =====================================================
+     PLANS AND SCANNER CHOICE
+     ===================================================== */
   
   .wireframe-choice-page {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     padding: 30px 24px;
@@ -165,7 +178,8 @@
     max-width: 330px;
     margin: 0 0 44px;
     color: #111;
-    font: 700 clamp(25px, 5vw, 30px)/1.2 Arial, sans-serif;
+    font-size: clamp(25px, 5vw, 30px);
+    line-height: 1.2;
   }
   
   .wireframe-choice-buttons {
@@ -176,12 +190,11 @@
   }
   
   .wireframe-choice-buttons button {
-    width: 100%;
     min-height: 56px;
     padding: 12px;
     border: 1px solid #a15383;
     border-radius: 0;
-    background: #fff;
+    background: white;
     color: #111;
     font-size: 17px;
     font-weight: 600;
@@ -189,7 +202,7 @@
   
   .wireframe-choice-buttons button:first-child {
     background: #a15383;
-    color: #fff;
+    color: white;
   }
   
   .wireframe-back-button {
@@ -202,15 +215,16 @@
     font-weight: 700;
   }
   
-  /* ==========================================
-     FOOD PROFILES
-     ========================================== */
+  /* =====================================================
+     SHARED PAGE LAYOUT
+     ===================================================== */
   
   .page {
     position: relative;
     width: 100%;
     height: 100%;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding:
       max(55px, env(safe-area-inset-top))
       22px
@@ -229,6 +243,10 @@
     color: #555;
     font-size: 13px;
   }
+  
+  /* =====================================================
+     FOOD PROFILE SELECTION
+     ===================================================== */
   
   .select-all-row {
     display: flex;
@@ -254,8 +272,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 76px;
     gap: 12px;
+    min-height: 76px;
     padding: 9px 13px;
     background: var(--burgundy);
     color: white;
@@ -272,21 +290,16 @@
     width: 50px;
     height: 50px;
     flex: 0 0 50px;
-    border-radius: 50%;
-    border: 2px solid #ffffffb9;
     overflow: hidden;
+    border: 2px solid #ffffffb9;
+    border-radius: 50%;
     background: #ddd;
   }
   
   .profile-photo img {
-    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-  
-  .user-text {
-    min-width: 0;
   }
   
   .user-name {
@@ -301,7 +314,7 @@
     gap: 6px;
     margin-top: 4px;
     font-size: 11px;
-    opacity: .9;
+    opacity: 0.9;
   }
   
   .restriction-dot {
@@ -315,7 +328,7 @@
     width: 42px;
     height: 42px;
     flex: 0 0 42px;
-    border: none;
+    border: 0;
     border-radius: 50%;
     background: white;
     color: var(--burgundy);
@@ -323,7 +336,7 @@
   }
   
   .user-add-button.selected {
-    background: #a3a63e;
+    background: var(--wheel-green);
     color: white;
   }
   
@@ -334,32 +347,322 @@
     margin-top: 32px;
   }
   
-  /* ==========================================
-     LOGO SCANNER
-     ========================================== */
+  /* =====================================================
+     MENU ANALYZER
+     ===================================================== */
+  
+  #screen-analyzer {
+    background: white;
+    color: #111;
+  }
+  
+  .analyzer-page {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: white;
+    padding-bottom: max(35px, env(safe-area-inset-bottom));
+  }
+  
+  .analyzer-header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+    padding:
+      calc(24px + env(safe-area-inset-top))
+      20px
+      20px;
+  }
+  
+  .analyzer-header h1 {
+    margin: 0;
+    color: #111;
+    font-size: 23px;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  #analyzerBack {
+    position: absolute;
+    top: calc(24px + env(safe-area-inset-top));
+    left: 18px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: #111;
+    font-size: 22px;
+  }
+  
+  .analyzer-content {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 30px 26px;
+  }
+  
+  .analyzer-location {
+    margin: 18px 0 30px;
+  }
+  
+  /* ALL-IN-ONE LOCATION SEARCH */
+  
+  #screen-analyzer #analyzerSearchForm.analyzer-search-container {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    height: 58px;
+    margin: 0;
+    padding: 0;
+    border: 6px solid #292929;
+    border-radius: 0;
+    background: #080808;
+    overflow: hidden;
+  }
+  
+  #screen-analyzer #analyzerLocation {
+    display: block;
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  #screen-analyzer #analyzerLocation::placeholder {
+    color: #999;
+    opacity: 1;
+  }
+  
+  #screen-analyzer #analyzerLocation::-webkit-search-cancel-button {
+    filter: grayscale(1) invert(1);
+  }
+  
+  #screen-analyzer #analyzerRadius.analyzer-inline-radius {
+    flex: 0 0 79px;
+    width: 79px;
+    min-width: 0;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 0 4px 0 7px;
+    border: 0;
+    border-left: 1px solid #555;
+    border-radius: 0;
+    outline: 0;
+    background: #080808;
+    color: white;
+    color-scheme: dark;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  #screen-analyzer #analyzerFindButton.analyzer-search-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 49px;
+    width: 49px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--pink);
+    color: white;
+  }
+  
+  #screen-analyzer .analyzer-search-button i {
+    color: white;
+    font-size: 23px;
+  }
+  
+  #screen-analyzer .analyzer-search-button:disabled {
+    opacity: 0.6;
+  }
+  
+  #screen-analyzer .analyzer-location-status {
+    display: block;
+    margin: 12px 0 0;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  
+  /* RECOMMENDATIONS */
+  
+  .analyzer-recommendations-header {
+    margin-bottom: 18px;
+  }
+  
+  .analyzer-recommendations-header h2 {
+    margin: 0;
+    color: #111;
+    font-size: 21px;
+    font-weight: 700;
+  }
+  
+  .analyzer-recommendations-header p {
+    margin: 6px 0 0;
+    color: #777;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  
+  .analyzer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 17px;
+  }
+  
+  .analyzer-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+  
+  .analyzer-card-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 18px;
+    overflow: hidden;
+    background: #dedede;
+    color: #333;
+    font-size: clamp(18px, 5vw, 25px);
+    font-weight: 800;
+    text-align: center;
+  }
+  
+  #screen-analyzer .analyzer-restaurant-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 0;
+    object-fit: contain;
+    object-position: center;
+  }
+  
+  .analyzer-card-details {
+    width: 100%;
+    padding: 11px 2px;
+  }
+  
+  .analyzer-card-name {
+    margin: 0 0 5px;
+    color: #111;
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  
+  .analyzer-card-distance {
+    display: block;
+    margin: 5px 0;
+    color: #666;
+    font-size: 12px;
+  }
+  
+  .analyzer-card:hover .analyzer-card-image {
+    background: #d3d3d3;
+  }
+  
+  .analyzer-empty {
+    margin-top: 20px;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .analyzer-disclaimer {
+    margin: 28px 0 0;
+    color: #777;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  
+  /* =====================================================
+     WORKING LOGO SCANNER CAMERA
+     ===================================================== */
   
   #screen-camera.active {
     position: relative;
+    overflow: hidden;
     background: transparent;
-    color: #fff;
+    color: white;
+  }
+  
+  #logoCameraPreview {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+    pointer-events: none;
   }
   
   .camera-header {
     position: absolute;
-    top: calc(40px + env(safe-area-inset-top));
+    top: calc(35px + env(safe-area-inset-top));
     left: 0;
     right: 0;
-    z-index: 2;
+    z-index: 5;
+    min-height: 55px;
     padding: 15px;
     text-align: center;
   }
   
   .camera-title {
     margin: 0;
+    padding: 0 55px;
     color: white;
     font-family: "Cheeseburger", Arial, sans-serif;
     font-size: 18px;
+    text-align: center;
     text-shadow: 0 2px 5px black;
+  }
+  
+  .logo-scanner-back {
+    position: absolute;
+    top: 9px;
+    left: 17px;
+    z-index: 6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: white;
+    font-size: 24px;
   }
   
   .tracking-status {
@@ -367,24 +670,29 @@
     bottom: calc(55px + env(safe-area-inset-bottom));
     left: 10px;
     right: 10px;
+    z-index: 5;
     color: white;
     font-size: 12px;
     text-align: center;
     text-shadow: 0 2px 5px black;
   }
   
-  /* ==========================================
-     LOADING AND COMPATIBILITY RESULTS
-     ========================================== */
-  
-  .center-screen {
-    display: none;
+  body.logo-scanner-active #arScene {
+    background: transparent !important;
   }
+  
+  body.logo-scanner-active #app {
+    background: transparent !important;
+  }
+  
+  /* =====================================================
+     LOADING AND COMPATIBILITY SCREENS
+     ===================================================== */
   
   .center-screen.active {
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
   }
   
   #screen-loading {
@@ -407,8 +715,8 @@
   
   .result-card {
     padding: 25px;
-    text-align: center;
     color: #281721;
+    text-align: center;
   }
   
   .result-icon {
@@ -429,27 +737,19 @@
     font-weight: 700;
   }
   
-  /* ==========================================
-     LIVE MOBILE MENU SCANNER
-     ========================================== */
-  
-  #screen-menu-scanner:not(.active) {
-    display: none !important;
-  }
+  /* =====================================================
+     LIVE MENU SCANNER
+     ===================================================== */
   
   #screen-menu-scanner.active {
-    display: block !important;
     position: fixed !important;
     inset: 0 !important;
+    z-index: 100;
     width: 100vw !important;
     height: 100dvh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: #000 !important;
-    color: #fff !important;
-    pointer-events: auto !important;
-    z-index: 100;
+    overflow: hidden;
+    background: black !important;
+    color: white !important;
   }
   
   .menu-scanner-page {
@@ -457,9 +757,6 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
     overflow: hidden;
     background: black;
   }
@@ -468,10 +765,9 @@
     position: relative;
     display: flex;
     flex: 0 0 auto;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     min-height: 80px;
-    margin: 0;
     padding:
       calc(18px + env(safe-area-inset-top))
       16px
@@ -489,11 +785,11 @@
   
   #menuScannerBack {
     position: absolute;
-    left: 14px;
     top: calc(20px + env(safe-area-inset-top));
+    left: 14px;
     z-index: 5;
-    border: none;
     padding: 8px;
+    border: 0;
     background: transparent;
     color: white;
     font-size: 20px;
@@ -501,12 +797,9 @@
   
   .menu-camera-container {
     position: relative;
-    display: block;
     flex: 1 1 auto;
     width: 100%;
     min-height: 0;
-    margin: 0;
-    padding: 0;
     overflow: hidden;
     background: black;
   }
@@ -518,33 +811,21 @@
     display: block;
     width: 100%;
     height: 100%;
-    max-width: none;
-    max-height: none;
-    margin: 0;
-    padding: 0;
     object-fit: contain;
     background: black;
-  }
-  
-  #menuCameraVideo[hidden],
-  #menuCaptureCanvas[hidden] {
-    display: none !important;
   }
   
   .menu-camera-guide {
     position: absolute;
     inset: 8% 6%;
     z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     pointer-events: none;
   }
   
   .menu-camera-frame {
     width: 100%;
     height: 100%;
-    border: 1px solid rgba(255,255,255,.35);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 8px;
   }
   
@@ -555,8 +836,7 @@
     right: 15px;
     z-index: 4;
     margin: 0;
-    padding: 0;
-    color: #fff;
+    color: white;
     font: 12px/1.5 Arial, sans-serif;
     text-align: center;
     text-shadow: 0 2px 5px black;
@@ -566,12 +846,12 @@
   .menu-scanner-controls {
     display: flex;
     flex: 0 0 auto;
-    align-items: center;
     justify-content: center;
-    width: 100%;
-    margin: 0;
-    padding: 18px 20px;
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    align-items: center;
+    padding:
+      18px
+      20px
+      max(24px, env(safe-area-inset-bottom));
     background: black;
   }
   
@@ -582,38 +862,118 @@
     width: 100%;
     max-width: 460px;
     min-height: 60px;
-    margin: 0;
     padding: 12px 18px;
-    border: none;
+    border: 0;
     border-radius: 0;
     background: var(--pink);
-    color: #fff;
+    color: white;
     font: 700 17px Arial, sans-serif;
-    box-shadow: none;
   }
   
   #captureMenuButton:disabled {
-    opacity: .45;
+    opacity: 0.45;
   }
   
-  /* ==========================================
+  /* =====================================================
+     MENU SCANNER AR FLAGS
+     ===================================================== */
+  
+  .menu-ar-flag-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    overflow: hidden;
+    pointer-events: none;
+    perspective: 650px;
+  }
+  
+  .menu-ar-warning {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transform: none;
+    transform-origin: left center;
+    filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.65));
+    animation: flag-appear 0.25s ease-out;
+  }
+  
+  .menu-ar-flag-symbol {
+    position: relative;
+    display: block;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 40px;
+    transform-style: preserve-3d;
+  }
+  
+  .menu-ar-flag-pole {
+    position: absolute;
+    top: 0;
+    left: 6px;
+    width: 4px;
+    height: 40px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #555, white, #555);
+  }
+  
+  .menu-ar-flag-cloth {
+    position: absolute;
+    top: 2px;
+    left: 9px;
+    width: 23px;
+    height: 22px;
+    background: linear-gradient(
+      115deg,
+      #ff6262,
+      #d71932 55%,
+      #9a0017
+    );
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      77% 49%,
+      100% 100%,
+      0 100%
+    );
+    transform: rotateY(-16deg);
+  }
+  
+  .menu-ar-flag-label {
+    max-width: 135px;
+    padding: 6px 9px;
+    border: 1px solid #ff7777;
+    border-radius: 6px;
+    background: rgba(61, 0, 12, 0.94);
+    color: white;
+    font: 700 11px/1.25 Arial, sans-serif;
+    overflow-wrap: anywhere;
+  }
+  
+  @keyframes flag-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+  
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* =====================================================
      SAVED MENU RESULTS
-     ========================================== */
-  
-  #screen-menu-results:not(.active) {
-    display: none !important;
-  }
+     ===================================================== */
   
   #screen-menu-results.active {
-    display: block !important;
     position: fixed !important;
     inset: 0 !important;
-    width: 100% !important;
-    height: 100dvh !important;
+    z-index: 110;
+    width: 100%;
+    height: 100dvh;
     background: black !important;
     color: white !important;
-    pointer-events: auto !important;
-    z-index: 110;
   }
   
   .menu-results-page {
@@ -638,7 +998,7 @@
   }
   
   #menuResultsBack {
-    border: none;
+    border: 0;
     padding: 8px;
     background: transparent;
     color: white;
@@ -646,9 +1006,9 @@
   }
   
   .filter-flags-button {
-    border: none;
-    border-radius: 25px;
     padding: 10px 16px;
+    border: 0;
+    border-radius: 25px;
     background: #797979;
     color: white;
     font-size: 14px;
@@ -657,7 +1017,6 @@
   .menu-results-score {
     width: 100%;
     max-width: 420px;
-    flex: 0 0 auto;
     margin: 24px auto 18px;
   }
   
@@ -677,7 +1036,7 @@
   }
   
   #menuResultsProgressFill {
-    width: 0%;
+    width: 0;
     height: 100%;
     border-radius: 20px;
     background: var(--green);
@@ -685,9 +1044,9 @@
   
   .menu-results-photo-area {
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex: 1 1 auto;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     max-width: 420px;
     min-height: 150px;
@@ -723,7 +1082,6 @@
   .menu-results-actions {
     display: flex;
     flex-direction: column;
-    flex: 0 0 auto;
     align-items: center;
     gap: 10px;
     width: 100%;
@@ -732,7 +1090,7 @@
   }
   
   .menu-results-retake {
-    border: none;
+    border: 0;
     padding: 10px;
     background: transparent;
     color: white;
@@ -742,9 +1100,7 @@
   .save-menu-results-button {
     width: 100%;
     min-height: 62px;
-    border: none;
-    border-radius: 0;
-    padding: 15px;
+    border: 0;
     background: var(--pink);
     color: white;
     font-size: 21px;
@@ -759,13 +1115,12 @@
     text-align: center;
   }
   
-  /* ==========================================
-     RESTAURANT RECALL LIST
-     ========================================== */
+  /* =====================================================
+     RECALL LIST
+     ===================================================== */
   
   .recall-page {
     background: white;
-    padding-top: max(55px, env(safe-area-inset-top));
   }
   
   .recall-header {
@@ -773,8 +1128,8 @@
   }
   
   #recallBackButton {
-    border: none;
     padding: 8px 0;
+    border: 0;
     background: transparent;
     color: var(--burgundy);
     font-weight: 700;
@@ -800,13 +1155,13 @@
   
   .recall-card {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     gap: 12px;
     width: 100%;
     min-height: 65px;
-    border: none;
     padding: 15px;
+    border: 0;
     background: var(--red);
     color: #25121e;
     text-align: left;
@@ -827,7 +1182,7 @@
   }
   
   .recall-score {
-    flex: 0 0 auto;
+    flex-shrink: 0;
     font-size: 12px;
     font-weight: 700;
   }
@@ -839,13 +1194,12 @@
     text-align: center;
   }
   
-  /* ==========================================
-     RESTAURANT MEALS
-     ========================================== */
+  /* =====================================================
+     RESTAURANT MENU
+     ===================================================== */
   
   .menu-page {
     padding-bottom: 130px;
-    background: #f4f4f4;
   }
   
   .restaurant-top-row {
@@ -865,8 +1219,8 @@
   }
   
   .scan-again-button {
-    border: none;
     padding: 9px 12px;
+    border: 0;
     background: var(--burgundy);
     color: white;
     font-size: 11px;
@@ -914,7 +1268,6 @@
   }
   
   .wine-line {
-    width: 100%;
     height: 2px;
     margin: 14px 0 18px;
     background: var(--burgundy);
@@ -952,7 +1305,6 @@
     padding: 9px;
     color: #111;
     font-size: 12px;
-    line-height: 1.3;
     font-weight: 600;
   }
   
@@ -963,128 +1315,297 @@
     z-index: 5;
     width: 34px;
     height: 34px;
-    border: none;
+    border: 0;
     border-radius: 50%;
     background: var(--pink);
     color: white;
     font-size: 20px;
   }
   
-  /* Food profile disc */
+  /* =====================================================
+     ORIGINAL PROJECT 2 BOTTOM-RIGHT PROFILE WHEEL
   
-  .profile-disc {
+     ONE DEFINITIVE VERSION.
+     NO COMPETING PROFILE WHEEL RULES.
+  
+     CLOSED: SINGLE PINK PROFILE CIRCLE
+     OPEN: PINK + BURGUNDY PROFILE CIRCLES
+     THICK BURGUNDY ARC AND LARGE GREEN PLUS
+     ===================================================== */
+  
+  #screen-menu #profileDisc {
     position: fixed;
-    right: 12px;
-    bottom: max(15px, env(safe-area-inset-bottom));
-    z-index: 70;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 100;
+    width: 86px;
+    height: 86px;
+    pointer-events: none;
+  }
+  
+  /* Expanded wheel dimensions */
+  
+  #screen-menu #profileDisc.open {
     width: 190px;
     height: 170px;
-    pointer-events: none;
   }
   
-  .profile-arc {
+  /* ORIGINAL THICK BURGUNDY CONNECTOR */
+  
+  #screen-menu #profileDisc .profile-arc {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
+    width: 190px;
+    height: 170px;
     opacity: 0;
-    transition: opacity .15s;
+    visibility: hidden;
+    pointer-events: none;
+    overflow: visible;
   }
   
-  .profile-arc path {
-    fill: none;
-    stroke: var(--burgundy);
-    stroke-width: 3;
-  }
-  
-  .profile-disc.open .profile-arc {
+  #screen-menu #profileDisc.open .profile-arc {
     opacity: 1;
+    visibility: visible;
   }
   
-  .profile-buttons {
+  #screen-menu #profileDisc .profile-arc path {
+    fill: none;
+    stroke: var(--wheel-arc);
+    stroke-width: 9px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  /* PROFILE BUTTON LAYER */
+  
+  #screen-menu #profileDisc .profile-buttons {
     position: absolute;
     inset: 0;
     pointer-events: none;
   }
   
-  .profile-button {
+  /* ORIGINAL OUTER BURGUNDY CIRCLE */
+  
+  #screen-menu #profileDisc .profile-button {
     position: absolute;
-    width: 64px;
-    height: 64px;
-    border: none;
+    margin: 0;
     padding: 0;
+    border: none;
     border-radius: 50%;
-    background: transparent;
+    background: var(--wheel-burgundy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: auto;
   }
   
-  .profile-button.small {
-    width: 57px;
-    height: 57px;
+  /* CLOSED: ONLY ACTIVE PROFILE VISIBLE */
+  
+  #screen-menu #profileDisc:not(.open) .profile-button {
+    display: none;
   }
   
-  .profile-main-icon {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border: 3px solid #a3a63e;
+  #screen-menu #profileDisc:not(.open) .profile-button.current {
+    display: flex;
+    background: var(--wheel-pink);
+  }
+  
+  /* EXPANDED: BURGUNDY OUTER RINGS */
+  
+  #screen-menu #profileDisc.open .profile-button {
+    display: flex;
+    background: var(--wheel-burgundy);
+  }
+  
+  /* ACTIVE PROFILE HAS THICK PINK OUTER RING */
+  
+  #screen-menu #profileDisc.open .profile-button.active {
+    background: var(--wheel-pink);
+  }
+  
+  /* SMALL PROFILE BUTTONS */
+  
+  #screen-menu #profileDisc .profile-button.small {
+    width: 62px;
+    height: 62px;
+  }
+  
+  /* LARGE ACTIVE PROFILE */
+  
+  #screen-menu #profileDisc .profile-button.active {
+    width: 94px;
+    height: 94px;
+    z-index: 6;
+  }
+  
+  /* CLOSED ACTIVE PROFILE */
+  
+  #screen-menu #profileDisc:not(.open) .profile-button.active {
+    width: 70px;
+    height: 70px;
+  }
+  
+  /* INNER PORTRAIT HOLDER */
+  
+  #screen-menu #profileDisc .profile-main-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
     border-radius: 50%;
-    background: #eee;
+    background: transparent;
+    overflow: visible;
   }
   
-  .profile-no-options {
-    border-color: #da4f56;
+  /* SMALL PORTRAIT */
+  
+  #screen-menu #profileDisc
+  .profile-button.small .profile-main-icon {
+    width: 48px;
+    height: 48px;
   }
   
-  .profile-nav-image {
+  /* ACTIVE PORTRAIT */
+  
+  #screen-menu #profileDisc
+  .profile-button.active .profile-main-icon {
+    width: 76px;
+    height: 76px;
+  }
+  
+  /* CLOSED PORTRAIT */
+  
+  #screen-menu #profileDisc:not(.open)
+  .profile-button.active .profile-main-icon {
+    width: 56px;
+    height: 56px;
+  }
+  
+  /* PORTRAIT IMAGE */
+  
+  #screen-menu #profileDisc .profile-nav-image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    box-sizing: border-box;
   }
   
-  .profile-status-icon {
+  /* GREEN INNER PORTRAIT RING */
+  
+  #screen-menu #profileDisc
+  .profile-has-options .profile-nav-image {
+    border-color: var(--wheel-green);
+  }
+  
+  /* RED INNER PORTRAIT RING */
+  
+  #screen-menu #profileDisc
+  .profile-no-options .profile-nav-image {
+    border-color: var(--wheel-red);
+  }
+  
+  /* STATUS CHECK / X */
+  
+  #screen-menu #profileDisc .profile-status-icon {
     position: absolute;
-    right: -2px;
-    bottom: -2px;
+    border-radius: 50%;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 21px;
-    height: 21px;
-    border-radius: 50%;
-    background: #a3a63e;
+    pointer-events: none;
+  }
+  
+  #screen-menu #profileDisc .profile-status-icon.ok {
+    background: var(--wheel-green);
+  }
+  
+  #screen-menu #profileDisc .profile-status-icon.bad {
+    background: var(--wheel-red);
+  }
+  
+  #screen-menu #profileDisc .profile-status-icon i {
     color: white;
-    font-size: 13px;
+    font-size: 15px;
   }
   
-  .profile-status-icon.bad {
-    background: #da4f56;
+  /* SMALL PORTRAIT STATUS CIRCLES */
+  
+  #screen-menu #profileDisc
+  .profile-button.small .profile-status-icon {
+    right: 1px;
+    bottom: 3px;
+    width: 23px;
+    height: 23px;
   }
   
-  .add-profile {
+  /* ACTIVE PORTRAIT STATUS CIRCLE */
+  
+  #screen-menu #profileDisc
+  .profile-button.active .profile-status-icon {
+    right: 3px;
+    bottom: 7px;
+    width: 28px;
+    height: 28px;
+  }
+  
+  /* CLOSED STATUS CIRCLE */
+  
+  #screen-menu #profileDisc:not(.open)
+  .profile-button.active .profile-status-icon {
+    right: 2px;
+    bottom: 4px;
+    width: 23px;
+    height: 23px;
+  }
+  
+  /* ORIGINAL LARGE GREEN PLUS BUTTON */
+  
+  #screen-menu #profileDisc .add-profile {
     position: absolute;
-    right: 5px;
-    bottom: 65px;
-    width: 48px;
-    height: 48px;
-    border: none;
+    right: 3px;
+    bottom: 4px;
+    width: 72px;
+    height: 72px;
+    margin: 0;
+    padding: 0;
+    border: 0;
     border-radius: 50%;
-    background: #a3a63e;
+    background: var(--wheel-green);
     color: white;
-    font-size: 24px;
+    align-items: center;
+    justify-content: center;
     pointer-events: auto;
+    z-index: 7;
   }
   
-  /* ==========================================
+  /* HIDDEN WHEN WHEEL IS CLOSED */
+  
+  #screen-menu #profileDisc:not(.open) .add-profile {
+    display: none !important;
+  }
+  
+  /* VISIBLE WHEN WHEEL IS OPEN */
+  
+  #screen-menu #profileDisc.open .add-profile {
+    display: flex !important;
+  }
+  
+  #screen-menu #profileDisc .add-profile i {
+    font-size: 40px;
+    line-height: 1;
+  }
+  
+  /* =====================================================
      HOUSE SALAD 3D DETAILS
-     ========================================== */
+     ===================================================== */
   
   #screen-dish {
-    background: #f4f4f4;
     overflow-y: auto;
+    background: #f4f4f4;
   }
   
   .dish-header {
@@ -1100,8 +1621,8 @@
   }
   
   .back-button {
-    border: none;
     padding: 8px;
+    border: 0;
     background: transparent;
     color: var(--burgundy);
     font-size: 22px;
@@ -1155,8 +1676,8 @@
   }
   
   .ingredient-button {
-    border: 1px solid var(--burgundy);
     padding: 10px 13px;
+    border: 1px solid var(--burgundy);
     background: var(--burgundy);
     color: white;
     font-size: 12px;
@@ -1185,8 +1706,8 @@
   
   .hotspot-icon {
     display: inline-flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1205,11 +1726,12 @@
     font-weight: 700;
   }
   
-  /* ==========================================
-     MOBILE REFINEMENTS
-     ========================================== */
+  /* =====================================================
+     MOBILE RESPONSIVE STYLES
+     ===================================================== */
   
   @media (max-width: 767px) {
+  
     .page {
       padding-left: 17px;
       padding-right: 17px;
@@ -1217,6 +1739,30 @@
   
     .page-title {
       font-size: 21px;
+    }
+  
+    .analyzer-header {
+      min-height: 88px;
+    }
+  
+    .analyzer-header h1 {
+      font-size: 21px;
+    }
+  
+    .analyzer-content {
+      padding: 27px 24px;
+    }
+  
+    .analyzer-grid {
+      gap: 15px;
+    }
+  
+    .analyzer-card-name {
+      font-size: 13px;
+    }
+  
+    .analyzer-card-distance {
+      font-size: 11px;
     }
   
     .menu-scanner-header {
@@ -1253,111 +1799,175 @@
     .scan-again-button {
       font-size: 10px;
     }
+  
+    .menu-ar-flag-symbol {
+      transform: scale(0.85);
+      transform-origin: left center;
+    }
+  
+    .menu-ar-flag-label {
+      max-width: 105px;
+      font-size: 10px;
+    }
   }
   
+  @media (max-width: 360px) {
+  
+    .analyzer-content {
+      padding-left: 17px;
+      padding-right: 17px;
+    }
+  
+    #screen-analyzer #analyzerLocation {
+      padding: 0 8px;
+      font-size: 14px;
+    }
+  
+    #screen-analyzer #analyzerRadius.analyzer-inline-radius {
+      flex-basis: 69px;
+      width: 69px;
+      font-size: 12px;
+    }
+  
+    #screen-analyzer #analyzerFindButton.analyzer-search-button {
+      flex-basis: 44px;
+      width: 44px;
+    }
+  
+    .analyzer-grid {
+      gap: 11px;
+    }
+  
+    .analyzer-card-image {
+      padding: 9px;
+      font-size: 17px;
+    }
+  }
+
+
 
 /* ==========================================
-   LIVE FLOATING 3D-STYLE AR FLAGS
+   GRUB SCRUB - UNIVERSAL BACK ARROWS
    ========================================== */
 
-.menu-ar-flag-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  overflow: hidden;
-  pointer-events: none;
-  perspective: 650px;
-}
+/* New back buttons */
 
-.menu-ar-warning {
+.gs-global-back {
   position: absolute;
+  top: calc(18px + env(safe-area-inset-top));
+  left: 18px;
+  z-index: 200;
+
   display: flex;
   align-items: center;
-  gap: 5px;
-  transform: none;
-  transform-origin: left center;
-  filter: drop-shadow(2px 4px 3px rgba(0,0,0,.65));
-  animation: flag-appear .25s ease-out;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: #111;
+
+  font-size: 24px;
+  cursor: pointer;
 }
 
-.menu-ar-flag-symbol {
-  position: relative;
-  display: block;
-  flex: 0 0 30px;
-  width: 30px;
-  height: 40px;
-  transform-style: preserve-3d;
+.gs-global-back i {
+  font-size: 24px;
+  line-height: 1;
 }
 
-.menu-ar-flag-pole {
-  position: absolute;
-  top: 0;
-  left: 6px;
-  width: 4px;
-  height: 40px;
-  border-radius: 2px;
-  background: linear-gradient(
-    90deg,
-    #555,
-    #fff,
-    #555
-  );
+/* Existing back arrows */
+
+.gs-existing-back {
+  position: fixed !important;
+  top: calc(18px + env(safe-area-inset-top)) !important;
+  left: 18px !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 200 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 44px !important;
+  height: 44px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+
+  background: transparent !important;
+  color: #111 !important;
+
+  cursor: pointer;
 }
 
-.menu-ar-flag-cloth {
-  position: absolute;
-  top: 2px;
-  left: 9px;
-  width: 23px;
-  height: 22px;
-  background: linear-gradient(
-    115deg,
-    #ff6262,
-    #d71932 55%,
-    #9a0017
-  );
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    77% 49%,
-    100% 100%,
-    0 100%
-  );
-  transform: rotateY(-16deg);
-  box-shadow: 0 2px 5px #0008;
+.gs-existing-back i {
+  font-size: 24px;
+  line-height: 1;
 }
 
-.menu-ar-flag-label {
-  max-width: 135px;
-  padding: 6px 9px;
-  border: 1px solid #ff7777;
-  border-radius: 6px;
-  background: rgba(61, 0, 12, .94);
-  color: white;
-  font: 700 11px/1.25 Arial, sans-serif;
-  overflow-wrap: anywhere;
+/* White arrows on dark screens */
+
+#screen-camera .gs-existing-back,
+#screen-menu-scanner .gs-existing-back,
+#screen-menu-results .gs-existing-back {
+  color: white !important;
 }
 
-@keyframes flag-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+#screen-loading .gs-global-back,
+#screen-result .gs-global-back {
+  color: #111;
 }
 
-@media (max-width: 767px) {
-  .menu-ar-flag-symbol {
-    transform: scale(.85);
-    transform-origin: left center;
-  }
+/* Dark arrow on the white Menu Analyzer */
 
-  .menu-ar-flag-label {
-    max-width: 105px;
-    font-size: 10px;
-  }
+#screen-analyzer .gs-existing-back {
+  color: #111 !important;
 }
+
+/* Keep the new arrow visible above menu content */
+
+#screen-menu .gs-global-back {
+  z-index: 200;
+}
+
+/* Give the restaurant title room for its arrow */
+
+#screen-menu .restaurant-top-row {
+  padding-top: 26px;
+}
+
+/* Prevent overlap on the plans and profile screens */
+
+#screen-plans .gs-global-back,
+#screen-users .gs-global-back {
+  z-index: 200;
+}
+
+/* Accessible touch targets */
+
+.gs-global-back:focus-visible,
+.gs-existing-back:focus-visible {
+  outline: 2px solid #b65c91;
+  outline-offset: 3px;
+}
+
+/* ==========================================
+   END BACK ARROW STYLING
+   ========================================== */
+
+  
+  /* =====================================================
+     END OF COMPLETE GRUB SCRUB STYLESHEET
+     ===================================================== */
+  
