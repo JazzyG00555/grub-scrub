@@ -1,553 +1,1035 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <meta name="theme-color" content="#000000">
   <title>Grub Scrub</title>
 
-  <link rel="stylesheet" href="./style.css?v=logo-wheel-fix-2">
-  <link rel="stylesheet"
-        href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
-  <link rel="stylesheet"
-        href="https://fonts.cdnfonts.com/css/cheeseburger">
+  <!-- MAIN GRUB SCRUB CSS -->
+  <link
+    rel="stylesheet"
+    href="./style.css?v=logo-wheel-fix-2"
+  >
 
+  <!-- FOOD PROFILE ONBOARDING CSS -->
+  <link
+    rel="stylesheet"
+    href="./onboarding.css"
+  >
+
+  <!-- PHOSPHOR ICONS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
+  >
+
+  <!-- GRUB SCRUB FONT -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.cdnfonts.com/css/cheeseburger"
+  >
+
+  <!-- A-FRAME -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- MINDAR LOGO SCANNER -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <script type="module"
-          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <!-- 3D MEAL VIEWER -->
+  <script
+    type="module"
+    src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+  ></script>
+
+  <!-- MENU OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 </head>
+
 <body>
 
-<main id="app">
+  <main id="app">
 
-  <!-- START -->
-  <section id="screen-title" class="screen normal-screen active">
-    <div class="title-content">
-      <div class="logo-circle">
-        <i class="ph ph-fork-knife"></i>
-      </div>
+    <!-- ======================================
+         START SCREEN
+         ====================================== -->
 
-      <h1 class="grub-title">THE
-        <br>GRUB
-        <br>SCRUB
-      </h1>
+    <section
+      id="screen-title"
+      class="screen normal-screen active"
+    >
 
-      <p class="tagline">Find meals for everyone at the table!</p>
+      <div class="title-content">
 
-      <button id="startButton" class="primary-button" type="button">
-        START
-      </button>
-    </div>
-  </section>
-
-  <!-- TODAY'S PLANS -->
-  <section id="screen-plans" class="screen normal-screen">
-    <div class="wireframe-choice-page">
-      <h2>What are today's plans?</h2>
-
-      <div class="wireframe-choice-buttons">
-        <button id="lastMinuteButton" type="button">
-          Last Minute Meal
-        </button>
-
-        <button id="pregatheringButton" type="button">
-          Pregathering Planning
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- SCANNER CHOICE -->
-  <section id="screen-scan-choice" class="screen normal-screen">
-    <div class="wireframe-choice-page">
-      <h2>Which item would you like to scan?</h2>
-
-      <div class="wireframe-choice-buttons">
-        <button id="chooseLogoScanner" type="button">
-          Scan Logo
-        </button>
-
-        <button id="chooseMenuScanner" type="button">
-          Scan Menu
-        </button>
-      </div>
-
-      <button id="scannerChoiceBack"
-              class="wireframe-back-button"
-              type="button">
-        BACK
-      </button>
-    </div>
-  </section>
-
-  <!-- FOOD PROFILES -->
-  <section id="screen-users" class="screen normal-screen">
-    <div class="page profiles-page">
-      <h2 class="page-title">
-        Who's Here &amp; What Can They Munch On?
-      </h2>
-
-      <p class="small-intro">
-        Add the food profiles of the people joining today.
-      </p>
-
-      <div class="select-all-row">
-        <button id="addAllButton"
-                class="add-all-button"
-                type="button">
-          SELECT ALL
-        </button>
-      </div>
-
-      <div id="userList" class="user-list"></div>
-
-      <button id="scanButton"
-              class="primary-button scan-button"
-              type="button"
-              disabled>
-        LET'S GET SCANNING!
-      </button>
-    </div>
-  </section>
-
-  <!-- PREGATHERING MENU ANALYZER -->
-  <section id="screen-analyzer" class="screen normal-screen">
-    <div class="analyzer-page">
-
-      <header class="analyzer-header">
-        <button id="analyzerBack"
-                type="button"
-                aria-label="Back to food profiles">
-          <i class="ph ph-arrow-left"></i>
-        </button>
-
-        <h1>Menu Analyzer</h1>
-      </header>
-
-      <div class="analyzer-content">
-        <div class="analyzer-location">
-
-          <!-- ALL-IN-ONE LOCATION SEARCH -->
-          <form id="analyzerSearchForm"
-                class="analyzer-search-container">
-
-            <input
-              id="analyzerLocation"
-              type="search"
-              placeholder="City, ZIP code, or area"
-              autocomplete="off"
-              aria-label="Search location"
-            >
-
-            <select
-              id="analyzerRadius"
-              class="analyzer-inline-radius"
-              aria-label="Search radius"
-            >
-              <option value="1">1 mi</option>
-              <option value="3">3 mi</option>
-              <option value="5" selected>5 mi</option>
-              <option value="10">10 mi</option>
-              <option value="25">25 mi</option>
-            </select>
-
-            <button
-              id="analyzerFindButton"
-              class="analyzer-search-button"
-              type="submit"
-              aria-label="Find restaurants"
-            >
-              <i class="ph ph-magnifying-glass"></i>
-            </button>
-          </form>
-
-          <p id="analyzerLocationStatus"
-             class="analyzer-location-status"
-             role="status">
-            Enter a location and tap the search icon.
-          </p>
+        <div class="logo-circle">
+          <i class="ph ph-fork-knife"></i>
         </div>
 
-        <div class="analyzer-recommendations-header">
-          <h2>Recommendations</h2>
-          <p>Explore restaurants in your selected area</p>
-        </div>
+        <h1 class="grub-title">
+          THE
+          <br>GRUB
+          <br>SCRUB
+        </h1>
 
-        <div id="analyzerGrid" class="analyzer-grid"></div>
-
-        <p id="analyzerEmpty"
-           class="analyzer-empty"
-           hidden>
-          No demo restaurants found in this area.
+        <p class="tagline">
+          Find meals for everyone at the table!
         </p>
 
-        <p class="analyzer-disclaimer">
-          Prototype search using two demonstration restaurant
-          locations. Compatibility appears after choosing a
-          restaurant. Dietary information has not been verified.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- LIVE MENU SCANNER -->
-  <section id="screen-menu-scanner" class="screen camera-screen">
-    <div class="menu-scanner-page">
-
-      <header class="menu-scanner-header">
-        <button id="menuScannerBack"
-                type="button"
-                aria-label="Go back">
-          <i class="ph ph-arrow-left"></i>
+        <button
+          id="startButton"
+          class="primary-button"
+          type="button"
+        >
+          START
         </button>
 
-        <h2>Scan Restaurant Menu</h2>
-      </header>
+        <!--
+          CREATE PROFILE IS ADDED AUTOMATICALLY
+          BY onboarding.js
+        -->
 
-      <div class="menu-camera-container">
-        <video id="menuCameraVideo"
-               autoplay
-               playsinline
-               muted></video>
+      </div>
 
-        <canvas id="menuCaptureCanvas" hidden></canvas>
+    </section>
 
-        <div id="menuARFlagLayer"
-             class="menu-ar-flag-layer"
-             aria-label="Potential dietary warnings"></div>
 
-        <div class="menu-camera-guide" aria-hidden="true">
-          <div class="menu-camera-frame"></div>
+    <!-- ======================================
+         TODAY'S PLANS
+         ====================================== -->
+
+    <section
+      id="screen-plans"
+      class="screen normal-screen"
+    >
+
+      <div class="wireframe-choice-page">
+
+        <h2>What are today's plans?</h2>
+
+        <div class="wireframe-choice-buttons">
+
+          <button
+            id="lastMinuteButton"
+            type="button"
+          >
+            Last Minute Meal
+          </button>
+
+          <button
+            id="pregatheringButton"
+            type="button"
+          >
+            Pregathering Planning
+          </button>
+
         </div>
 
-        <p id="menuCameraStatus"
-           role="status"
-           aria-live="polite">
-          Point your camera at a restaurant menu.
-        </p>
       </div>
 
-      <div class="menu-scanner-controls">
-        <button id="captureMenuButton"
-                type="button"
-                disabled>
-          SAVE MENU RESULTS
-        </button>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- SAVED MENU RESULTS -->
-  <section id="screen-menu-results" class="screen normal-screen">
-    <div class="menu-results-page">
 
-      <header class="menu-results-header">
-        <button id="menuResultsBack"
-                type="button"
-                aria-label="Back">
-          <i class="ph ph-arrow-left"></i>
-        </button>
+    <!-- ======================================
+         SCANNER CHOICE
+         ====================================== -->
 
-        <button id="filterFlagsButton"
-                class="filter-flags-button"
-                type="button">
-          Filter Flags
-        </button>
-      </header>
+    <section
+      id="screen-scan-choice"
+      class="screen normal-screen"
+    >
 
-      <div class="menu-results-score">
-        <p id="menuResultsMatchLabel">Analysis pending</p>
+      <div class="wireframe-choice-page">
 
-        <div id="menuResultsProgress"
-             class="menu-results-progress"
-             role="progressbar"
-             aria-label="Menu compatibility"
-             aria-valuemin="0"
-             aria-valuemax="100"
-             aria-valuetext="Not analyzed">
-
-          <div id="menuResultsProgressFill"></div>
-        </div>
-      </div>
-
-      <div class="menu-results-photo-area">
-        <img id="menuResultsPhoto"
-             alt="Saved restaurant menu photo">
-      </div>
-
-      <p id="menuFlagsMessage"
-         class="menu-flags-message"
-         hidden>
-        Red flags highlight possible dietary conflicts found
-        in visible text. Confirm ingredients and cross-contact
-        with the restaurant.
-      </p>
-
-      <p class="menu-results-disclaimer">
-        No warning does not mean a dish is safe.
-        Always confirm allergens.
-      </p>
-
-      <div class="menu-results-actions">
-        <button id="retakeMenuResultsButton"
-                class="menu-results-retake"
-                type="button">
-          Retake Photo
-        </button>
-
-        <button id="saveMenuResultsButton"
-                class="save-menu-results-button"
-                type="button">
-          Save Menu Results
-        </button>
-
-        <p id="menuSaveStatus"
-           class="menu-save-status"
-           role="status"></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- LOGO SCANNER: CAMERA AND BACK BUTTON -->
-  <section id="screen-camera" class="screen camera-screen">
-
-    <video
-      id="logoCameraPreview"
-      autoplay
-      muted
-      playsinline
-      aria-hidden="true"
-    ></video>
-
-    <header class="camera-header">
-      <button id="logoScannerBack"
-              class="logo-scanner-back"
-              type="button"
-              aria-label="Back to food profiles">
-        <i class="ph ph-arrow-left"></i>
-      </button>
-
-      <h2 class="camera-title">
-        SCAN RESTAURANT LOGO
-      </h2>
-    </header>
-
-    <p id="trackingStatus"
-       class="tracking-status"
-       role="status"
-       aria-live="polite">
-      Looking for logo...
-    </p>
-  </section>
-
-  <!-- LOADING -->
-  <section id="screen-loading"
-           class="screen normal-screen center-screen">
-    <p class="loading-card">IT IS...</p>
-  </section>
-
-  <!-- COMPATIBILITY RESULT -->
-  <section id="screen-result"
-           class="screen normal-screen center-screen">
-    <div id="resultCard" class="result-card">
-      <i id="resultIcon"
-         class="ph ph-check-circle result-icon"></i>
-
-      <h2 id="resultTitle" class="result-title">
-        A MATCH!
-      </h2>
-
-      <p id="resultSubtitle" class="result-subtitle">
-        Everyone can eat here!
-      </p>
-    </div>
-  </section>
-
-  <!-- RESTAURANT RECALL LIST -->
-  <section id="screen-recall" class="screen normal-screen">
-    <div class="page recall-page">
-
-      <header class="recall-header">
-        <button id="recallBackButton" type="button">
-          <i class="ph ph-arrow-left"></i> BACK
-        </button>
-
-        <h1>Restaurant Recall List</h1>
-        <p>Previously scanned restaurants and menus</p>
-      </header>
-
-      <div id="recallList" class="recall-list"></div>
-
-      <p id="recallEmpty" class="recall-empty">
-        No restaurants or menus saved yet.
-      </p>
-    </div>
-  </section>
-
-  <!-- RESTAURANT MENU -->
-  <section id="screen-menu" class="screen normal-screen">
-    <div class="page menu-page">
-
-      <header class="restaurant-top-row">
-        <h2 id="restaurantName" class="restaurant-name">
-          P.S. Kitchen
+        <h2>
+          Which item would you like to scan?
         </h2>
 
-        <button id="scanAgainButton"
-                class="scan-again-button"
-                type="button">
-          SCAN AGAIN
+        <div class="wireframe-choice-buttons">
+
+          <button
+            id="chooseLogoScanner"
+            type="button"
+          >
+            Scan Logo
+          </button>
+
+          <button
+            id="chooseMenuScanner"
+            type="button"
+          >
+            Scan Menu
+          </button>
+
+        </div>
+
+        <button
+          id="scannerChoiceBack"
+          class="wireframe-back-button"
+          type="button"
+        >
+          BACK
         </button>
 
-        <button id="openRecallButton"
-                class="scan-again-button"
-                type="button">
-          RECALL LIST
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         FOOD PROFILES
+         ====================================== -->
+
+    <section
+      id="screen-users"
+      class="screen normal-screen"
+    >
+
+      <div class="page profiles-page">
+
+        <h2 class="page-title">
+          Who's Here &amp; What Can They Munch On?
+        </h2>
+
+        <p class="small-intro">
+          Add the food profiles of the people joining today.
+        </p>
+
+        <div class="select-all-row">
+
+          <button
+            id="addAllButton"
+            class="add-all-button"
+            type="button"
+          >
+            SELECT ALL
+          </button>
+
+        </div>
+
+        <!--
+          + CREATE NEW PROFILE IS ADDED
+          BY onboarding.js
+        -->
+
+        <div
+          id="userList"
+          class="user-list"
+        ></div>
+
+        <button
+          id="scanButton"
+          class="primary-button scan-button"
+          type="button"
+          disabled
+        >
+          LET'S GET SCANNING!
         </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         PREGATHERING MENU ANALYZER
+         ====================================== -->
+
+    <section
+      id="screen-analyzer"
+      class="screen normal-screen"
+    >
+
+      <div class="analyzer-page">
+
+        <header class="analyzer-header">
+
+          <button
+            id="analyzerBack"
+            type="button"
+            aria-label="Back to food profiles"
+          >
+            <i class="ph ph-arrow-left"></i>
+          </button>
+
+          <h1>Menu Analyzer</h1>
+
+        </header>
+
+        <div class="analyzer-content">
+
+          <div class="analyzer-location">
+
+            <!-- ALL-IN-ONE LOCATION SEARCH -->
+
+            <form
+              id="analyzerSearchForm"
+              class="analyzer-search-container"
+            >
+
+              <input
+                id="analyzerLocation"
+                type="search"
+                placeholder="City, ZIP code, or area"
+                autocomplete="off"
+                aria-label="Search location"
+              >
+
+              <select
+                id="analyzerRadius"
+                class="analyzer-inline-radius"
+                aria-label="Search radius"
+              >
+
+                <option value="1">1 mi</option>
+                <option value="3">3 mi</option>
+                <option value="5" selected>5 mi</option>
+                <option value="10">10 mi</option>
+                <option value="25">25 mi</option>
+
+              </select>
+
+              <button
+                id="analyzerFindButton"
+                class="analyzer-search-button"
+                type="submit"
+                aria-label="Find restaurants"
+              >
+                <i class="ph ph-magnifying-glass"></i>
+              </button>
+
+            </form>
+
+            <p
+              id="analyzerLocationStatus"
+              class="analyzer-location-status"
+              role="status"
+            >
+              Enter a location and tap the search icon.
+            </p>
+
+          </div>
+
+          <div class="analyzer-recommendations-header">
+
+            <h2>Recommendations</h2>
+
+            <p>
+              Explore restaurants in your selected area
+            </p>
+
+          </div>
+
+          <div
+            id="analyzerGrid"
+            class="analyzer-grid"
+          ></div>
+
+          <p
+            id="analyzerEmpty"
+            class="analyzer-empty"
+            hidden
+          >
+            No demo restaurants found in this area.
+          </p>
+
+          <p class="analyzer-disclaimer">
+            Prototype search using two demonstration restaurant
+            locations. Compatibility appears after choosing a
+            restaurant. Dietary information has not been verified.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         LIVE MENU SCANNER
+         ====================================== -->
+
+    <section
+      id="screen-menu-scanner"
+      class="screen camera-screen"
+    >
+
+      <div class="menu-scanner-page">
+
+        <header class="menu-scanner-header">
+
+          <button
+            id="menuScannerBack"
+            type="button"
+            aria-label="Go back"
+          >
+            <i class="ph ph-arrow-left"></i>
+          </button>
+
+          <h2>Scan Restaurant Menu</h2>
+
+        </header>
+
+        <div class="menu-camera-container">
+
+          <!-- LIVE CAMERA -->
+          <video
+            id="menuCameraVideo"
+            autoplay
+            playsinline
+            muted
+          ></video>
+
+          <!-- MENU IMAGE CAPTURE -->
+          <canvas
+            id="menuCaptureCanvas"
+            hidden
+          ></canvas>
+
+          <!-- LIVE DIETARY FLAGS -->
+          <div
+            id="menuARFlagLayer"
+            class="menu-ar-flag-layer"
+            aria-label="Potential dietary warnings"
+          ></div>
+
+          <div
+            class="menu-camera-guide"
+            aria-hidden="true"
+          >
+            <div class="menu-camera-frame"></div>
+          </div>
+
+          <p
+            id="menuCameraStatus"
+            role="status"
+            aria-live="polite"
+          >
+            Point your camera at a restaurant menu.
+          </p>
+
+        </div>
+
+        <div class="menu-scanner-controls">
+
+          <button
+            id="captureMenuButton"
+            type="button"
+            disabled
+          >
+            SAVE MENU RESULTS
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         SAVED MENU RESULTS
+         ====================================== -->
+
+    <section
+      id="screen-menu-results"
+      class="screen normal-screen"
+    >
+
+      <div class="menu-results-page">
+
+        <!-- TOP CONTROLS -->
+
+        <header class="menu-results-header">
+
+          <button
+            id="menuResultsBack"
+            type="button"
+            aria-label="Back"
+          >
+            <i class="ph ph-arrow-left"></i>
+          </button>
+
+          <!-- FUNCTIONAL FILTER FLAGS BUTTON -->
+          <button
+            id="filterFlagsButton"
+            class="filter-flags-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="gsScanCompatPanel"
+          >
+            Filter Flags
+          </button>
+
+        </header>
+
+
+        <!-- ==================================
+             OVERALL MENU MATCH PERCENTAGE
+             ================================== -->
+
+        <div class="menu-results-score">
+
+          <p
+            id="menuResultsMatchLabel"
+            role="status"
+            aria-live="polite"
+          >
+            Analysis pending
+          </p>
+
+          <div
+            id="menuResultsProgress"
+            class="menu-results-progress"
+            role="progressbar"
+            aria-label="Potential menu compatibility"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuetext="Not analyzed"
+          >
+
+            <div
+              id="menuResultsProgressFill"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==================================
+             USER + GROUP FILTER RESULTS
+             Populated by menu-compat.js
+             ================================== -->
+
+        <!--
+          menu-compat.js automatically creates
+          #gsScanCompatPanel after .menu-results-score
+
+          It displays:
+          - Individual users
+          - Pairs of users
+          - Three-person groups
+          - Potential dietary conflicts
+          - OCR-based percentage
+        -->
+
+
+        <!-- ==================================
+             SAVED MENU IMAGE
+             ================================== -->
+
+        <div class="menu-results-photo-area">
+
+          <img
+            id="menuResultsPhoto"
+            alt="Saved restaurant menu photo"
+          >
+
+        </div>
+
+
+        <!-- EXISTING RED-FLAG EXPLANATION -->
+
+        <p
+          id="menuFlagsMessage"
+          class="menu-flags-message"
+          hidden
+        >
+          Red flags highlight possible dietary conflicts found
+          in visible text. Confirm ingredients and cross-contact
+          with the restaurant.
+        </p>
+
+
+        <!-- FOOD SAFETY DISCLAIMER -->
+
+        <p class="menu-results-disclaimer">
+          No warning does not mean a dish is safe.
+          Always confirm allergens.
+        </p>
+
+
+        <!-- RESULTS ACTIONS -->
+
+        <div class="menu-results-actions">
+
+          <button
+            id="retakeMenuResultsButton"
+            class="menu-results-retake"
+            type="button"
+          >
+            Retake Photo
+          </button>
+
+          <button
+            id="saveMenuResultsButton"
+            class="save-menu-results-button"
+            type="button"
+          >
+            Save Menu Results
+          </button>
+
+          <p
+            id="menuSaveStatus"
+            class="menu-save-status"
+            role="status"
+          ></p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         LOGO SCANNER
+         KEEP EXISTING CAMERA
+         ====================================== -->
+
+    <section
+      id="screen-camera"
+      class="screen camera-screen"
+    >
+
+      <video
+        id="logoCameraPreview"
+        autoplay
+        muted
+        playsinline
+        aria-hidden="true"
+      ></video>
+
+      <header class="camera-header">
+
+        <button
+          id="logoScannerBack"
+          class="logo-scanner-back"
+          type="button"
+          aria-label="Back to food profiles"
+        >
+          <i class="ph ph-arrow-left"></i>
+        </button>
+
+        <h2 class="camera-title">
+          SCAN RESTAURANT LOGO
+        </h2>
+
       </header>
 
-      <div class="menu-user-header">
-        <div class="menu-user-row">
-          <h3 id="activeUserName"
-              class="active-user-name">Jamie</h3>
-
-          <p id="activeUserRestrictions"
-             class="active-user-restrictions">Vegan</p>
-        </div>
-
-        <div class="menu-summary">
-          <strong id="availabilityCount">4/4</strong>
-
-          <p id="optionsMessage">
-            meal options available
-          </p>
-        </div>
-      </div>
-
-      <div class="wine-line" aria-hidden="true"></div>
-
-      <div id="menuGrid" class="menu-grid"></div>
-    </div>
-
-    <!-- ORIGINAL BOTTOM-RIGHT PROFILE WHEEL -->
-    <nav id="profileDisc"
-         class="profile-disc"
-         aria-label="Food profile navigation">
-
-      <svg class="profile-arc"
-           viewBox="0 0 190 170"
-           aria-hidden="true">
-        <path d="M 34 158 C 5 87, 39 23, 110 20 C 137 20, 157 29, 178 37"></path>
-      </svg>
-
-      <div id="profileButtons"
-           class="profile-buttons"></div>
-
-      <button id="addProfileButton"
-              class="add-profile"
-              type="button"
-              aria-label="Edit food profiles">
-        <i class="ph ph-plus"></i>
-      </button>
-    </nav>
-  </section>
-
-  <!-- HOUSE SALAD 3D DETAILS -->
-  <section id="screen-dish" class="screen dish-screen">
-
-    <header class="dish-header">
-      <button id="backToMenu"
-              class="back-button"
-              type="button"
-              aria-label="Back to menu">
-        <i class="ph ph-arrow-left"></i>
-      </button>
-
-      <div>
-        <p id="dishRestaurant" class="dish-restaurant">
-          P.S. Kitchen
-        </p>
-        <h2 id="dishName" class="dish-name">
-          House Salad
-        </h2>
-      </div>
-    </header>
-
-    <p id="dishLoading"
-       class="dish-loading"
-       role="status"
-       hidden>
-      Loading House Salad...
-    </p>
-
-    <div id="saladDetailStage" class="salad-detail-stage">
-      <model-viewer
-        id="saladDetailViewer"
-        alt="Interactive 3D House Salad"
-        camera-controls
-        auto-rotate
-        rotation-per-second="12deg"
-        interaction-prompt="none"
-        camera-orbit="0deg 65deg auto"
-        field-of-view="35deg"
-        shadow-intensity="0.6"
-        exposure="1"
-        loading="eager"
+      <p
+        id="trackingStatus"
+        class="tracking-status"
+        role="status"
+        aria-live="polite"
       >
-        <div id="ingredientHotspot"
-             slot="hotspot-ingredient"
-             data-position="0m 0m 0m"
-             data-normal="0m 1m 0m"
-             class="ingredient-hotspot is-hidden"
-             aria-hidden="true">
-          <span class="hotspot-icon">
-            <i class="ph ph-circle"></i>
-          </span>
+        Looking for logo...
+      </p>
 
-          <span id="hotspotLabel" class="hotspot-label">
-            Lettuce
-          </span>
+    </section>
+
+
+    <!-- ======================================
+         LOADING SCREEN
+         ====================================== -->
+
+    <section
+      id="screen-loading"
+      class="screen normal-screen center-screen"
+    >
+
+      <p class="loading-card">
+        IT IS...
+      </p>
+
+    </section>
+
+
+    <!-- ======================================
+         COMPATIBILITY RESULT
+         ====================================== -->
+
+    <section
+      id="screen-result"
+      class="screen normal-screen center-screen"
+    >
+
+      <div
+        id="resultCard"
+        class="result-card"
+      >
+
+        <i
+          id="resultIcon"
+          class="ph ph-check-circle result-icon"
+        ></i>
+
+        <h2
+          id="resultTitle"
+          class="result-title"
+        >
+          A MATCH!
+        </h2>
+
+        <p
+          id="resultSubtitle"
+          class="result-subtitle"
+        >
+          Everyone can eat here!
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         RESTAURANT RECALL LIST
+         ====================================== -->
+
+    <section
+      id="screen-recall"
+      class="screen normal-screen"
+    >
+
+      <div class="page recall-page">
+
+        <header class="recall-header">
+
+          <button
+            id="recallBackButton"
+            type="button"
+          >
+            <i class="ph ph-arrow-left"></i>
+            BACK
+          </button>
+
+          <h1>Restaurant Recall List</h1>
+
+          <p>
+            Previously scanned restaurants and menus
+          </p>
+
+        </header>
+
+        <div
+          id="recallList"
+          class="recall-list"
+        ></div>
+
+        <p
+          id="recallEmpty"
+          class="recall-empty"
+        >
+          No restaurants or menus saved yet.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================
+         RESTAURANT MENU
+         ====================================== -->
+
+    <section
+      id="screen-menu"
+      class="screen normal-screen"
+    >
+
+      <div class="page menu-page">
+
+        <header class="restaurant-top-row">
+
+          <h2
+            id="restaurantName"
+            class="restaurant-name"
+          >
+            P.S. Kitchen
+          </h2>
+
+          <button
+            id="scanAgainButton"
+            class="scan-again-button"
+            type="button"
+          >
+            SCAN AGAIN
+          </button>
+
+          <button
+            id="openRecallButton"
+            class="scan-again-button"
+            type="button"
+          >
+            RECALL LIST
+          </button>
+
+        </header>
+
+        <div class="menu-user-header">
+
+          <div class="menu-user-row">
+
+            <h3
+              id="activeUserName"
+              class="active-user-name"
+            >
+              Jamie
+            </h3>
+
+            <p
+              id="activeUserRestrictions"
+              class="active-user-restrictions"
+            >
+              Vegan
+            </p>
+
+          </div>
+
+          <div class="menu-summary">
+
+            <strong id="availabilityCount">
+              4/4
+            </strong>
+
+            <p id="optionsMessage">
+              meal options available
+            </p>
+
+          </div>
+
         </div>
-      </model-viewer>
-    </div>
 
-    <div class="ingredients-panel">
-      <h3>Ingredients</h3>
-      <div id="ingredientButtons"
-           class="ingredient-buttons"></div>
-    </div>
-  </section>
-</main>
+        <div
+          class="wine-line"
+          aria-hidden="true"
+        ></div>
 
-<!-- MINDAR LOGO TARGETS -->
-<a-scene
-  id="arScene"
-  mindar-image="imageTargetSrc: https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/targets%20(1).mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no;"
-  color-space="sRGB"
-  renderer="colorManagement: true; alpha: true"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded
->
-  <a-camera
-    id="arCamera"
-    position="0 0 0"
-    look-controls="enabled: false">
-  </a-camera>
+        <div
+          id="menuGrid"
+          class="menu-grid"
+        ></div>
 
-  <a-entity id="psTarget"
-            mindar-image-target="targetIndex: 1"></a-entity>
+      </div>
 
-  <a-entity id="danboTarget"
-            mindar-image-target="targetIndex: 0"></a-entity>
-</a-scene>
 
-<script src="./script.js?v=logo-wheel-fix-2"></script>
-<script type="module" src="./supabase-test.js"></script>
+      <!-- ==================================
+           ORIGINAL PROJECT 2 PROFILE WHEEL
+           ================================== -->
+
+      <nav
+        id="profileDisc"
+        class="profile-disc"
+        aria-label="Food profile navigation"
+      >
+
+        <svg
+          class="profile-arc"
+          viewBox="0 0 190 170"
+          aria-hidden="true"
+        >
+
+          <path
+            d="M 34 158 C 5 87, 39 23, 110 20 C 137 20, 157 29, 178 37"
+          ></path>
+
+        </svg>
+
+        <div
+          id="profileButtons"
+          class="profile-buttons"
+        ></div>
+
+        <button
+          id="addProfileButton"
+          class="add-profile"
+          type="button"
+          aria-label="Edit food profiles"
+        >
+          <i class="ph ph-plus"></i>
+        </button>
+
+      </nav>
+
+    </section>
+
+
+    <!-- ======================================
+         INTERACTIVE 3D MEAL DETAILS
+         ====================================== -->
+
+    <section
+      id="screen-dish"
+      class="screen dish-screen"
+    >
+
+      <header class="dish-header">
+
+        <button
+          id="backToMenu"
+          class="back-button"
+          type="button"
+          aria-label="Back to menu"
+        >
+          <i class="ph ph-arrow-left"></i>
+        </button>
+
+        <div>
+
+          <p
+            id="dishRestaurant"
+            class="dish-restaurant"
+          >
+            P.S. Kitchen
+          </p>
+
+          <h2
+            id="dishName"
+            class="dish-name"
+          >
+            House Salad
+          </h2>
+
+        </div>
+
+      </header>
+
+      <p
+        id="dishLoading"
+        class="dish-loading"
+        role="status"
+        hidden
+      >
+        Loading House Salad...
+      </p>
+
+      <div
+        id="saladDetailStage"
+        class="salad-detail-stage"
+      >
+
+        <model-viewer
+          id="saladDetailViewer"
+          alt="Interactive 3D House Salad"
+          camera-controls
+          auto-rotate
+          rotation-per-second="12deg"
+          interaction-prompt="none"
+          camera-orbit="0deg 65deg auto"
+          field-of-view="35deg"
+          shadow-intensity="0.6"
+          exposure="1"
+          loading="eager"
+        >
+
+          <div
+            id="ingredientHotspot"
+            slot="hotspot-ingredient"
+            data-position="0m 0m 0m"
+            data-normal="0m 1m 0m"
+            class="ingredient-hotspot is-hidden"
+            aria-hidden="true"
+          >
+
+            <span class="hotspot-icon">
+              <i class="ph ph-circle"></i>
+            </span>
+
+            <span
+              id="hotspotLabel"
+              class="hotspot-label"
+            >
+              Lettuce
+            </span>
+
+          </div>
+
+        </model-viewer>
+
+      </div>
+
+      <div class="ingredients-panel">
+
+        <h3>Ingredients</h3>
+
+        <div
+          id="ingredientButtons"
+          class="ingredient-buttons"
+        ></div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ========================================
+       MINDAR LOGO TARGETS
+       KEEP ORIGINAL TARGETS
+       ======================================== -->
+
+  <a-scene
+    id="arScene"
+    mindar-image="imageTargetSrc: https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/targets%20(1).mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no;"
+    color-space="sRGB"
+    renderer="colorManagement: true; alpha: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    embedded
+  >
+
+    <a-camera
+      id="arCamera"
+      position="0 0 0"
+      look-controls="enabled: false"
+    ></a-camera>
+
+    <a-entity
+      id="psTarget"
+      mindar-image-target="targetIndex: 1"
+    ></a-entity>
+
+    <a-entity
+      id="danboTarget"
+      mindar-image-target="targetIndex: 0"
+    ></a-entity>
+
+  </a-scene>
+
+
+  <!-- ========================================
+       JAVASCRIPT FILES
+       ======================================== -->
+
+  <!-- SUPABASE INGREDIENT DATABASE -->
+  <script src="./meal-db.js"></script>
+
+  <!-- FOOD PROFILE ONBOARDING -->
+  <script src="./onboarding.js"></script>
+
+  <!-- EXISTING GRUB SCRUB APPLICATION -->
+  <script src="./script.js?v=logo-wheel-fix-2"></script>
+
+  <!-- NEW MENU COMPATIBILITY + USER FILTERING -->
+  <script src="./menu-compat.js"></script>
+
+  <!-- EXISTING SUPABASE TEST -->
+  <script
+    type="module"
+    src="./supabase-test.js"
+  ></script>
 
 </body>
+
 </html>

@@ -374,7 +374,13 @@ window.addEventListener("load", function () {
   }
 
   function fits(meal, user) {
-    return user.filters.every(filter => meal[filter] === true);
+    if (user.requiresVerification) {
+      return false;
+    }
+
+    return user.filters.every(
+      filter => meal[filter] === true
+    );
   }
 
   function available(restaurant, user) {
@@ -2360,6 +2366,738 @@ window.addEventListener("load", function () {
   // ==========================================
   // END BACK BUTTON NAVIGATION
   // ==========================================
+
+
+  // ==========================================
+  
+  // ==========================================
+  // GRUB SCRUB - ALL MEAL LABELS
+  // PROJECT 2 STYLE + REAL 3D HOTSPOTS
+  // ==========================================
+
+  // Demo labels, not verified ingredient lists.
+  // House Salad keeps its original hotspot logic.
+
+  const GS_MEAL_LABELS = {
+    "Sweet Potato & Red Rice Bowl": [
+      "Sweet potato",
+      "Red rice"
+    ],
+    "Salmon & Brussels Sprouts": [
+      "Salmon",
+      "Brussels sprouts"
+    ],
+    "Mac and Cheese": [
+      "Pasta",
+      "Cheese"
+    ],
+    "Pork Belly Tonkotsu Ramen": [
+      "Pork belly",
+      "Noodles",
+      "Broth"
+    ],
+    "Shoyu Ramen": [
+      "Noodles",
+      "Shoyu-style broth"
+    ],
+    "Vegan Assam Fish Head": [
+      "Plant-based fish alternative",
+      "Assam-style sauce"
+    ],
+    "Vegan Hainanese Chicken Rice": [
+      "Plant-based chicken alternative",
+      "Rice"
+    ]
+  };
+
+  const GS_HOTSPOT_KEY =
+    "grub-scrub-meal-hotspots-v1";
+
+  let gsCurrentMeal = null;
+  let gsSelectedLabel = null;
+  let gsWaitingForPosition = false;
+  let gsPointerStart = null;
+
+  // ------------------------------------------
+  // SAVED HOTSPOT COORDINATES
+  // ------------------------------------------
+
+  function gsReadHotspots() {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(GS_HOTSPOT_KEY) || "{}"
+      );
+
+      return saved && typeof saved === "object"
+        ? saved
+        : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  let gsSavedHotspots = gsReadHotspots();
+
+  function gsHotspotKey(meal, ingredient) {
+    return (
+      restaurants[state.restaurant].name +
+      "::" +
+      meal.name +
+      "::" +
+      ingredient
+    );
+  }
+
+  
+  function gsGetSavedPosition(meal, ingredient) {
+    const restaurant =
+      restaurants[state.restaurant].name;
+
+    const key = gsHotspotKey(meal, ingredient);
+
+    // A locally edited position takes precedence
+    // until you publish the approved version.
+    const localPosition = gsSavedHotspots[key];
+
+    if (localPosition) {
+      return localPosition;
+    }
+
+    // Otherwise use the approved shared position
+    // loaded from Supabase.
+    return window.GSMealDB?.getPosition(
+      restaurant,
+      meal.name,
+      ingredient
+    ) || null;
+  }
+
+
+  function gsSavePosition(meal, ingredient, point) {
+    const key = gsHotspotKey(meal, ingredient);
+
+    gsSavedHotspots[key] = {
+      position: point.position.toString(),
+      normal: point.normal.toString()
+    };
+
+    try {
+      localStorage.setItem(
+        GS_HOTSPOT_KEY,
+        JSON.stringify(gsSavedHotspots)
+      );
+    } catch (error) {
+      console.warn(
+        "Could not save ingredient hotspot:",
+        error
+      );
+    }
+  }
+
+  // ------------------------------------------
+  // RESTORE ORIGINAL HOTSPOT APPEARANCE
+  // ------------------------------------------
+
+  // The original HTML already contains:
+  // ingredientHotspot, hotspotLabel,
+  // and the circular hotspot icon.
+  // We reuse those elements rather than
+  // adding a floating label at the bottom.
+
+  const gsIngredientsPanel =
+    ingredientButtons.parentElement;
+
+  const gsIngredientNote =
+    document.createElement("p");
+
+  gsIngredientNote.id = "gsIngredientNote";
+  gsIngredientNote.className = "gs-ingredient-note";
+
+  gsIngredientsPanel.appendChild(gsIngredientNote);
+
+  function gsHideMealHotspot() {
+    gsWaitingForPosition = false;
+    gsSelectedLabel = null;
+    hideHotspot();
+  }
+
+  function gsShowPositionedLabel(label, coordinates) {
+    if (!coordinates) return;
+
+    hotspotLabel.textContent = label;
+    hotspot.classList.remove("label-left");
+
+    detailViewer.updateHotspot({
+      name: "hotspot-ingredient",
+      position: coordinates.position,
+      normal: coordinates.normal
+    });
+
+    hotspot.classList.remove("is-hidden");
+    hotspot.setAttribute("aria-hidden", "false");
+  }
+
+  // ------------------------------------------
+  
+  // ------------------------------------------
+  // SELECT AN INGREDIENT
+  // ------------------------------------------
+
+  function gsFindVisibleFoodPoint() {
+    if (
+      !detailViewer.loaded ||
+      typeof detailViewer.positionAndNormalFromPoint !== "function"
+    ) {
+      return null;
+    }
+
+    const rect = detailViewer.getBoundingClientRect();
+
+    const samples = [
+      [0.50, 0.50],
+      [0.43, 0.43],
+      [0.57, 0.43],
+      [0.43, 0.57],
+      [0.57, 0.57],
+      [0.50, 0.35],
+      [0.35, 0.50],
+      [0.65, 0.50],
+      [0.50, 0.65]
+    ];
+
+    for (const [x, y] of samples) {
+      try {
+        const point = detailViewer.positionAndNormalFromPoint(
+          rect.width * x,
+          rect.height * y
+        );
+
+        if (point && point.position && point.normal) {
+          return {
+            position: point.position.toString(),
+            normal: point.normal.toString()
+          };
+        }
+      } catch (error) {
+        console.warn("Model point:", error);
+      }
+    }
+
+    return null;
+  }
+
+  function gsSelectMealIngredient(label, button) {
+    if (!gsCurrentMeal) return;
+
+    // Tap the same ingredient to hide its label.
+    if (gsSelectedLabel === label) {
+      gsHideMealHotspot();
+
+      ingredientButtons
+        .querySelectorAll(".ingredient-button")
+        .forEach(item => {
+          item.classList.remove("active");
+          item.setAttribute("aria-pressed", "false");
+        });
+
+      gsIngredientNote.textContent =
+        "Choose an ingredient to display its label.";
+
+      detailViewer.setAttribute("auto-rotate", "");
+      return;
+    }
+
+    gsSelectedLabel = label;
+
+    ingredientButtons
+      .querySelectorAll(".ingredient-button")
+      .forEach(item => {
+        const active = item === button;
+
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+
+    detailViewer.removeAttribute("auto-rotate");
+    hideHotspot();
+
+    const saved = gsGetSavedPosition(gsCurrentMeal, label);
+    const coordinates = saved || gsFindVisibleFoodPoint();
+
+    if (coordinates) {
+      try {
+        gsShowPositionedLabel(label, coordinates);
+
+        gsIngredientNote.textContent = saved
+          ? "Label displayed. Tap the food to reposition it."
+          : "Preview shown. Tap the correct ingredient on the food to save its location.";
+      } catch (error) {
+        console.error("Could not display label:", error);
+
+        gsIngredientNote.textContent =
+          "Tap the food to position this label.";
+      }
+    } else {
+      gsIngredientNote.textContent =
+        "Tap the ingredient's location on the 3D model to place its label.";
+    }
+
+    gsWaitingForPosition = true;
+  }
+
+  // ------------------------------------------
+
+
+  // ------------------------------------------
+  // OPEN ANY MEAL'S DETAIL VIEW
+  // ------------------------------------------
+
+  function gsOpenMealDetail(meal) {
+    if (!meal) return;
+
+    gsCurrentMeal = meal;
+    gsHideMealHotspot();
+
+    // House Salad retains the original
+    // Project 2 positioned hotspot behavior.
+    if (meal.heroAR && state.restaurant === 0) {
+      gsIngredientNote.textContent =
+        "Tap an ingredient to display " +
+        "its label on the 3D model.";
+
+      if (
+        detailViewer.getAttribute("src") !==
+        SALAD_URL
+      ) {
+        detailReady = false;
+        detailFailed = false;
+
+        detailViewer.removeAttribute("src");
+      }
+
+      openHeroDish(meal);
+      return;
+    }
+
+    // All other meals reuse the same detail screen.
+    selectedIngredient = null;
+    hideHotspot();
+
+    detailReady = false;
+    detailFailed = false;
+
+    dishRestaurant.textContent =
+      restaurants[state.restaurant].name;
+
+    dishName.textContent = meal.name;
+
+    ingredientButtons.replaceChildren();
+
+    const labels =
+    window.GSMealDB?.getIngredients(
+      restaurants[state.restaurant].name,
+      meal.name
+    ) ||
+    GS_MEAL_LABELS[meal.name] ||
+    [];
+
+
+    labels.forEach(label => {
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "ingredient-button";
+      button.textContent = label;
+      button.setAttribute(
+        "aria-pressed",
+        "false"
+      );
+
+      button.addEventListener("click", () => {
+        gsSelectMealIngredient(label, button);
+      });
+
+      ingredientButtons.appendChild(button);
+    });
+
+    if (!labels.length) {
+      const message = document.createElement("p");
+
+      message.className = "gs-ingredient-note";
+      message.textContent =
+        "Ingredient labels are not available " +
+        "for this meal yet.";
+
+      ingredientButtons.appendChild(message);
+    }
+
+    gsIngredientNote.textContent =
+      "Select an ingredient, then tap its " +
+      "location on the 3D model. " +
+      "Demo ingredients are not verified " +
+      "restaurant allergen information.";
+
+    showScreen("dish");
+
+    showDishStatus(
+      meal.model
+        ? "Loading " + meal.name + "..."
+        : "3D model unavailable."
+    );
+
+    detailViewer.setAttribute(
+      "camera-controls",
+      ""
+    );
+
+    detailViewer.setAttribute(
+      "interaction-prompt",
+      "none"
+    );
+
+    detailViewer.setAttribute(
+      "auto-rotate",
+      ""
+    );
+
+    if (meal.model) {
+      detailViewer.removeAttribute("src");
+      detailViewer.setAttribute(
+        "src",
+        meal.model
+      );
+    } else {
+      detailViewer.removeAttribute("src");
+    }
+  }
+
+  // ------------------------------------------
+  // POSITION LABELS ON THE ACTUAL 3D FOOD
+  // ------------------------------------------
+
+  // Ignore dragging so normal 3D rotation
+  // still works. Short taps position a label.
+
+  detailViewer.addEventListener(
+    "pointerdown",
+    event => {
+      gsPointerStart = {
+        x: event.clientX,
+        y: event.clientY
+      };
+    }
+  );
+
+  detailViewer.addEventListener(
+    "pointerup",
+    event => {
+      if (
+        !gsCurrentMeal ||
+        gsCurrentMeal.heroAR ||
+        !gsSelectedLabel ||
+        !detailViewer.loaded ||
+        !gsPointerStart
+      ) {
+        gsPointerStart = null;
+        return;
+      }
+
+      const distance = Math.hypot(
+        event.clientX - gsPointerStart.x,
+        event.clientY - gsPointerStart.y
+      );
+
+      gsPointerStart = null;
+
+      // Dragging rotates the model.
+      if (distance > 12) return;
+
+      if (
+        typeof detailViewer
+          .positionAndNormalFromPoint !== "function"
+      ) {
+        gsIngredientNote.textContent =
+          "3D positioning is unavailable.";
+        return;
+      }
+
+      
+      // Get the position relative to the 3D viewer.
+      const rect = detailViewer.getBoundingClientRect();
+
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const point = detailViewer.positionAndNormalFromPoint(
+        x,
+        y
+      );
+  
+      if (!point) {
+        gsIngredientNote.textContent =
+          "Tap directly on the food model, " +
+          "not the empty background.";
+        return;
+      }
+
+      gsSavePosition(
+        gsCurrentMeal,
+        gsSelectedLabel,
+        point
+      );
+
+      gsWaitingForPosition = false;
+
+      gsShowPositionedLabel(
+        gsSelectedLabel,
+        {
+          position: point.position.toString(),
+          normal: point.normal.toString()
+        }
+      );
+
+      gsIngredientNote.textContent =
+        "Label positioned! You can rotate the " +
+        "model or tap another spot to move it.";
+    }
+  );
+
+  // ------------------------------------------
+  // MAKE ALL MEAL CARDS OPEN DETAILS
+  // ------------------------------------------
+
+  // Event delegation keeps the existing
+  // House Salad functionality and supports
+  // future restaurant menus too.
+
+  menuGrid.addEventListener(
+    "click",
+    event => {
+      const card =
+        event.target.closest(".meal-card");
+
+      if (
+        !card ||
+        !menuGrid.contains(card)
+      ) return;
+
+      const name = card
+        .querySelector(".meal-name")
+        ?.textContent.trim();
+
+      const meal =
+        restaurants[state.restaurant].meals.find(
+          item => item.name === name
+        );
+
+      if (!meal) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      gsOpenMealDetail(meal);
+    },
+    true
+  );
+
+  menuGrid.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key !== "Enter" &&
+        event.key !== " "
+      ) return;
+
+      const card =
+        event.target.closest(".meal-card");
+
+      if (
+        !card ||
+        !menuGrid.contains(card)
+      ) return;
+
+      const name = card
+        .querySelector(".meal-name")
+        ?.textContent.trim();
+
+      const meal =
+        restaurants[state.restaurant].meals.find(
+          item => item.name === name
+        );
+
+      if (!meal) return;
+
+      event.preventDefault();
+
+      gsOpenMealDetail(meal);
+    }
+  );
+
+  // Accessible meal cards.
+  const gsMenuObserver =
+    new MutationObserver(() => {
+      menuGrid
+        .querySelectorAll(".meal-card")
+        .forEach(card => {
+          if (card.dataset.gsDetailReady) return;
+
+          card.dataset.gsDetailReady = "true";
+          card.setAttribute("role", "button");
+          card.setAttribute("tabindex", "0");
+
+          const name = card
+            .querySelector(".meal-name")
+            ?.textContent.trim() || "meal";
+
+          card.setAttribute(
+            "aria-label",
+            "View details for " + name
+          );
+        });
+    });
+
+  gsMenuObserver.observe(menuGrid, {
+    childList: true,
+    subtree: true
+  });
+
+  // ------------------------------------------
+  // MODEL LOAD AND BACK NAVIGATION
+  // ------------------------------------------
+
+  detailViewer.addEventListener("load", () => {
+    if (
+      state.screen !== "dish" ||
+      !gsCurrentMeal
+    ) return;
+
+    showDishStatus("");
+
+    if (
+      !gsCurrentMeal.heroAR &&
+      gsSelectedLabel
+    ) {
+      const saved = gsGetSavedPosition(
+        gsCurrentMeal,
+        gsSelectedLabel
+      );
+
+      if (saved) {
+        gsShowPositionedLabel(
+          gsSelectedLabel,
+          saved
+        );
+      }
+    }
+  });
+
+  detailViewer.addEventListener("error", () => {
+    if (
+      state.screen === "dish" &&
+      gsCurrentMeal
+    ) {
+      showDishStatus(
+        gsCurrentMeal.name +
+        ": 3D model could not load."
+      );
+    }
+  });
+
+  backToMenu.addEventListener("click", () => {
+    gsCurrentMeal = null;
+    gsHideMealHotspot();
+  });
+
+  // ==========================================
+  // END ALL-MEAL DETAIL EXTENSION
+  // ==========================================
+
+  // Refresh ingredient buttons if Supabase finishes
+  // loading while a meal detail view is already open.
+  document.addEventListener(
+    "grub-meal-db-loaded",
+    () => {
+      if (
+        state.screen !== "dish" ||
+        !gsCurrentMeal ||
+        gsCurrentMeal.heroAR ||
+        gsSelectedLabel
+      ) {
+        return;
+      }
+
+      const labels = window.GSMealDB?.getIngredients(
+        restaurants[state.restaurant].name,
+        gsCurrentMeal.name
+      );
+
+      if (!labels?.length) return;
+
+      ingredientButtons.replaceChildren();
+
+      labels.forEach(label => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "ingredient-button";
+        button.textContent = label;
+        button.setAttribute("aria-pressed", "false");
+
+        button.addEventListener("click", () => {
+          gsSelectMealIngredient(label, button);
+        });
+
+        ingredientButtons.appendChild(button);
+      });
+    }
+  );
+
+
+  // ==========================================
+  // CUSTOM FOOD PROFILES FROM ONBOARDING
+  // ==========================================
+
+  const savedCustomProfiles =
+    window.GrubOnboarding?.getProfiles() || [];
+
+  savedCustomProfiles.forEach(profile => {
+    if (!users.some(user => user.id === profile.id)) {
+      users.push(profile);
+    }
+  });
+
+  window.addEventListener("grub-profile-saved", event => {
+    const newProfile = event.detail.profile;
+
+    const existingIndex = users.findIndex(
+      user => user.id === newProfile.id
+    );
+
+    if (existingIndex >= 0) {
+      users[existingIndex] = newProfile;
+    } else {
+      users.push(newProfile);
+    }
+
+    state.activeUser = 0;
+    renderUsers();
+  });
+
+  // ==========================================
+  // END CUSTOM FOOD PROFILE INTEGRATION
+  // ==========================================
+
+  // Let the menu compatibility screen read the people
+  // selected in Grub Scrub's Food Profiles screen.
+  window.GrubScanProfiles = function () {
+    return selectedUsers().map(user => ({
+      id: user.id || user.name,
+      name: user.name,
+      filters: [...user.filters],
+      restrictions: [...user.restrictions],
+      requiresVerification: !!user.requiresVerification
+    }));
+  };
 
   renderUsers();
 });

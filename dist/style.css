@@ -1962,11 +1962,502 @@
   outline-offset: 3px;
 }
 
+
 /* ==========================================
    END BACK ARROW STYLING
    ========================================== */
 
+
+
+
+/* ==========================================
+   GRUB SCRUB - ALL MEAL DETAIL LABELS
+   ========================================== */
+
+/* Make every meal card interactive */
+
+#screen-menu .meal-card {
+  cursor: pointer;
+}
+
+#screen-menu .meal-card:focus-visible {
+  outline: 3px solid #b65c91;
+  outline-offset: 3px;
+}
+
+/* Identify cards that open a detail view */
+
+#screen-menu .meal-card::after {
+  content: "VIEW DETAILS";
+
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+
+  padding: 6px 9px;
+
+  background: rgba(89, 21, 54, 0.92);
+  color: white;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+
+  pointer-events: none;
+}
+
+/* Preserve the original House Salad info icon */
+
+#screen-menu .meal-card .ar-label {
+  z-index: 5;
+}
+
+/* Existing 3D stage */
+
+#screen-dish .salad-detail-stage {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Floating ingredient label */
+
+#gsDishLabelOverlay {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 15;
+
+  transform: translateX(-50%);
+
+  max-width: calc(100% - 35px);
+  padding: 11px 18px;
+
+  border: 2px solid #591536;
+  border-radius: 24px;
+
+  background: #b65c91;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: center;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+  pointer-events: none;
+}
+
+/* Ingredient buttons */
+
+#screen-dish .ingredient-button {
+  min-height: 42px;
+  padding: 10px 14px;
+
+  border: 2px solid #591536;
+  border-radius: 22px;
+
+  background: #591536;
+  color: white;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+/* Selected ingredient */
+
+#screen-dish .ingredient-button.active {
+  border-color: #a3a63e;
+  background: #a3a63e;
+  color: #241323;
+}
+
+/* Demo information */
+
+.gs-ingredient-note {
+  max-width: 550px;
+  margin: 17px 0 0;
+
+  color: #6f6f6f;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gs-no-labels {
+  margin: 0;
+  color: #777;
+  font-size: 13px;
+}
+
+/* Phone-friendly sizing */
+
+@media (max-width: 767px) {
+  #gsDishLabelOverlay {
+    bottom: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  #screen-dish .ingredient-button {
+    min-height: 40px;
+    font-size: 11px;
+  }
+}
+
+
+/* ==========================================
+   GRUB SCRUB - PROJECT 2 INGREDIENT DESIGN
+   FINAL BUTTON AND HOTSPOT OVERRIDES
+   ========================================== */
+
+/* SQUARE BURGUNDY INGREDIENT BUTTONS */
+
+#screen-dish .ingredient-buttons .ingredient-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: auto !important;
+  min-height: 0 !important;
+
+  margin: 0 !important;
+  padding: 9px 12px !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: #591536 !important;
+  color: #ffffff !important;
+
+  font-family: Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ORIGINAL PROJECT 2 BUTTON SPACING */
+
+#screen-dish .ingredient-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+/* ORIGINAL SELECTED STATE:
+   MUTED PINK WITH DOUBLE OUTLINE */
+
+#screen-dish .ingredient-buttons
+.ingredient-button.active {
+  background: #8b315d !important;
+  color: white !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  outline: 2px solid #591536 !important;
+  outline-offset: 3px !important;
+
+  box-shadow: 0 0 0 2px white !important;
+}
+
+/* HOUSE SALAD AND OTHER MEALS:
+   SAME ORIGINAL MODEL-ANCHORED HOTSPOT */
+
+#screen-dish .ingredient-hotspot {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+
+  width: max-content !important;
+
+  transform: translate(-7px, -50%) !important;
+  pointer-events: none !important;
+
+  filter: drop-shadow(
+    0 2px 5px rgba(0, 0, 0, 0.2)
+  ) !important;
+}
+
+#screen-dish .ingredient-hotspot.is-hidden {
+  display: none !important;
+}
+
+/* THE DARK CIRCULAR HOTSPOT MARKER */
+
+#screen-dish .ingredient-hotspot .hotspot-icon {
+  display: flex !important;
+  flex: 0 0 30px !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 30px !important;
+  height: 30px !important;
+
+  padding: 0 !important;
+
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+
+  background: #3e1a2e !important;
+  color: white !important;
+
+  box-shadow:
+    0 0 0 1px #3e1a2e !important;
+}
+
+#screen-dish .hotspot-icon i {
+  font-size: 20px !important;
+  line-height: 1 !important;
+  color: white !important;
+}
+
+/* WHITE LABEL WITH DARK BURGUNDY BORDER */
+
+#screen-dish .ingredient-hotspot .hotspot-label {
+  display: inline-block !important;
+
+  width: auto !important;
+  padding: 9px 13px !important;
+
+  border: 2px solid #3e1a2e !important;
+  border-radius: 8px !important;
+
+  background: white !important;
+  color: #3e1a2e !important;
+
+  font-family: Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+
+  white-space: nowrap !important;
+}
+
+/* KEEP HOTSPOT LABEL VISIBLE ON THE MODEL */
+
+#screen-dish #saladDetailViewer {
+  --min-hotspot-opacity: 1;
+  --max-hotspot-opacity: 1;
+}
+
+/* HIDE OLD FIXED BOTTOM LABELS */
+
+#gsDishLabelOverlay {
+  display: none !important;
+}
+
+/* ORIGINAL MOBILE BUTTON STYLING */
+
+@media (max-width: 767px) {
+  #screen-dish .ingredient-buttons
+  .ingredient-button {
+    padding: 9px 11px !important;
+    font-size: 11px !important;
+  }
+
+  #screen-dish .ingredient-hotspot
+  .hotspot-label {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ==========================================
+   END PROJECT 2 INGREDIENT RESTORATION
+   ========================================== */
+
+
+/* ==========================================
+   END ALL MEAL DETAIL LABELS
+   ========================================== */
+
   
+/* ==========================================
+   GRUB SCRUB - MENU COMPATIBILITY FILTERS
+   ========================================== */
+
+#gsScanCompatPanel {
+  width: 100%;
+  max-width: 600px;
+  margin: 8px auto 22px;
+  padding: 18px;
+  background: #181818;
+  color: white;
+  border: 1px solid #444;
+}
+
+#gsScanCompatPanel[hidden] {
+  display: none !important;
+}
+
+.gs-scan-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+
+.gs-scan-selector-label {
+  color: #d6dc69;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.gs-scan-group-select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 2px solid #b65c91;
+  border-radius: 0;
+  background: #fff;
+  color: #591536;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gs-scan-heading {
+  margin: 0 0 12px;
+  color: white;
+  font-size: 19px;
+  line-height: 1.3;
+}
+
+.gs-scan-counts {
+  margin: 0 0 12px;
+  color: #d6dc69;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.gs-scan-explanation {
+  margin: 0 0 18px;
+  color: #ccc;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.gs-scan-dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.gs-scan-dish-card {
+  padding: 14px;
+  border-left: 5px solid #888;
+  background: #282828;
+}
+
+.gs-scan-dish-card.possible {
+  border-left-color: #d2dc65;
+}
+
+.gs-scan-dish-card.flagged {
+  border-left-color: #e95c64;
+}
+
+.gs-scan-dish-card.unknown {
+  border-left-color: #aaa;
+}
+
+.gs-scan-dish-name {
+  display: block;
+  margin-bottom: 7px;
+  color: white;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.gs-scan-dish-description {
+  margin: 0 0 10px;
+  color: #c3c3c3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gs-scan-dish-status {
+  margin: 8px 0 12px;
+  color: #d2dc65;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gs-scan-dish-card.flagged .gs-scan-dish-status {
+  color: #ff9297;
+}
+
+.gs-scan-dish-card.unknown .gs-scan-dish-status {
+  color: #bbb;
+}
+
+.gs-scan-person-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid #444;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.gs-scan-person-result strong {
+  color: #fff;
+}
+
+.gs-scan-person-result span {
+  color: #ffaaa9;
+}
+
+/* Keep the original score visible above results. */
+
+#screen-menu-results .menu-results-score {
+  max-width: 600px;
+}
+
+#screen-menu-results #menuResultsMatchLabel {
+  color: #d2dc65;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+#screen-menu-results #menuResultsProgressFill {
+  background: #d2dc65;
+  transition: width 0.2s ease;
+}
+
+@media (max-width: 767px) {
+  #gsScanCompatPanel {
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+
+  .gs-scan-heading {
+    font-size: 16px;
+  }
+
+  .gs-scan-group-select {
+    font-size: 13px;
+  }
+}
+
+
+/* ==========================================
+   END MENU COMPATIBILITY FILTERS
+   ========================================== */
+
   /* =====================================================
      END OF COMPLETE GRUB SCRUB STYLESHEET
      ===================================================== */
