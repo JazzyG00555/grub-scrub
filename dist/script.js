@@ -1064,12 +1064,21 @@ window.addEventListener("load", function () {
       const text = word.text.replace(/[^a-zA-Z]/g, "").toLowerCase();
       if (!text || Number(word.confidence ?? 100) < 40) return;
 
-      const conflicts = dietaryFlagRules.filter(rule =>
-        selected.some(user =>
-          user.name === rule.profile &&
-          user.filters.includes(rule.filter)
-        ) &&
-        rule.pattern.test(text)
+    
+      const conflicts = dietaryFlagRules.flatMap(rule =>
+        selected
+          .filter(user =>
+            user.filters.includes(rule.filter) &&
+            (
+              !window.GrubLiveScan ||
+              window.GrubLiveScan.includesUser(user.name)
+            ) &&
+            rule.pattern.test(text)
+          )
+          .map(user => ({
+            ...rule,
+            profile: user.name
+          }))
       );
 
       if (!conflicts.length) return;
@@ -1375,6 +1384,16 @@ window.addEventListener("load", function () {
           ) {
             unclearFrames = 0;
             lastRecognizedMenuText = bestScore.text;
+
+
+            document.dispatchEvent(
+              new CustomEvent("grub-live-menu-text", {
+                detail: {
+                  text: bestScore.text
+                }
+              })
+            );
+
 
             renderMenuARFlags(
               bestResult.data,
