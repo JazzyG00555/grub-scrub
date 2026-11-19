@@ -1012,6 +1012,36 @@ window.addEventListener("load", function () {
   const MENU_SCAN_STORAGE_KEY = "grub-scrub-menu-scans-v1";
   const RECALL_STORAGE_KEY = "grub-scrub-recall-v1";
 
+  
+try {
+  localStorage.removeItem("grub-scrub-recall-v1");
+  localStorage.removeItem("grub-scrub-menu-scans-v1");
+} catch (error) {
+  console.warn("Recall reset failed:", error);
+}
+
+  // ==========================================
+  // CLEAR DEMO RECALL HISTORY ON REFRESH
+  // ==========================================
+
+  try {
+    localStorage.removeItem(RECALL_STORAGE_KEY);
+    localStorage.removeItem(MENU_SCAN_STORAGE_KEY);
+
+    console.info(
+      "Grub Scrub: recall history reset on refresh."
+    );
+  } catch (error) {
+    console.warn(
+      "Could not reset recall history:",
+      error
+    );
+  }
+
+  // ==========================================
+  // END RECALL RESET
+  // ==========================================
+
   function clearMenuARFlags() {
     menuARFlagLayer.replaceChildren();
   }
@@ -1883,19 +1913,6 @@ window.addEventListener("load", function () {
         status.textContent = "Loading 3D food...";
         picture.append(viewer, status);
         entries.push({ viewer, status, meal });
-      }
-
-      if (meal.heroAR) {
-        const infoButton = document.createElement("button");
-        infoButton.type = "button";
-        infoButton.className = "ar-label";
-        infoButton.innerHTML = '<i class="ph ph-info"></i>';
-
-        infoButton.addEventListener("click", event => {
-          event.stopPropagation();
-          openHeroDish(meal);
-        });
-        card.appendChild(infoButton);
       }
 
       menuGrid.appendChild(card);

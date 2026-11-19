@@ -1,24 +1,22 @@
 
-/*
-  GRUB SCRUB - CREATE FOOD PROFILE
-  Four-step onboarding flow
-  Keeps existing app screens and scanners intact.
-*/
+/**
+ * GRUB SCRUB - CREATE FOOD PROFILE
+ * Four-step onboarding flow
+ * Keeps existing app screens and scanners intact.
+ */
 
 (function () {
   "use strict";
 
   const STORAGE_KEY = "grub-scrub-created-profiles-v1";
 
-
-  // Reset custom profiles whenever the app reloads.
-  // Jamie, Gus, and Brad remain in script.js.
+  // Reset custom profiles on refresh.
+  // Jamie, Gus and Brad remain in script.js.
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
     console.warn("Could not reset demo profiles:", error);
   }
-
 
   const ALLERGIES = [
     "Peanuts", "Tree nuts", "Shellfish", "Fish",
@@ -122,9 +120,7 @@
       : generateAvatar(profile.name);
   }
 
-  // Match the dietary flags currently supported
-  // by the demo meals. Other restrictions must
-  // be verified rather than assumed safe.
+  // Match dietary flags supported by the demo.
   function appProfile(source) {
     const filters = new Set();
     const restrictions = [];
@@ -137,11 +133,15 @@
     }
 
     for (const allergy of source.allergies) {
-      if (allergy === "Peanuts" ||
-          allergy === "Tree nuts") {
+      if (
+        allergy === "Peanuts" ||
+        allergy === "Tree nuts"
+      ) {
         add(allergy + " Allergy", "nutSafe");
-      } else if (allergy === "Fish" ||
-                 allergy === "Shellfish") {
+      } else if (
+        allergy === "Fish" ||
+        allergy === "Shellfish"
+      ) {
         add(allergy + " Allergy", "seafoodSafe");
       } else if (allergy === "Wheat") {
         add("Wheat Allergy", "glutenFree");
@@ -162,8 +162,7 @@
       if (diet === "Vegan") {
         add(diet, "vegan");
       } else if (diet === "Vegetarian") {
-        // Vegan dishes are a conservative subset
-        // of vegetarian dishes in this prototype.
+        // Conservative prototype rule.
         add(diet, "vegan");
       } else {
         add(diet, null);
@@ -171,7 +170,9 @@
     }
 
     if (source.dislikes.trim()) {
-      restrictions.push("Dislikes: " + source.dislikes.trim());
+      restrictions.push(
+        "Dislikes: " + source.dislikes.trim()
+      );
       requiresVerification = true;
     }
 
@@ -190,8 +191,6 @@
     };
   }
 
-  // Provide saved profiles to the existing
-  // script.js without modifying its core data.
   window.GrubOnboarding = {
     getProfiles() {
       return readProfiles().map(appProfile);
@@ -257,6 +256,7 @@
       <label class="gs-ob-field-label" for="gsObName">
         Name
       </label>
+
       <input
         id="gsObName"
         class="gs-ob-text-input"
@@ -276,7 +276,9 @@
           <legend>Allergies</legend>
           <div class="gs-ob-choices">
             ${optionsMarkup(
-              ALLERGIES, profile.allergies, "allergies"
+              ALLERGIES,
+              profile.allergies,
+              "allergies"
             )}
           </div>
         </fieldset>
@@ -285,7 +287,9 @@
           <legend>Intolerances</legend>
           <div class="gs-ob-choices">
             ${optionsMarkup(
-              INTOLERANCES, profile.intolerances, "intolerances"
+              INTOLERANCES,
+              profile.intolerances,
+              "intolerances"
             )}
           </div>
         </fieldset>
@@ -294,7 +298,9 @@
           <legend>Lifestyle Diet</legend>
           <div class="gs-ob-choices">
             ${optionsMarkup(
-              DIETS, profile.diets, "diets"
+              DIETS,
+              profile.diets,
+              "diets"
             )}
           </div>
         </fieldset>
@@ -326,8 +332,10 @@
           `).join("")}
       </select>
 
-      <label class="gs-ob-question gs-ob-dislikes"
-             for="gsObDislikes">
+      <label
+        class="gs-ob-question gs-ob-dislikes"
+        for="gsObDislikes"
+      >
         Any foods you dislike?
       </label>
 
@@ -419,11 +427,12 @@
 
   function render() {
     root().innerHTML = `
-      <div class="gs-ob-screen"
-           role="dialog"
-           aria-modal="true"
-           aria-labelledby="gsObHeading">
-
+      <div
+        class="gs-ob-screen"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gsObHeading"
+      >
         <div class="gs-ob-top">
           <button
             type="button"
@@ -432,7 +441,9 @@
             aria-label="Close onboarding"
           >×</button>
 
-          <h2 id="gsObHeading">Create your Food Profile</h2>
+          <h2 id="gsObHeading">
+            Create your Food Profile
+          </h2>
 
           ${progressMarkup()}
         </div>
@@ -441,16 +452,26 @@
           ${screenContent()}
         </div>
 
-        <p class="gs-ob-error" id="gsObError"
-           role="alert"></p>
+        <p
+          class="gs-ob-error"
+          id="gsObError"
+          role="alert"
+        ></p>
 
         <div class="gs-ob-actions">
-          <button type="button" id="gsObBack"
-                  class="gs-ob-back">
+          <button
+            type="button"
+            id="gsObBack"
+            class="gs-ob-back"
+          >
             Back
           </button>
-          <button type="button" id="gsObNext"
-                  class="gs-ob-next">
+
+          <button
+            type="button"
+            id="gsObNext"
+            class="gs-ob-next"
+          >
             ${step === 3 ? "Finish" : "Next"}
           </button>
         </div>
@@ -463,8 +484,10 @@
     document.getElementById("gsObBack")
       .addEventListener("click", () => {
         collectStep();
-        if (step === 0) close();
-        else {
+
+        if (step === 0) {
+          close();
+        } else {
           step--;
           render();
         }
@@ -482,6 +505,7 @@
       });
 
     const image = document.getElementById("gsObImage");
+
     if (image) {
       image.addEventListener("change", async event => {
         const file = event.target.files?.[0];
@@ -500,18 +524,25 @@
 
   function showError(message) {
     const element = document.getElementById("gsObError");
-    if (element) element.textContent = message;
+    if (element) {
+      element.textContent = message;
+    }
   }
 
   function collectStep() {
     if (step === 0) {
       const input = document.getElementById("gsObName");
-      if (input) profile.name = input.value.trim();
+
+      if (input) {
+        profile.name = input.value.trim();
+      }
     }
 
     if (step === 1) {
       for (const group of [
-        "allergies", "intolerances", "diets"
+        "allergies",
+        "intolerances",
+        "diets"
       ]) {
         profile[group] = [
           ...root().querySelectorAll(
@@ -525,6 +556,7 @@
       profile.minMeals = Number(
         document.getElementById("gsObMinMeals")?.value || 3
       );
+
       profile.dislikes =
         document.getElementById("gsObDislikes")
           ?.value.trim() || "";
@@ -577,13 +609,14 @@
 
     window.dispatchEvent(
       new CustomEvent("grub-profile-saved", {
-        detail: { profile: appProfile(profile) }
+        detail: {
+          profile: appProfile(profile)
+        }
       })
     );
   }
 
-  // Resize uploaded photos to avoid filling
-  // localStorage with full-resolution images.
+  // Resize profile photos to avoid storage limits.
   async function resizeImage(file) {
     if (!file.type.startsWith("image/")) {
       throw new Error("Not an image");
@@ -612,59 +645,130 @@
     const sy = (image.height - size) / 2;
 
     context.drawImage(
-      image, sx, sy, size, size,
-      0, 0, 180, 180
+      image,
+      sx,
+      sy,
+      size,
+      size,
+      0,
+      0,
+      180,
+      180
     );
 
     return canvas.toDataURL("image/jpeg", 0.75);
   }
 
+  
   function addLaunchButton(container, text) {
-    if (!container ||
-        container.querySelector(".gs-ob-launch")) return;
+    if (!container) return;
+
+    const existing = container.querySelector(".gs-ob-launch");
+    if (existing) return;
 
     const button = document.createElement("button");
+
     button.type = "button";
     button.className = "gs-ob-launch";
     button.textContent = text;
+
+    // WHITE BUTTON WITH PINK OUTLINE
+    button.style.setProperty(
+      "background-color", "#ffffff", "important"
+    );
+
+    button.style.setProperty(
+      "color", "#591536", "important"
+    );
+
+    button.style.setProperty(
+      "border", "2px solid #b65c91", "important"
+    );
+
+    button.style.setProperty(
+      "border-radius", "0", "important"
+    );
+
     button.addEventListener("click", () => open());
 
     container.appendChild(button);
   }
 
-  function initialize() {
-    const overlay = document.createElement("div");
-    overlay.id = "gsOnboarding";
-    overlay.hidden = true;
-    document.body.appendChild(overlay);
 
-    // Home-screen Create Profile button.
+  function initialize() {
+    // Existing onboarding overlay.
+    let overlay = document.getElementById(
+      "gsOnboarding"
+    );
+
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "gsOnboarding";
+      overlay.hidden = true;
+      document.body.appendChild(overlay);
+    }
+
+    // HOME SCREEN:
+    // Leave START unchanged.
+    // Add a separate Create Profile button.
     addLaunchButton(
-      document.querySelector("#screen-title .title-content"),
+      document.querySelector(
+        "#screen-title .title-content"
+      ),
       "CREATE PROFILE"
     );
 
-    // Create another profile from the existing
-    // Food Profiles screen.
+    // FOOD PROFILES:
+    // Put Create New Profile INSIDE
+    // the same row as SELECT ALL.
     const profilePage = document.querySelector(
       "#screen-users .profiles-page"
     );
 
     if (profilePage) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "gs-ob-launch gs-ob-launch-inline";
-      button.textContent = "+ CREATE NEW PROFILE";
-      button.addEventListener("click", () => open());
+      const row = profilePage.querySelector(
+        ".select-all-row"
+      );
 
-      const userList = document.getElementById("userList");
-      if (userList) userList.before(button);
+      const selectAll = document.getElementById(
+        "addAllButton"
+      );
+
+      let button = profilePage.querySelector(
+        ".gs-ob-launch-inline"
+      );
+
+      if (!button) {
+        button = document.createElement("button");
+        button.type = "button";
+        button.className =
+          "gs-ob-launch gs-ob-launch-inline";
+        button.textContent = "+ CREATE NEW PROFILE";
+        button.addEventListener(
+          "click",
+          () => open()
+        );
+      }
+
+      if (row && selectAll) {
+        row.insertBefore(button, selectAll);
+      } else {
+        const userList = document.getElementById(
+          "userList"
+        );
+
+        if (userList) {
+          userList.before(button);
+        }
+      }
     }
   }
 
   if (document.readyState === "loading") {
     document.addEventListener(
-      "DOMContentLoaded", initialize, { once: true }
+      "DOMContentLoaded",
+      initialize,
+      { once: true }
     );
   } else {
     initialize();
