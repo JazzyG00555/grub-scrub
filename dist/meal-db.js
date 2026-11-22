@@ -18,10 +18,12 @@
   // NEVER use a secret or service_role key.
 
   
-const SUPABASE_URL = "https://kfjvdviwqndadvztufez.supabase.co";
+
+  const SUPABASE_URL = "https://kfjvdviwqndadvztufez.supabase.co";
 
 
-  const SUPABASE_KEY = "sb_publishable_HDvoxEfL25kcIJz0mi5xTg_cARq6ziPY";
+
+  const SUPABASE_KEY = "sb_publishable_HDvoxEfL25kcIJz0mi5xTg_cARq6ziP";
 
   const TABLE_NAME = "gs_meal_ingredients";
 
@@ -191,13 +193,37 @@ const SUPABASE_URL = "https://kfjvdviwqndadvztufez.supabase.co";
     };
   }
 
+
+  // Get all published meal names for a restaurant
+  // directly from the Supabase ingredient records.
+  function getMealNames(restaurant) {
+    const result = [];
+    const seen = new Set();
+
+    for (const key of meals.keys()) {
+      const [restaurantName, mealName] = JSON.parse(key);
+
+      if (restaurantName !== restaurant) continue;
+      if (seen.has(mealName)) continue;
+
+      seen.add(mealName);
+      result.push(mealName);
+    }
+
+    return result;
+  }
+
+
+ 
   window.GSMealDB = {
     load,
     getIngredients,
     getPosition,
+    getMealNames,
     isConfigured,
     isLoaded: () => loaded
   };
+
 
   // Start loading immediately.
   load();

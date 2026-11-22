@@ -5,10 +5,18 @@ window.addEventListener("load", function () {
   const BASE = "https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/";
   const SALAD_URL = BASE + "salad%20%281%29.glb";
 
-  const RESTAURANT_LOGOS = {
-    psKitchen: "https://static.wixstatic.com/media/705a3e_f84fc59012154b508d470217c567e238~mv2.png/v1/fit/w_2500%2Ch_1330%2Cal_c/705a3e_f84fc59012154b508d470217c567e238~mv2.png",
-    danbo: "https://doordash-static.s3.amazonaws.com/media/restaurant/cover_square/d94dd458-30b3-45b8-81e5-45a4bf18e061.png"
-  };
+const RESTAURANT_LOGOS = {
+  psKitchen: "https://static.wixstatic.com/media/705a3e_f84fc59012154b508d470217c567e238~mv2.png/v1/fit/w_2500%2Ch_1330%2Cal_c/705a3e_f84fc59012154b508d470217c567e238~mv2.png",
+
+  danbo: "https://doordash-static.s3.amazonaws.com/media/restaurant/cover_square/d94dd458-30b3-45b8-81e5-45a4bf18e061.png",
+
+  beyondSushi: "https://beyondsushi.com/wp-content/uploads/2024/08/beyond-sushi-new-logo.png",
+
+  littleBeet: "https://a.mktgcdn.com/p/kGCIVquKE2QvdwJhk_9Wu7OyLzMLtLmvU_yqXRw0f0w/1927x1927.png",
+
+  veganLatinKitchen: "https://media-cdn.grubhub.com/image/upload/d_search%3Abrowse-images%3Adefault.jpg/w_300%2Cq_100%2Cfl_lossy%2Cdpr_2.0%2Cc_fit%2Cf_auto%2Ch_300/dsha5dnlqokfiipf5rqn"
+};
+
 
   const SOUNDS = {
     click: BASE + "683099__florianreichelt__computer-mouse-click.mp3",
@@ -198,6 +206,147 @@ window.addEventListener("load", function () {
     }
   ];
 
+ 
+  // ==========================================
+  // SUPABASE RESTAURANTS
+  // BEYOND SUSHI + LITTLE BEET
+  // ==========================================
+
+
+  
+
+  const NEW_MEAL_MODELS = {
+    "Beyond Sushi": {
+      "Mighty Mushroom": BASE + "mighty_mushroom_sushi.glb",
+      "Spicy Mang": BASE + "spicy_mang_sushi.glb",
+      "Miso Soup": BASE + "miso_soup.glb",
+      "Steamed Edamame": BASE + "steamed_edamame.glb",
+      "Sweet Tree": BASE + "sweet_tree_sushi.glb"
+    },
+  
+    "Little Beet": {
+      "Autumn Salmon Caesar Bowl": BASE + "autumn_salmon_caesar_bowl.glb",
+      "Steak & Brussels Bowl": BASE + "steak_brussels_bowl.glb",
+      "Miso Tofu Salad": BASE + "miso_tofu_salad.glb",
+      "Beet Falafel Bowl": BASE + "beet_falafel_bowl.glb",
+      "Whole 30 Bowl": BASE + "whole_30_bowl.glb"
+    },
+  
+    "VEGAN Latin Kitchen Beyond": {
+      "Avocado Quinoa Platter": BASE + "avocado_quinoa_platter.glb",
+      "Vegan Vegetables Tacos": BASE + "vegan_vegetable_tacos.glb",
+      "Vegetables Mofonguitos": BASE + "vegetables_mofonguitos.glb",
+      "Tofu Vegetables Stir Fry": BASE + "tofu_vegetables_stir_fry.glb",
+      "Vegan Chicken Quinoa Platter": BASE + "vegan_chicken_quinoa_platter.glb"
+    }
+  };
+  
+
+
+  async function loadAdditionalRestaurants() {
+    const db = window.GSMealDB;
+
+    if (!db || typeof db.getMealNames !== "function") {
+      console.warn(
+        "Grub Scrub: Supabase meal discovery unavailable."
+      );
+      return;
+    }
+
+    const loaded = await db.load();
+
+    if (!loaded) {
+      console.warn(
+        "Grub Scrub: Supabase unavailable. Existing restaurants remain."
+      );
+      return;
+    }
+
+    const configurations = [
+      {
+        name: "Beyond Sushi",
+        location: {
+          lat: 40.7523,
+          lon: -73.9890
+        },
+        demoVegan: true
+      },
+      {
+        name: "Little Beet",
+        location: {
+          lat: 40.7614,
+          lon: -73.9819
+        },
+        demoVegan: false
+      }
+    ];
+
+    for (const config of configurations) {
+      const mealNames = db.getMealNames(config.name);
+
+      if (!mealNames.length) {
+        console.warn(
+          "No published Supabase meals for:",
+          config.name
+        );
+        continue;
+      }
+
+      const databaseMeals = mealNames.map(mealName => ({
+        name: mealName,
+       model: NEW_MEAL_MODELS[config.name]?.[mealName] || null,
+
+
+        // These are conservative prototype classifications.
+        // Beyond Sushi's vegan-only demo is enabled.
+        // Allergy safety is not verified.
+        vegan: config.demoVegan,
+        nutSafe: false,
+        glutenFree: false,
+        seafoodSafe: false,
+
+        ingredients: (
+          db.getIngredients(config.name, mealName) || []
+        ).map(name => ({ name }))
+      }));
+
+      const existingIndex = restaurants.findIndex(
+        restaurant => restaurant.name === config.name
+      );
+
+      if (existingIndex >= 0) {
+        restaurants[existingIndex].meals = databaseMeals;
+        analyzerRestaurantLocations[existingIndex] =
+          config.location;
+      } else {
+        restaurants.push({
+          name: config.name,
+          
+logo: config.name === "Beyond Sushi"
+? RESTAURANT_LOGOS.beyondSushi
+: RESTAURANT_LOGOS.littleBeet,
+
+          meals: databaseMeals,
+          demoFromSupabase: true
+        });
+
+        analyzerRestaurantLocations.push(config.location);
+      }
+    }
+
+    if (state.screen === "analyzer") {
+      renderAnalyzerRecommendations();
+    }
+
+    if (state.screen === "recall") {
+      renderRecallList();
+    }
+
+    console.info(
+      "Grub Scrub: new restaurants loaded from Supabase."
+    );
+  }
+ 
   // ==========================================
   // STATE
   // ==========================================
@@ -553,34 +702,63 @@ window.addEventListener("load", function () {
     return 2 * 3958.8 * Math.asin(Math.min(1, Math.sqrt(a)));
   }
 
-  function createRestaurantLogoCard(restaurant) {
-    const picture = document.createElement("div");
-    picture.className = "analyzer-card-image";
 
-    const logo = document.createElement("img");
-    logo.src = restaurant.logo;
-    logo.alt = restaurant.name + " logo";
-    logo.className = "analyzer-restaurant-logo";
-    logo.loading = "lazy";
+  
+function createRestaurantLogoCard(restaurant) {
+  const picture = document.createElement("div");
+  picture.className = "analyzer-card-image";
 
-    logo.onerror = function () {
-      const fallback = document.createElement("span");
-      fallback.textContent = restaurant.name;
-      Object.assign(fallback.style, {
-        display: "block",
-        width: "100%",
-        textAlign: "center",
-        fontWeight: "800",
-        fontSize: "clamp(16px,4vw,25px)",
-        lineHeight: "1.2",
-        overflowWrap: "break-word"
-      });
-      picture.replaceChildren(fallback);
-    };
+  const fallbackDomains = {
+    "Beyond Sushi": "beyondsushi.com",
+    "Little Beet": "thelittlebeet.com"
+  };
 
-    picture.appendChild(logo);
-    return picture;
+  const domain = fallbackDomains[restaurant.name];
+
+  const sources = [
+    restaurant.logo,
+    domain
+      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256`
+      : null
+  ].filter(Boolean);
+
+  const logo = document.createElement("img");
+  logo.alt = restaurant.name + " logo";
+  logo.className = "analyzer-restaurant-logo";
+  logo.loading = "lazy";
+
+  let sourceIndex = 0;
+
+  function tryNextSource() {
+    if (sourceIndex < sources.length) {
+      logo.src = sources[sourceIndex++];
+      return;
+    }
+
+    const fallback = document.createElement("span");
+    fallback.textContent = restaurant.name;
+
+    Object.assign(fallback.style, {
+      display: "block",
+      width: "100%",
+      textAlign: "center",
+      fontWeight: "800",
+      fontSize: "clamp(16px, 4vw, 25px)",
+      lineHeight: "1.2",
+      overflowWrap: "break-word"
+    });
+
+    picture.replaceChildren(fallback);
   }
+
+  logo.onerror = tryNextSource;
+  picture.appendChild(logo);
+  tryNextSource();
+
+  return picture;
+}
+
+
 
   function renderAnalyzerRecommendations() {
     const radius = Number(analyzerRadius.value);
@@ -1249,215 +1427,253 @@ try {
     }
   }
 
+
   async function getMenuOCRWorker() {
     if (!window.Tesseract) {
       throw new Error("Tesseract.js did not load");
     }
-
+  
     if (!menuOCRWorkerPromise) {
       menuOCRWorkerPromise = window.Tesseract.createWorker("eng")
+        .then(async worker => {
+          // Restaurant menus contain scattered text, prices and headings.
+          await worker.setParameters({
+            tessedit_pageseg_mode: "11",
+            preserve_interword_spaces: "1"
+          });
+          return worker;
+        })
         .catch(error => {
           menuOCRWorkerPromise = null;
           throw error;
         });
     }
-
+  
     return menuOCRWorkerPromise;
   }
-
+  
   async function startLiveMenuOCR() {
     const generation = ++menuOCRGeneration;
+  
     const isActive = () =>
       generation === menuOCRGeneration &&
       state.screen === "menuScanner" &&
       !!menuCameraStream;
-
+  
     let worker;
-
+  
     try {
-      menuCameraStatus.textContent =
-        "Loading menu text recognition...";
+      menuCameraStatus.textContent = "Loading menu text recognition...";
       worker = await getMenuOCRWorker();
     } catch (error) {
       console.error("OCR initialization:", error);
+  
       if (isActive()) {
         menuCameraStatus.textContent =
           "OCR unavailable. You can still save a menu photo.";
       }
       return;
     }
-
+  
     if (!isActive()) return;
-
+  
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", {
       willReadFrequently: true
     });
+  
     if (!context) return;
-
+  
     let unclearFrames = 0;
-
-    function prepareImage(sourcePixels, invert = false) {
-      const width = canvas.width;
-      const height = canvas.height;
-      const image = context.createImageData(width, height);
-      image.data.set(sourcePixels);
-
+  
+    function prepareImage(originalPixels, invert = false) {
+      const image = context.createImageData(
+        canvas.width,
+        canvas.height
+      );
+  
+      image.data.set(originalPixels);
       const pixels = image.data;
-      const left = Math.round(width * 0.06);
-      const right = Math.round(width * 0.94);
-      const top = Math.round(height * 0.08);
-      const bottom = Math.round(height * 0.92);
-
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const i = (y * width + x) * 4;
-
-          if (
-            x < left || x >= right ||
-            y < top || y >= bottom
-          ) {
-            pixels[i] = 255;
-            pixels[i + 1] = 255;
-            pixels[i + 2] = 255;
-            pixels[i + 3] = 255;
-            continue;
-          }
-
-          let gray =
-            pixels[i] * 0.299 +
-            pixels[i + 1] * 0.587 +
-            pixels[i + 2] * 0.114;
-
-          gray = (gray - 128) * 1.45 + 128;
-          if (invert) gray = 255 - gray;
-          gray = Math.max(0, Math.min(255, gray));
-
-          pixels[i] = gray;
-          pixels[i + 1] = gray;
-          pixels[i + 2] = gray;
-          pixels[i + 3] = 255;
-        }
+  
+      for (let i = 0; i < pixels.length; i += 4) {
+        const gray =
+          0.299 * pixels[i] +
+          0.587 * pixels[i + 1] +
+          0.114 * pixels[i + 2];
+  
+        // Gentle contrast preserves thin letters.
+        let value = Math.max(
+          0,
+          Math.min(255, (gray - 128) * 1.2 + 128)
+        );
+  
+        if (invert) value = 255 - value;
+  
+        pixels[i] = value;
+        pixels[i + 1] = value;
+        pixels[i + 2] = value;
+        pixels[i + 3] = 255;
       }
-
+  
       context.putImageData(image, 0, 0);
     }
-
+  
     function scoreOCR(result) {
-      const text = (result.data.text || "").trim();
       const words = getOCRWords(result.data).filter(word =>
-        (word.text || "").replace(/[^a-zA-Z]/g, "").length >= 3 &&
+        /[a-zA-Z]{2,}/.test(word.text || "") &&
         Number(word.confidence ?? 0) >= 35
       );
-
+  
       const confidence = words.length
         ? words.reduce(
-            (sum, word) => sum + Number(word.confidence ?? 0),
+            (sum, word) =>
+              sum + Number(word.confidence ?? 0),
             0
           ) / words.length
-        : 0;
-
+        : Number(result.data.confidence ?? 0);
+  
       return {
-        text,
-        wordCount: words.length,
+        words: words.length,
         confidence,
-        score: words.length * 5 + confidence * 0.5
+        score: words.length * 3 + confidence * 0.7
       };
     }
-
+  
     while (isActive()) {
       try {
         const video = menuCameraVideo;
-
+  
         if (video.videoWidth && video.videoHeight) {
-          const width = Math.min(1600, video.videoWidth);
-          const scale = width / video.videoWidth;
-
-          canvas.width = Math.round(width);
-          canvas.height = Math.round(
-            video.videoHeight * scale
+          // Enlarge small camera frames for clearer OCR.
+          const scale = Math.min(
+            2,
+            1800 / video.videoWidth
           );
-
+  
+          canvas.width = Math.max(
+            1,
+            Math.round(video.videoWidth * scale)
+          );
+  
+          canvas.height = Math.max(
+            1,
+            Math.round(video.videoHeight * scale)
+          );
+  
           context.drawImage(
-            video, 0, 0, canvas.width, canvas.height
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
           );
-
+  
           const original = context.getImageData(
-            0, 0, canvas.width, canvas.height
+            0,
+            0,
+            canvas.width,
+            canvas.height
           );
-
-          menuCameraStatus.textContent = "Analyzing menu text...";
-
-          prepareImage(original.data, false);
-          const lightResult = await worker.recognize(
-            canvas, {}, { text: true, blocks: true }
+  
+          menuCameraStatus.textContent =
+            "Analyzing menu text...";
+  
+          // First OCR pass.
+          prepareImage(original.data);
+  
+          let bestResult = await worker.recognize(
+            canvas,
+            {},
+            { text: true, blocks: true }
           );
-
+  
           if (!isActive()) return;
-          const lightScore = scoreOCR(lightResult);
-
-          prepareImage(original.data, true);
-          const darkResult = await worker.recognize(
-            canvas, {}, { text: true, blocks: true }
-          );
-
-          if (!isActive()) return;
-          const darkScore = scoreOCR(darkResult);
-
-          const useDark = darkScore.score > lightScore.score;
-          const bestResult = useDark ? darkResult : lightResult;
-          const bestScore = useDark ? darkScore : lightScore;
-
+  
+          let bestScore = scoreOCR(bestResult);
+  
+          // Only use a second pass when recognition is unclear.
           if (
-            bestScore.wordCount >= 3 &&
-            bestScore.confidence >= 35
+            bestScore.words < 3 ||
+            bestScore.confidence < 55
+          ) {
+            prepareImage(original.data, true);
+  
+            const alternate = await worker.recognize(
+              canvas,
+              {},
+              { text: true, blocks: true }
+            );
+  
+            if (!isActive()) return;
+  
+            const alternateScore = scoreOCR(alternate);
+  
+            if (alternateScore.score > bestScore.score) {
+              bestResult = alternate;
+              bestScore = alternateScore;
+            }
+          }
+  
+          if (
+            bestScore.words >= 3 &&
+            bestScore.confidence >= 45
           ) {
             unclearFrames = 0;
-            lastRecognizedMenuText = bestScore.text;
-
-
+  
+            lastRecognizedMenuText =
+              (bestResult.data.text || "").trim();
+  
             document.dispatchEvent(
               new CustomEvent("grub-live-menu-text", {
                 detail: {
-                  text: bestScore.text
+                  text: lastRecognizedMenuText
                 }
               })
             );
-
-
+  
+            // Keep existing red warning flags.
             renderMenuARFlags(
               bestResult.data,
               canvas.width,
               canvas.height
             );
-
+  
             menuCameraStatus.textContent =
               "Detected: " +
-              bestScore.text.replace(/\s+/g, " ").slice(0, 100);
+              lastRecognizedMenuText
+                .replace(/\s+/g, " ")
+                .slice(0, 100);
+  
           } else {
             unclearFrames++;
+  
             menuCameraStatus.textContent =
-              unclearFrames === 1
-                ? "Refocusing on menu text..."
-                : "Move closer or hold the menu steady.";
-
-            if (unclearFrames > 1) {
+              "Move closer, hold steady, or improve lighting.";
+  
+            if (unclearFrames >= 2) {
               clearMenuARFlags();
               lastDetectedMenuWarnings = [];
             }
           }
         }
+  
       } catch (error) {
         console.warn("OCR frame:", error);
+  
         if (isActive()) {
           menuCameraStatus.textContent =
             "Could not read menu. Try better lighting.";
         }
       }
-
-      await new Promise(resolve => setTimeout(resolve, 2000));
+  
+      if (isActive()) {
+        await new Promise(resolve =>
+          setTimeout(resolve, 1200)
+        );
+      }
     }
   }
+  
 
   // ==========================================
   // SAVE SCANNED MENUS
@@ -1890,6 +2106,28 @@ try {
       label.textContent = meal.name;
 
       card.append(picture, label);
+
+
+      // Show a placeholder for database meals
+      // that do not yet have a 3D model.
+      if (!meal.model) {
+        const placeholder = document.createElement("div");
+        placeholder.textContent = "🍽️";
+
+        Object.assign(placeholder.style, {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          minHeight: "110px",
+          width: "100%",
+          fontSize: "50px",
+          backgroundColor: "#f1ecef"
+        });
+
+        picture.appendChild(placeholder);
+      }
+
 
       if (meal.model) {
         const viewer = createViewer(meal);
@@ -3135,5 +3373,3305 @@ try {
     }));
   };
 
-  renderUsers();
+ 
+ 
+  // ==========================================
+  // GRUB SCRUB COMPATIBILITY UPDATE
+  // ==========================================
+
+  // Calculate each selected person's compatibility
+  // based on dietary restrictions and minimum meals.
+  // The group score is the average of individual scores.
+
+  groupCompatibility = function (restaurant) {
+    const selected = selectedUsers();
+
+    if (!selected.length) return 0;
+
+    const total = selected.reduce((sum, user) => {
+      const required = Math.max(
+        1,
+        Number(user.minMeals) || 1
+      );
+
+      const compatible = available(
+        restaurant,
+        user
+      ).length;
+
+      const individualPercentage = Math.min(
+        100,
+        (compatible / required) * 100
+      );
+
+      return sum + individualPercentage;
+    }, 0);
+
+    return Math.round(total / selected.length);
+  };
+
+
+  // ==========================================
+  // RESTAURANT COMPATIBILITY RESULT
+  // ==========================================
+
+  renderResult = function () {
+    const restaurant = restaurants[state.restaurant];
+
+    const percentage = groupCompatibility(restaurant);
+    const matched = groupMatch(restaurant);
+
+    // Above 70% = positive compatibility.
+    const positive = percentage > 70;
+
+    resultTitle.textContent = `${percentage}% MATCH`;
+
+    resultSubtitle.textContent = matched
+      ? "Everyone meets their minimum meal requirement!"
+      : positive
+        ? "Positive match! Some profiles still need more meal options."
+        : "Not everyone has enough meal options here.";
+
+    screens.result.classList.toggle(
+      "no-match",
+      !positive
+    );
+
+    resultCard.classList.toggle(
+      "bad-match",
+      !positive
+    );
+
+    resultCard.classList.toggle(
+      "positive-compatibility",
+      positive
+    );
+
+    resultIcon.className =
+      "ph result-icon " +
+      (positive ? "ph-check-circle" : "ph-x-circle");
+
+
+    // Always display dietary safety reminder.
+    let note = resultCard.querySelector(
+      ".gs-safety-note"
+    );
+
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "gs-safety-note";
+      resultCard.appendChild(note);
+    }
+
+    note.textContent =
+      "⚠️ Compatibility is an estimate. Always confirm ingredients, allergens, and cross-contact with the restaurant.";
+
+    playSound(positive ? "bell" : "crunch");
+  };
+
+
+  // ==========================================
+  // POSITIVE COMPATIBILITY STYLING
+  // ==========================================
+
+ 
+  // ==========================================
+  // ORIGINAL FULL-SCREEN RESULT LAYOUT
+  // Only change colors, never the card layout.
+  // ==========================================
+
+  const compatibilityStyle = document.createElement("style");
+
+  compatibilityStyle.textContent = `
+
+    /* Positive scores above 70%: green full screen */
+    #screen-result:not(.no-match) {
+      background: #d9f5e5 !important;
+    }
+
+    /* Preserve the original centered result layout */
+    #screen-result .result-card {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #281721 !important;
+    }
+
+    /* Keep the original text sizes and positioning */
+    #screen-result .result-icon,
+    #screen-result .result-title,
+    #screen-result .result-subtitle {
+      color: inherit !important;
+    }
+
+    /* Warning stays at the bottom, not inside a box */
+    #screen-result .gs-safety-note {
+      position: fixed;
+      left: 20px;
+      right: 20px;
+      bottom: 32px;
+      margin: 0 auto;
+      padding: 0;
+      max-width: 650px;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.4;
+      text-align: center;
+      color: #281721;
+      background: transparent;
+      border: none;
+    }
+
+  `;
+
+  document.head.appendChild(compatibilityStyle);
+
+
+
+  // ==========================================
+  // INITIALIZE EXISTING APPLICATION
+  // ==========================================
+
+  
+  // ==========================================
+  // BRONX RESTAURANT
+  // VEGAN LATIN KITCHEN BEYOND
+  // Real restaurant, simulated dietary classifications
+  // ==========================================
+
+  const bronxRestaurant = {
+    name: "VEGAN Latin Kitchen Beyond",
+    logo: RESTAURANT_LOGOS.veganLatinKitchen,
+    demoFromSupabase: false,
+    demoCompatibilityUnverified: true,
+
+    meals: [
+      {
+        name: "Avocado Quinoa Platter",
+        vegan: true,
+        nutSafe: true,
+        glutenFree: true,
+        seafoodSafe: true,
+        ingredients: [
+          { name: "Quinoa" },
+          { name: "Avocado" },
+          { name: "Tomatoes" },
+          { name: "Cucumbers" },
+          { name: "Black beans" },
+          { name: "Greens" }
+        ]
+      },
+      {
+        name: "Vegan Vegetables Tacos",
+        vegan: true,
+        nutSafe: true,
+        glutenFree: true,
+        seafoodSafe: true,
+        ingredients: [
+          { name: "Mixed vegetables" },
+          { name: "Corn tortillas" },
+          { name: "Pico de gallo" }
+        ]
+      },
+      {
+        name: "Vegetables Mofonguitos",
+        vegan: true,
+        nutSafe: true,
+        glutenFree: true,
+        seafoodSafe: true,
+        ingredients: [
+          { name: "Fried plantain cups" },
+          { name: "Vegetables" },
+          { name: "Additional ingredients unverified" }
+        ]
+      },
+      {
+        name: "Tofu Vegetables Stir Fry",
+        vegan: true,
+        nutSafe: true,
+        glutenFree: true,
+        seafoodSafe: true,
+        ingredients: [
+          { name: "Tofu" },
+          { name: "Vegetables" },
+          { name: "Sauce ingredients unverified" }
+        ]
+      },
+      {
+        name: "Vegan Chicken Quinoa Platter",
+        vegan: true,
+        nutSafe: true,
+        glutenFree: true,
+        seafoodSafe: true,
+        ingredients: [
+          { name: "Quinoa" },
+          { name: "Black beans" },
+          { name: "Tomatoes" },
+          { name: "Vegan chicken" },
+          { name: "Greens" },
+          { name: "Vegan chicken ingredients unverified" }
+        ]
+      }
+    ]
+  };
+
+  // The true values above are prototype assumptions.
+  // Nut-free, gluten-free, and seafood-allergy safety
+  // have NOT been established for these real dishes.
+
+  function addBronxRestaurant() {
+    const exists = restaurants.some(
+      restaurant => restaurant.name === bronxRestaurant.name
+    );
+
+    if (exists) return;
+
+    
+
+bronxRestaurant.meals.forEach(meal => {
+  meal.model =
+    NEW_MEAL_MODELS["VEGAN Latin Kitchen Beyond"]?.[meal.name] || null;
 });
+
+
+restaurants.push(bronxRestaurant);
+
+    // Coordinates for 2618 Jerome Avenue, Bronx.
+    analyzerRestaurantLocations.push({
+      lat: 40.86688,
+      lon: -73.897815
+    });
+
+    if (state.screen === "analyzer") {
+      renderAnalyzerRecommendations();
+    }
+
+    if (state.screen === "recall") {
+      renderRecallList();
+    }
+  }
+
+  // ==========================================
+  // MENU SCANNER IMPROVEMENTS
+  // OCR, PHOTO FLAGS, LIVE MENU MATCHING
+  // ==========================================
+
+  const gsMenuAudit = {
+    text: "",
+    warnings: [],
+    analysis: null
+  };
+
+  const gsRules = [
+    {
+      profile: "Jamie",
+      pattern: /\b(beef|pork|chicken|bacon|ham|milk|butter|cheese|egg|eggs|honey|gelatin|shrimp|salmon|fish|steak|cream|yogurt|mayonnaise|mayo|dairy)\b/i
+    },
+    {
+      profile: "Gus",
+      pattern: /\b(peanuts?|walnuts?|almonds?|cashews?|pistachios?|pecans?|hazelnuts?|sesame|nut butter)\b/i
+    },
+    {
+      profile: "Brad",
+      pattern: /\b(wheat|barley|rye|semolina|couscous|bulgur|flour|bread|pasta|noodles|breadcrumbs|shrimp|prawns?|crab|lobster|oysters?|mussels?|clams?|salmon|tuna|anchov(?:y|ies)|fish)\b/i
+    }
+  ];
+
+  // Calculate a potential match from the actual OCR text.
+
+  // ==========================================
+  // MENU-BASED COMPATIBILITY CALCULATION
+  // Works with priced and unpriced menus.
+  // ==========================================
+
+  function gsAnalyzeRecognizedMenu(text) {
+    const profiles = selectedUsers();
+
+    const lines = String(text || "")
+      .split(/\r?\n/)
+      .map(line => line.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+
+    const emptyResult = {
+      percentage: null,
+      count: 0,
+      flagged: 0,
+      items: [],
+      note: "Not enough identifiable dishes to estimate a menu match."
+    };
+
+    if (!profiles.length || !lines.length) {
+      return emptyResult;
+    }
+
+    const ignoredHeadings = [
+      /^(chef'?s? selection|our menu|main courses?|starters?|appetizers?|desserts?|drinks?|beverages?|sides?|specials?|entrees?|entrées?|lunch|dinner|breakfast|brunch)$/i,
+      /^(please inform|all prices|taxes|gratuity|allergies|dietary restrictions)/i
+    ];
+
+    function cleanTitle(line) {
+      return line
+        .replace(/\s*(?:\$|USD)\s*\d+(?:\.\d{2})?\s*$/i, "")
+        .replace(/\s+\d{1,3}\.\d{2}\s*$/, "")
+        .replace(/[•·\s]+$/, "")
+        .trim();
+    }
+
+    function isTitle(line) {
+      const title = cleanTitle(line);
+
+      if (title.length < 5 || title.length > 85) return false;
+      if (!/[a-zA-ZÀ-ÿ]/.test(title)) return false;
+      if (ignoredHeadings.some(rule => rule.test(title))) {
+        return false;
+      }
+
+      // Explicit price at the end of a dish name.
+      const priced =
+        /(?:\$|USD)\s*\d+(?:\.\d{2})?\s*$/i.test(line) ||
+        /\s+\d{1,3}\.\d{2}\s*$/.test(line);
+
+      if (priced) return true;
+
+      // Recognize uppercase dish headings even without prices.
+      const letters = title.match(/[a-zA-ZÀ-ÿ]/g) || [];
+      const uppercase = letters.filter(
+        character =>
+          character === character.toUpperCase() &&
+          character !== character.toLowerCase()
+      );
+
+      const uppercaseRatio = letters.length
+        ? uppercase.length / letters.length
+        : 0;
+
+      const words = title.split(/\s+/);
+
+      return (
+        uppercaseRatio >= 0.75 &&
+        words.length <= 10 &&
+        letters.length >= 7 &&
+        !/[.!?]$/.test(title)
+      );
+    }
+
+    // Group dish headings with the descriptions below them.
+    const dishes = [];
+    let current = null;
+
+    for (const line of lines) {
+      if (isTitle(line)) {
+        if (current) dishes.push(current);
+
+        current = {
+          name: cleanTitle(line),
+          description: []
+        };
+      } else if (current) {
+        // Skip footer notes and section headings.
+        if (
+          ignoredHeadings.some(rule => rule.test(line)) ||
+          /^please\b/i.test(line)
+        ) {
+          continue;
+        }
+
+        current.description.push(line);
+      }
+    }
+
+    if (current) dishes.push(current);
+
+    // Remove duplicate headings from repeated OCR readings.
+    const uniqueDishes = [];
+    const seen = new Set();
+
+    for (const dish of dishes) {
+      const key = dish.name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "");
+
+      if (!key || seen.has(key)) continue;
+
+      seen.add(key);
+      uniqueDishes.push(dish);
+    }
+
+    // Specific visible ingredients that may conflict with profiles.
+    const rules = {
+      Jamie: /\b(beef|pork|chicken|bacon|ham|milk|butter|cheese|egg|eggs|honey|gelatin|shrimp|prawns?|salmon|fish|steak|cream|yogurt|dairy|burrata|parmesan|pecorino|scallops?|mozzarella|ricotta|anchov(?:y|ies))\b/i,
+
+      Gus: /\b(peanuts?|walnuts?|almonds?|cashews?|pistachios?|pecans?|hazelnuts?|pine nuts?|pesto)\b/i,
+
+      Brad: /\b(wheat|barley|rye|semolina|couscous|bulgur|flour|bread|pasta|noodles|breadcrumbs|tagliatelle|spaghetti|linguine|fettuccine|shrimp|prawns?|crab|lobster|oysters?|mussels?|clams?|scallops?|salmon|tuna|anchov(?:y|ies)|fish)\b/i
+    };
+
+    const analyzed = uniqueDishes.map(dish => {
+      const combined = [
+        dish.name,
+        ...dish.description
+      ].join(" ");
+
+      // Don't flag explicitly vegan substitutes as animal meat.
+      const normalized = combined
+        .replace(/\bvegan chicken\b/gi, "plant protein")
+        .replace(/\bvegan cheese\b/gi, "plant cheese substitute")
+        .replace(/\bplant.based milk\b/gi, "plant beverage")
+        .replace(/\bcoconut milk\b/gi, "coconut beverage")
+        .replace(/\bvegan mayo\b/gi, "plant dressing");
+
+      const conflicts = profiles
+        .filter(profile => {
+          const pattern = rules[profile.name];
+
+          return pattern
+            ? pattern.test(normalized)
+            : false;
+        })
+        .map(profile => profile.name);
+
+      return {
+        name: dish.name,
+        description: dish.description.join(" "),
+        conflicts,
+        potentialMatch: conflicts.length === 0
+      };
+    });
+
+    // Do not invent a percentage from insufficient OCR.
+    if (analyzed.length < 2) {
+      return {
+        ...emptyResult,
+        count: analyzed.length,
+        items: analyzed
+      };
+    }
+
+    const unflagged = analyzed.filter(
+      dish => dish.potentialMatch
+    ).length;
+
+    const flagged = analyzed.length - unflagged;
+
+    const percentage = Math.round(
+      100 * unflagged / analyzed.length
+    );
+
+    return {
+      percentage,
+      count: analyzed.length,
+      flagged,
+      items: analyzed,
+      note:
+        `${unflagged} of ${analyzed.length} detected dishes ` +
+        `have no recognized conflicts for the selected profiles. ` +
+        `${flagged} have potential conflicts. ` +
+        "This is an OCR screening estimate, not verified " +
+        "ingredient or allergy safety. Confirm with the restaurant."
+    };
+  }
+
+
+  // Update the scanned-menu percentage.
+  function gsShowMenuScore(analysis) {
+    if (!analysis || analysis.percentage === null) {
+      menuResultsMatchLabel.textContent =
+        "MENU MATCH UNAVAILABLE";
+
+      menuResultsProgressFill.style.width = "0%";
+
+      menuResultsProgress.setAttribute(
+        "aria-valuetext",
+        "Insufficient menu information"
+      );
+
+      menuResultsProgress.removeAttribute("aria-valuenow");
+    } else {
+      menuResultsMatchLabel.textContent =
+        `${analysis.percentage}% POTENTIAL MATCH`;
+
+      menuResultsProgressFill.style.width =
+        `${analysis.percentage}%`;
+
+      menuResultsProgress.setAttribute(
+        "aria-valuenow",
+        String(analysis.percentage)
+      );
+
+      menuResultsProgress.setAttribute(
+        "aria-valuetext",
+        analysis.note
+      );
+    }
+
+    menuFlagsMessage.hidden = false;
+    menuFlagsMessage.textContent =
+      analysis?.note || "Menu not analyzed";
+  }
+
+  // ==========================================
+  // RED FLAGS WITH PROFILE PHOTOS
+  // ==========================================
+
+  
+  // ==========================================
+  // INDIVIDUAL NON-OVERLAPPING AR FLAGS
+  // ==========================================
+
+  renderMenuARFlags = function (data, imageWidth, imageHeight) {
+    clearMenuARFlags();
+
+    const bounds = getMenuVideoBounds(imageWidth, imageHeight);
+    const selected = selectedUsers();
+    const words = getOCRWords(data);
+    const warnings = [];
+    const placed = [];
+
+    const padding = 5;
+    const gap = 7;
+    const maxFlags = 16;
+
+    // Convert OCR word positions to screen coordinates.
+    const textBoxes = words
+      .filter(word => word?.bbox && word?.text)
+      .map(word => ({
+        left: bounds.left + word.bbox.x0 * bounds.scale,
+        right: bounds.left + word.bbox.x1 * bounds.scale,
+        top: bounds.top + word.bbox.y0 * bounds.scale,
+        bottom: bounds.top + word.bbox.y1 * bounds.scale
+      }));
+
+    function intersects(a, b, spacing = 0) {
+      return !(
+        a.right + spacing <= b.left ||
+        a.left >= b.right + spacing ||
+        a.bottom + spacing <= b.top ||
+        a.top >= b.bottom + spacing
+      );
+    }
+
+    function isFree(x, y, width, height) {
+      const box = {
+        left: x,
+        top: y,
+        right: x + width,
+        bottom: y + height
+      };
+
+      // Keep every badge inside the camera view.
+      if (
+        box.left < padding ||
+        box.top < padding ||
+        box.right > bounds.width - padding ||
+        box.bottom > bounds.height - padding
+      ) {
+        return false;
+      }
+
+      // Never overlap an existing badge.
+      if (placed.some(other => intersects(box, other, gap))) {
+        return false;
+      }
+
+      // Avoid covering recognized menu text.
+      if (textBoxes.some(text => intersects(box, text, 3))) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // Find the nearest empty spot around an ingredient.
+    function findPosition(anchor, width, height) {
+      const preferredY = anchor.y - height / 2;
+
+      const xCandidates = [
+        anchor.right + 12,
+        anchor.left - width - 12,
+        bounds.width - width - 10,
+        10
+      ];
+
+      // Try the same line first, then nearby rows.
+      const offsets = [0];
+
+      for (let step = 1; step <= 12; step++) {
+        offsets.push(step * 12, -step * 12);
+      }
+
+      for (const offset of offsets) {
+        const y = preferredY + offset;
+
+        for (const x of xCandidates) {
+          if (isFree(x, y, width, height)) {
+            return { x, y };
+          }
+        }
+      }
+
+      // Search unused space across the camera view.
+      for (
+        let y = padding;
+        y <= bounds.height - height - padding;
+        y += 10
+      ) {
+        for (
+          let x = bounds.width - width - padding;
+          x >= padding;
+          x -= 10
+        ) {
+          if (isFree(x, y, width, height)) {
+            return { x, y };
+          }
+        }
+      }
+
+      // Never place a badge over text or another badge.
+      return null;
+    }
+
+    const candidates = [];
+
+    // Create a separate warning for each affected profile.
+    for (const word of words) {
+      if (!word?.bbox || !word?.text) continue;
+      if (Number(word.confidence ?? 0) < 40) continue;
+
+      const normalized = word.text
+        .toLowerCase()
+        .replace(/[^a-z]/g, "");
+
+      if (!normalized) continue;
+
+      const affected = selected.filter(profile =>
+        gsRules.some(rule =>
+          rule.profile === profile.name &&
+          rule.pattern.test(normalized)
+        )
+      );
+
+      if (!affected.length) continue;
+
+      const anchor = {
+        left: bounds.left + word.bbox.x0 * bounds.scale,
+        right: bounds.left + word.bbox.x1 * bounds.scale,
+        y:
+          bounds.top +
+          ((word.bbox.y0 + word.bbox.y1) / 2) *
+          bounds.scale
+      };
+
+      for (const profile of affected) {
+        candidates.push({
+          word: normalized,
+          profile,
+          anchor
+        });
+      }
+    }
+
+    // Process top to bottom for predictable placement.
+    candidates.sort((a, b) => a.anchor.y - b.anchor.y);
+
+    for (const item of candidates) {
+      if (placed.length >= maxFlags) break;
+
+      const badge = document.createElement("div");
+      badge.className = "menu-ar-warning";
+
+      badge.style.cssText = `
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 4px 6px;
+        background: rgba(20,20,20,0.9);
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        z-index: 30;
+        white-space: nowrap;
+        visibility: hidden;
+        box-sizing: border-box;
+      `;
+
+      // Red flag icon.
+      const flag = document.createElement("span");
+      flag.setAttribute("aria-hidden", "true");
+
+      flag.style.cssText = `
+        position: relative;
+        display: inline-block;
+        width: 22px;
+        height: 26px;
+        flex-shrink: 0;
+      `;
+
+      flag.innerHTML = `
+        <span style="
+          position:absolute;
+          left:3px;
+          top:2px;
+          width:2px;
+          height:22px;
+          background:white;
+          border-radius:2px;
+        "></span>
+        <span style="
+          position:absolute;
+          left:5px;
+          top:3px;
+          width:16px;
+          height:14px;
+          background:#f2273f;
+          clip-path:polygon(
+            0 0,
+            100% 0,
+            75% 50%,
+            100% 100%,
+            0 100%
+          );
+        "></span>
+      `;
+
+      // Profile photo.
+      const photo = document.createElement("img");
+
+      photo.src = item.profile.image;
+      photo.alt = "";
+
+      photo.style.cssText = `
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
+        box-sizing: border-box;
+        flex-shrink: 0;
+      `;
+
+      badge.append(flag, photo);
+
+      // Accessibility label, without visible text.
+      badge.setAttribute("role", "img");
+
+      badge.setAttribute(
+        "aria-label",
+        `Possible dietary conflict for ${item.profile.name}: ${item.word}`
+      );
+
+      menuARFlagLayer.appendChild(badge);
+
+      const width = badge.offsetWidth || 67;
+      const height = badge.offsetHeight || 35;
+
+      const position = findPosition(
+        item.anchor,
+        width,
+        height
+      );
+
+      if (!position) {
+        // No space available: don't cover the menu.
+        badge.remove();
+        continue;
+      }
+
+      badge.style.left = `${position.x}px`;
+      badge.style.top = `${position.y}px`;
+      badge.style.visibility = "visible";
+
+      placed.push({
+        left: position.x,
+        top: position.y,
+        right: position.x + width,
+        bottom: position.y + height
+      });
+
+      warnings.push({
+        word: item.word,
+        profiles: [item.profile.name]
+      });
+    }
+
+    lastDetectedMenuWarnings = warnings;
+    gsMenuAudit.warnings = warnings;
+
+    return placed.length;
+  };
+
+  // ==========================================
+  // MULTI-COLOR MENU OCR
+  // ==========================================
+
+  startLiveMenuOCR = async function () {
+    const generation = ++menuOCRGeneration;
+
+    const active = () =>
+      generation === menuOCRGeneration &&
+      state.screen === "menuScanner" &&
+      !!menuCameraStream;
+
+    let worker;
+
+    try {
+      worker = await getMenuOCRWorker();
+    } catch (error) {
+      console.warn("Menu OCR:", error);
+
+      if (active()) {
+        menuCameraStatus.textContent =
+          "Text recognition unavailable";
+      }
+      return;
+    }
+
+    if (!active()) return;
+
+    const canvas = document.createElement("canvas");
+
+    const ctx = canvas.getContext("2d", {
+      willReadFrequently: true
+    });
+
+    if (!ctx) return;
+
+    const score = result => {
+      const words = getOCRWords(result.data).filter(w =>
+        Number(w.confidence ?? 0) >= 35 &&
+        /[a-z]{2}/i.test(w.text || "")
+      );
+
+      const avg = words.length
+        ? words.reduce(
+            (n, w) => n + Number(w.confidence),
+            0
+          ) / words.length
+        : 0;
+
+      return words.length * 4 + avg;
+    };
+
+    let pass = 0;
+
+    while (active()) {
+      try {
+        const video = menuCameraVideo;
+
+        if (video.videoWidth && video.videoHeight) {
+          const scale = Math.min(
+            2,
+            1800 / video.videoWidth
+          );
+
+          canvas.width = Math.round(
+            video.videoWidth * scale
+          );
+
+          canvas.height = Math.round(
+            video.videoHeight * scale
+          );
+
+          ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const original = ctx.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const run = async mode => {
+            const pixels = new Uint8ClampedArray(
+              original.data
+            );
+
+            for (
+              let i = 0;
+              i < pixels.length;
+              i += 4
+            ) {
+              const r = pixels[i];
+              const g = pixels[i + 1];
+              const b = pixels[i + 2];
+
+              const light = Math.max(r, g, b);
+              const dark = Math.min(r, g, b);
+
+              let v = mode === 1
+                ? light
+                : mode === 2
+                ? dark
+                : 0.299 * r +
+                  0.587 * g +
+                  0.114 * b;
+
+              if (mode === 3) {
+                v = 255 - v;
+              }
+
+              v = Math.max(
+                0,
+                Math.min(
+                  255,
+                  (v - 128) * 1.22 + 128
+                )
+              );
+
+              pixels[i] = v;
+              pixels[i + 1] = v;
+              pixels[i + 2] = v;
+            }
+
+            ctx.putImageData(
+              new ImageData(
+                pixels,
+                canvas.width,
+                canvas.height
+              ),
+              0,
+              0
+            );
+
+            return worker.recognize(
+              canvas,
+              {},
+              { text: true, blocks: true }
+            );
+          };
+
+          menuCameraStatus.textContent =
+            "Reading menu...";
+
+          const primary = await run(pass % 4);
+
+          if (!active()) return;
+
+          let best = primary;
+
+          if (score(primary) < 90) {
+            const alternate = await run(
+              (pass + 2) % 4
+            );
+
+            if (!active()) return;
+
+            if (
+              score(alternate) > score(best)
+            ) {
+              best = alternate;
+            }
+          }
+
+          const found = getOCRWords(
+            best.data
+          ).filter(w =>
+            Number(w.confidence ?? 0) >= 35
+          );
+
+          if (found.length >= 3) {
+            gsMenuAudit.text = String(
+              best.data.text || ""
+            ).trim();
+
+            lastRecognizedMenuText =
+              gsMenuAudit.text;
+
+            gsMenuAudit.analysis =
+              gsAnalyzeRecognizedMenu(
+                gsMenuAudit.text
+              );
+
+            document.dispatchEvent(
+              new CustomEvent(
+                "grub-live-menu-text",
+                {
+                  detail: {
+                    text: gsMenuAudit.text
+                  }
+                }
+              )
+            );
+
+            renderMenuARFlags(
+              best.data,
+              canvas.width,
+              canvas.height
+            );
+
+            menuCameraStatus.textContent =
+  `Detected ${gsMenuAudit.analysis.count} menu dishes. ` +
+  (gsMenuAudit.analysis.percentage === null
+    ? "Match unavailable."
+    : `${gsMenuAudit.analysis.percentage}% with no detected conflicts.`);
+          } else {
+            clearMenuARFlags();
+
+            menuCameraStatus.textContent =
+              "Move closer and hold the menu steady";
+          }
+
+          pass++;
+        }
+      } catch (error) {
+        console.warn(
+          "Menu OCR frame:",
+          error
+        );
+
+        if (active()) {
+          menuCameraStatus.textContent =
+            "Try another angle or brighter lighting";
+        }
+      }
+
+      if (active()) {
+        await new Promise(resolve =>
+          setTimeout(resolve, 1200)
+        );
+      }
+    }
+  };
+
+  // ==========================================
+  // SAVE SCANNED MENU ANALYSIS
+  // ==========================================
+
+  const gsOriginalSaveMenu =
+    saveCapturedMenu;
+
+  saveCapturedMenu = function () {
+    lastRecognizedMenuText =
+      gsMenuAudit.text ||
+      lastRecognizedMenuText;
+
+    lastDetectedMenuWarnings =
+      gsMenuAudit.warnings;
+
+    const saved = gsOriginalSaveMenu();
+
+    if (saved) {
+      try {
+        const items = getSavedMenuScans();
+
+        if (items.length) {
+          items[0].menuAnalysis =
+            gsMenuAudit.analysis ||
+            gsAnalyzeRecognizedMenu(
+              gsMenuAudit.text
+            );
+
+          items[0].potentialWarnings =
+            gsMenuAudit.warnings;
+
+          items[0].recognizedText =
+            gsMenuAudit.text;
+
+          localStorage.setItem(
+            MENU_SCAN_STORAGE_KEY,
+            JSON.stringify(items)
+          );
+
+          renderRecallList();
+        }
+      } catch (error) {
+        console.warn(
+          "Menu analysis save:",
+          error
+        );
+      }
+    }
+
+    return saved;
+  };
+
+  const gsOriginalOpenResults =
+    openMenuResults;
+
+  openMenuResults = function (
+    photo,
+    fromRecall = false
+  ) {
+    gsOriginalOpenResults(
+      photo,
+      fromRecall
+    );
+
+    const item = getSavedMenuScans().find(
+      entry => entry.photo === photo
+    );
+
+    gsShowMenuScore(
+      item?.menuAnalysis ||
+      gsAnalyzeRecognizedMenu(
+        item?.recognizedText || ""
+      )
+    );
+  };
+
+  const gsOriginalRecall =
+    renderRecallList;
+
+  renderRecallList = function () {
+    gsOriginalRecall();
+
+    const items = getSavedMenuScans();
+
+    const cards = [
+      ...recallList.querySelectorAll(
+        ".menu-photo-recall"
+      )
+    ];
+
+    cards.forEach((card, index) => {
+      const analysis =
+        items[index]?.menuAnalysis;
+
+      const score = card.querySelector(
+        ".recall-score"
+      );
+
+      if (score && analysis) {
+        score.textContent =
+          analysis.percentage === null
+            ? "Match unavailable"
+            : `${analysis.percentage}% potential match`;
+      }
+    });
+  };
+
+  // Reset menu findings before a new scan.
+  const gsOriginalStartMenuCamera =
+    startMenuCamera;
+
+  startMenuCamera = async function () {
+    gsMenuAudit.text = "";
+    gsMenuAudit.warnings = [];
+    gsMenuAudit.analysis = null;
+
+    return gsOriginalStartMenuCamera();
+  };
+
+
+  // ==========================================
+  // UNIFIED MENU COMPATIBILITY + GROUPED FLAGS
+  // ==========================================
+
+  const gsScreeningPatterns = {
+    vegan: /\b(beef|pork|chicken|bacon|ham|milk|butter|cheese|eggs?|honey|gelatin|shrimp|salmon|fish|steak|cream|yogurt|dairy|burrata|parmesan|pecorino|scallops?|mozzarella|ricotta|anchov(?:y|ies))\b/i,
+
+    nutSafe: /\b(peanuts?|walnuts?|almonds?|cashews?|pistachios?|pecans?|hazelnuts?|pine\s+nuts?|macadamia|brazil\s+nuts?)\b/i,
+
+    glutenFree: /\b(wheat|barley|rye|semolina|couscous|bulgur|flour|bread|pasta|noodles|breadcrumbs|tagliatelle|spaghetti|linguine|fettuccine)\b/i,
+
+    seafoodSafe: /\b(shrimp|prawns?|crab|lobster|oysters?|mussels?|clams?|scallops?|salmon|tuna|anchov(?:y|ies)|fish)\b/i
+  };
+
+  // Analyze complete dishes, including their descriptions.
+  gsAnalyzeRecognizedMenu = function (text) {
+    const profiles = selectedUsers();
+
+    const lines = String(text || "")
+      .split(/\r?\n/)
+      .map(s => s.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+
+    const dishes = [];
+
+    const heading =
+      /^(chef'?s? selection|our menu|menu|maison sauce|mains?|entrees?|entrées?|starters?|appetizers?|desserts?|sides?|drinks?|beverages?|specials?|please inform|allergies|dietary restrictions|all prices|taxes|gratuity)$/i;
+
+    const clean = s =>
+      s.replace(
+        /\s*(?:\$\s*\d+(?:\.\d{2})?|\d+\.\d{2})\s*$/,
+        ""
+      ).trim();
+
+    const isTitle = s => {
+      const t = clean(s);
+
+      if (
+        t.length < 5 ||
+        t.length > 90 ||
+        heading.test(t) ||
+        /^please\b/i.test(t)
+      ) {
+        return false;
+      }
+
+      const letters = t.match(/[a-zA-ZÀ-ÿ]/g) || [];
+      if (letters.length < 6) return false;
+
+      const upper =
+        letters.filter(c => c === c.toUpperCase()).length /
+        letters.length;
+
+      const priced =
+        /(?:\$\s*\d+(?:\.\d{2})?|\d+\.\d{2})\s*$/.test(s);
+
+      return priced || (
+        upper > 0.78 &&
+        t.split(/\s+/).length <= 10
+      );
+    };
+
+    // Group descriptions beneath their dish titles.
+    for (const line of lines) {
+      if (isTitle(line)) {
+        dishes.push({
+          name: clean(line),
+          description: []
+        });
+      } else if (
+        dishes.length &&
+        !heading.test(line) &&
+        !/^please\b/i.test(line)
+      ) {
+        dishes[dishes.length - 1].description.push(line);
+      }
+    }
+
+    // Eliminate duplicate recognized dishes.
+    const unique = [
+      ...new Map(
+        dishes.map(d => [d.name.toLowerCase(), d])
+      ).values()
+    ];
+
+    // Unknown profile restrictions cannot be verified.
+    const unsupported = profiles.some(p =>
+      p.requiresVerification ||
+      !p.filters?.length ||
+      p.filters.some(f => !gsScreeningPatterns[f])
+    );
+
+    const items = unique.map(d => {
+      const phrase = (
+        d.name + " " + d.description.join(" ")
+      )
+        .replace(
+          /\bvegan\s+(chicken|cheese|beef|fish)\b/gi,
+          "plant substitute"
+        )
+        .replace(
+          /\bcoconut milk\b/gi,
+          "coconut beverage"
+        )
+        .replace(
+          /\bplant.based milk\b/gi,
+          "plant beverage"
+        );
+
+      const profilesAffected = profiles.filter(p =>
+        p.filters.some(f =>
+          gsScreeningPatterns[f]?.test(phrase)
+        )
+      );
+
+      return {
+        name: d.name,
+        description: d.description.join(" "),
+        conflicts: profilesAffected.map(p => p.name),
+        potentialMatch: profilesAffected.length === 0
+      };
+    });
+
+    const eligible =
+      items.length >= 2 &&
+      profiles.length > 0 &&
+      !unsupported;
+
+    const unflagged = items.filter(
+      item => item.potentialMatch
+    ).length;
+
+    return {
+      percentage: eligible
+        ? Math.round(100 * unflagged / items.length)
+        : null,
+
+      count: items.length,
+      flagged: items.length - unflagged,
+      items,
+
+      note: eligible
+        ? `${unflagged} of ${items.length} recognized dishes ` +
+          "have no detected conflicts. This does not verify " +
+          "ingredient safety or cross-contact."
+        : "Not enough identifiable dishes or unsupported " +
+          "profile restrictions. Match unavailable."
+    };
+  };
+
+  // ==========================================
+  // SAME ANALYSIS DRIVES SCORE AND AR FLAGS
+  // ==========================================
+
+  renderMenuARFlags = function (
+    data,
+    imageWidth,
+    imageHeight
+  ) {
+    clearMenuARFlags();
+
+    const analysis = gsAnalyzeRecognizedMenu(
+      data?.text || ""
+    );
+
+    gsMenuAudit.analysis = analysis;
+    gsMenuAudit.text = String(data?.text || "");
+    lastRecognizedMenuText = gsMenuAudit.text;
+
+    // Update the existing results percentage.
+    gsShowMenuScore(analysis);
+
+    // Update the live compatibility display.
+    const label = analysis.percentage === null
+      ? "Match unavailable"
+      : `${analysis.percentage}% POTENTIAL MATCH · ${analysis.count} dishes`;
+
+    const scanner = screens.menuScanner;
+
+    const leaves = scanner
+      ? [...scanner.querySelectorAll("*")].filter(el =>
+          el.children.length === 0 &&
+          /^(not enough menu data|\d+%\s*(?:potential\s*)?match|match unavailable)$/i.test(
+            el.textContent.trim()
+          )
+        )
+      : [];
+
+    if (leaves.length) {
+      
+      leaves[0].textContent = label;
+
+      const percent = analysis.percentage;
+
+      const matchColor =
+        percent > 70 ? "#d9f5e5" : "#f2273f";
+
+      const bar = leaves[0].parentElement || leaves[0];
+
+      bar.style.background = percent === null
+        ? "#808080"
+        : `linear-gradient(to right,
+            ${matchColor} 0%,
+            ${matchColor} ${percent}%,
+            #808080 ${percent}%,
+            #808080 100%)`;
+
+      bar.style.borderRadius = "30px";
+      bar.style.color = percent > 70 ? "#111" : "#fff";
+
+    } else if (scanner) {
+      let indicator = scanner.querySelector(
+        "#gs-camera-match-score"
+      );
+
+      if (!indicator) {
+        indicator = document.createElement("div");
+        indicator.id = "gs-camera-match-score";
+
+        indicator.style.cssText = `
+          padding: 10px 16px;
+          margin: 8px;
+          border-radius: 12px;
+          background: #777;
+          color: white;
+          font-weight: 700;
+          text-align: center;
+        `;
+
+        const camera = scanner.querySelector(
+          ".menu-camera-container"
+        );
+
+        if (camera) camera.before(indicator);
+        else scanner.prepend(indicator);
+      }
+
+      indicator.textContent = label;
+    }
+
+    // ==========================================
+    // NON-OVERLAPPING BADGE PLACEMENT
+    // ==========================================
+
+    const bounds = getMenuVideoBounds(
+      imageWidth,
+      imageHeight
+    );
+
+    const words = getOCRWords(data).filter(
+      w => w?.bbox && w?.text
+    );
+
+    const boxes = words.map(w => ({
+      l: bounds.left + w.bbox.x0 * bounds.scale,
+      r: bounds.left + w.bbox.x1 * bounds.scale,
+      t: bounds.top + w.bbox.y0 * bounds.scale,
+      b: bounds.top + w.bbox.y1 * bounds.scale
+    }));
+
+    const occupied = [];
+    const warnings = [];
+
+    const overlaps = (a, b, gap = 0) =>
+      a.l < b.r + gap &&
+      a.r + gap > b.l &&
+      a.t < b.b + gap &&
+      a.b + gap > b.t;
+
+    const free = (x, y, w, h) => {
+      const b = {
+        l: x,
+        r: x + w,
+        t: y,
+        b: y + h
+      };
+
+      return (
+        x >= 4 &&
+        y >= 4 &&
+        b.r <= bounds.width - 4 &&
+        b.b <= bounds.height - 4 &&
+        !occupied.some(o => overlaps(b, o, 7)) &&
+        !boxes.some(o => overlaps(b, o, 3))
+      );
+    };
+
+    // One badge per dish, with every affected profile.
+    for (const dish of analysis.items) {
+      if (
+        !dish.conflicts.length ||
+        warnings.length >= 10
+      ) {
+        continue;
+      }
+
+      const profiles = selectedUsers().filter(p =>
+        dish.conflicts.includes(p.name)
+      );
+
+      if (!profiles.length) continue;
+
+      // Find the dish title in the live OCR positions.
+      const titleWords = dish.name
+        .toLowerCase()
+        .match(/[a-zà-ÿ]{4,}/g) || [];
+
+      const anchor = words.find(w =>
+        titleWords.includes(
+          w.text
+            .toLowerCase()
+            .replace(/[^a-zà-ÿ]/g, "")
+        )
+      );
+
+      if (!anchor) continue;
+
+      const badge = document.createElement("div");
+      badge.className = "menu-ar-warning";
+
+      badge.style.cssText = `
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 6px;
+        border-radius: 22px;
+        background: rgba(15,15,15,.9);
+        white-space: nowrap;
+        visibility: hidden;
+        z-index: 30;
+        box-sizing: border-box;
+      `;
+
+      // Single red flag.
+      const flag = document.createElement("span");
+      flag.setAttribute("aria-hidden", "true");
+
+      flag.style.cssText = `
+        display: inline-block;
+        width: 21px;
+        height: 26px;
+        position: relative;
+        flex-shrink: 0;
+      `;
+
+      flag.innerHTML = `
+        <span style="
+          position:absolute;
+          left:3px;
+          top:2px;
+          width:2px;
+          height:22px;
+          background:white;
+        "></span>
+        <span style="
+          position:absolute;
+          left:5px;
+          top:3px;
+          width:16px;
+          height:14px;
+          background:#f2273f;
+          clip-path:polygon(
+            0 0,100% 0,75% 50%,100% 100%,0 100%
+          );
+        "></span>
+      `;
+
+      badge.append(flag);
+
+      // Add all affected profile photos beside the flag.
+      for (const profile of profiles) {
+        const img = document.createElement("img");
+
+        img.src = profile.image;
+        img.alt = "";
+
+        img.style.cssText = `
+          width: 27px;
+          height: 27px;
+          object-fit: cover;
+          border: 2px solid white;
+          border-radius: 50%;
+          box-sizing: border-box;
+        `;
+
+        badge.append(img);
+      }
+
+      badge.setAttribute("role", "img");
+
+      badge.setAttribute(
+        "aria-label",
+        `Possible conflict: ${dish.name} for ${dish.conflicts.join(", ")}`
+      );
+
+      menuARFlagLayer.append(badge);
+
+      const width =
+        badge.offsetWidth || 60 + profiles.length * 32;
+
+      const height = badge.offsetHeight || 35;
+
+      const ax =
+        bounds.left + anchor.bbox.x1 * bounds.scale;
+
+      const ay =
+        bounds.top +
+        (anchor.bbox.y0 + anchor.bbox.y1) /
+          2 * bounds.scale;
+
+      let position = null;
+
+      // Search nearby available spaces without covering text.
+      for (
+        let step = 0;
+        step <= 18 && !position;
+        step++
+      ) {
+        for (
+          const dy of step
+            ? [step * 13, -step * 13]
+            : [0]
+        ) {
+          const y = ay - height / 2 + dy;
+
+          for (
+            const x of [
+              ax + 10,
+              bounds.width - width - 8,
+              8
+            ]
+          ) {
+            if (free(x, y, width, height)) {
+              position = { x, y };
+              break;
+            }
+          }
+
+          if (position) break;
+        }
+      }
+
+      if (!position) {
+        badge.remove();
+        continue;
+      }
+
+      badge.style.left = position.x + "px";
+      badge.style.top = position.y + "px";
+      badge.style.visibility = "visible";
+
+      occupied.push({
+        l: position.x,
+        r: position.x + width,
+        t: position.y,
+        b: position.y + height
+      });
+
+      warnings.push({
+        word: dish.name,
+        profiles: dish.conflicts
+      });
+    }
+
+    lastDetectedMenuWarnings = warnings;
+    gsMenuAudit.warnings = warnings;
+
+    return warnings.length;
+  };
+
+
+  // ==========================================
+  // FIX MENU SAVE -> RECALL COMPATIBILITY
+  // ==========================================
+
+  let gsBestMenuScan = null;
+
+  // Keep the most complete valid scan while the camera runs.
+  const gsPreviousFlagRenderer = renderMenuARFlags;
+
+  renderMenuARFlags = function (...args) {
+    const result = gsPreviousFlagRenderer(...args);
+    const analysis = gsMenuAudit.analysis;
+
+    if (
+      analysis &&
+      Number.isFinite(analysis.percentage) &&
+      analysis.count >= 2
+    ) {
+      if (
+        !gsBestMenuScan ||
+        analysis.count >= gsBestMenuScan.analysis.count
+      ) {
+        gsBestMenuScan = {
+          analysis: JSON.parse(JSON.stringify(analysis)),
+          text: gsMenuAudit.text,
+          warnings: JSON.parse(
+            JSON.stringify(gsMenuAudit.warnings || [])
+          )
+        };
+      }
+    }
+
+    return result;
+  };
+
+  // Start a new scan with no previous menu data.
+  const gsPreviousCameraStart = startMenuCamera;
+
+  startMenuCamera = function (...args) {
+    gsBestMenuScan = null;
+    return gsPreviousCameraStart(...args);
+  };
+
+  // Preserve the recognized percentage when saving.
+  const gsPreviousMenuSave = saveCapturedMenu;
+
+  saveCapturedMenu = function (...args) {
+    if (gsBestMenuScan) {
+      gsMenuAudit.analysis = gsBestMenuScan.analysis;
+      gsMenuAudit.text = gsBestMenuScan.text;
+      gsMenuAudit.warnings = gsBestMenuScan.warnings;
+
+      lastRecognizedMenuText = gsBestMenuScan.text;
+      lastDetectedMenuWarnings =
+        gsBestMenuScan.warnings;
+    }
+
+    const saved = gsPreviousMenuSave(...args);
+
+    if (saved) {
+      try {
+        const scans = getSavedMenuScans();
+
+        if (scans.length) {
+          const analysis =
+            gsBestMenuScan?.analysis ||
+            gsMenuAudit.analysis ||
+            gsAnalyzeRecognizedMenu(
+              scans[0].recognizedText || ""
+            );
+
+          scans[0].menuAnalysis = analysis;
+          scans[0].recognizedText =
+            gsBestMenuScan?.text ||
+            scans[0].recognizedText ||
+            "";
+
+          scans[0].potentialWarnings =
+            gsBestMenuScan?.warnings ||
+            scans[0].potentialWarnings ||
+            [];
+
+          localStorage.setItem(
+            MENU_SCAN_STORAGE_KEY,
+            JSON.stringify(scans)
+          );
+        }
+
+        renderRecallList();
+      } catch (error) {
+        console.warn(
+          "Could not preserve scanned menu score:",
+          error
+        );
+      }
+    }
+
+    return saved;
+  };
+
+  // Display the saved score on each Recall card.
+  const gsPreviousRecallRender = renderRecallList;
+
+  renderRecallList = function (...args) {
+    const result = gsPreviousRecallRender(...args);
+
+    const scans = getSavedMenuScans();
+
+    const cards = recallList.querySelectorAll(
+      ".menu-photo-recall"
+    );
+
+    cards.forEach((card, index) => {
+      const scan = scans[index];
+      if (!scan) return;
+
+      const analysis =
+        scan.menuAnalysis &&
+        Number.isFinite(scan.menuAnalysis.percentage)
+          ? scan.menuAnalysis
+          : gsAnalyzeRecognizedMenu(
+              scan.recognizedText || ""
+            );
+
+      const score = card.querySelector(".recall-score");
+
+      if (score) {
+        score.textContent =
+          Number.isFinite(analysis.percentage)
+            ? `${analysis.percentage}% POTENTIAL MATCH`
+            : "Match unavailable";
+      }
+
+      // Preserve the analysis for the detail screen.
+      if (
+        !scan.menuAnalysis &&
+        Number.isFinite(analysis.percentage)
+      ) {
+        scan.menuAnalysis = analysis;
+      }
+    });
+
+    return result;
+  };
+
+  // END MENU SAVE -> RECALL FIX
+
+ 
+  // ==========================================
+  // RESTAURANT NAME + COLORED RECALL CARDS
+  // ==========================================
+
+  function gsDetectRestaurantName(ocrText) {
+    const lines = String(ocrText || "")
+      .split(/\r?\n/)
+      .map(line => line.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+
+    const section =
+      /\b(chef'?s? selection|appetizers?|starters?|entr[eé]es?|main courses?|desserts?|drinks?|beverages?|sides?|breakfast|brunch|lunch|dinner|specials?|our menu|food menu)\b/i;
+
+    const generic =
+      /\b(menu|restaurant|welcome|please|allergen|allergies|dietary|selection|course|kitchen hours|tax|prices?|sauce)\b/i;
+
+    const firstSection = lines.findIndex(line =>
+      section.test(line)
+    );
+
+    // Only infer names appearing before a menu section.
+    if (firstSection <= 0) {
+      return "Restaurant name unavailable";
+    }
+
+    const header = lines.slice(0, firstSection).slice(0, 5);
+
+    for (const line of header) {
+      const candidate = line
+        .replace(/[^a-zA-ZÀ-ÿ0-9 &'’.-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const letters =
+        candidate.match(/[a-zA-ZÀ-ÿ]/g) || [];
+
+      const uppercase = letters.filter(letter =>
+        letter === letter.toUpperCase()
+      ).length;
+
+      const words = candidate.split(/\s+/).filter(Boolean);
+
+      if (
+        letters.length >= 6 &&
+        words.length >= 2 &&
+        words.length <= 5 &&
+        candidate.length <= 45 &&
+        uppercase / letters.length >= 0.75 &&
+        !generic.test(candidate) &&
+        !/\d/.test(candidate)
+      ) {
+        return candidate
+          .toLowerCase()
+          .replace(/\b[a-zà-ÿ]/g, char =>
+            char.toUpperCase()
+          );
+      }
+    }
+
+    return "Restaurant name unavailable";
+  }
+
+  // Save restaurant name with menu scan.
+  const gsSaveBeforeRestaurantNames = saveCapturedMenu;
+
+  saveCapturedMenu = function (...args) {
+    const saved = gsSaveBeforeRestaurantNames(...args);
+
+    if (!saved) return saved;
+
+    try {
+      const scans = getSavedMenuScans();
+
+      if (scans.length) {
+        const scan = scans[0];
+
+        const text =
+          gsBestMenuScan?.text ||
+          scan.recognizedText ||
+          gsMenuAudit.text ||
+          "";
+
+        let inferredName = gsDetectRestaurantName(text);
+
+
+        const lettersOnly = inferredName.replace(
+          /[^a-z]/gi, ""
+        );
+
+        if (
+          lettersOnly.length < 5 ||
+          !/[aeiouy]/i.test(lettersOnly)
+        ) {
+          inferredName = "Restaurant name unavailable";
+        }
+
+
+        // Let the user identify an unreadable restaurant.
+        if (inferredName === "Restaurant name unavailable") {
+          const entered = window.prompt(
+            "Restaurant name not recognized. Enter the restaurant name:",
+            ""
+          );
+
+          if (entered && entered.trim()) {
+            inferredName = entered.trim().slice(0, 80);
+          }
+        }
+
+        scan.name = inferredName;
+
+        localStorage.setItem(
+          MENU_SCAN_STORAGE_KEY,
+          JSON.stringify(scans)
+        );
+
+        renderRecallList();
+      }
+    } catch (error) {
+      console.warn(
+        "Could not save restaurant name:",
+        error
+      );
+    }
+
+    return saved;
+  };
+
+  // Apply restaurant names and compatibility colors.
+  const gsRecallBeforeRestaurantColors = renderRecallList;
+
+  renderRecallList = function (...args) {
+    const result =
+      gsRecallBeforeRestaurantColors(...args);
+
+    const scans = getSavedMenuScans();
+
+    const cards = recallList.querySelectorAll(
+      ".menu-photo-recall"
+    );
+
+    cards.forEach((card, index) => {
+      const scan = scans[index];
+
+      if (!scan) return;
+
+      const name = card.querySelector(
+        ".recall-restaurant-name"
+      );
+
+      const score = card.querySelector(
+        ".recall-score"
+      );
+
+      const inferred = gsDetectRestaurantName(
+        scan.recognizedText || ""
+      );
+
+      if (name) {
+        name.textContent =
+          scan.name && scan.name !== "Scanned Menu"
+            ? scan.name
+            : inferred;
+      }
+
+      const percent = scan.menuAnalysis?.percentage;
+
+      const valid = Number.isFinite(percent);
+      const good = valid && percent > 70;
+
+      // Red = lower potential match.
+      // Green = higher potential match.
+      // Gray = unavailable.
+      card.style.background = !valid
+        ? "#e8e0e6"
+        : good
+          ? "#d9f5e5"
+          : "#ffe1e5";
+
+      card.style.borderLeft = `6px solid ${
+        !valid
+          ? "#808080"
+          : good
+            ? "#268653"
+            : "#f2273f"
+      }`;
+
+      if (score) {
+        score.textContent = valid
+          ? `${percent}% POTENTIAL MATCH`
+          : "Match unavailable";
+
+        score.style.color = !valid
+          ? "#454545"
+          : good
+            ? "#17663d"
+            : "#a7142e";
+
+        score.style.fontWeight = "800";
+      }
+    });
+
+    return result;
+  };
+
+  // END RESTAURANT NAME + RECALL COLORS
+ 
+
+  // ==========================================
+  // SAVED MENU -> RESTAURANT-STYLE MEALS SCREEN
+  // ==========================================
+
+  let gsOpenedScan = null;
+  let gsOpenedScanRestaurantIndex = -1;
+
+  // Read the colors from the EXISTING result screen CSS.
+  function gsExistingMatchColor(positive) {
+    const screen = screens.result;
+    const oldScreen = screen.className;
+    const oldCard = resultCard.className;
+    const oldIcon = resultIcon.className;
+    const read = () => [
+      getComputedStyle(resultCard).backgroundColor,
+      getComputedStyle(screen).backgroundColor,
+      getComputedStyle(resultIcon).color
+    ];
+    const meaningful = color =>
+      color && color !== "transparent" &&
+      !/rgba\([^)]*,\s*0\s*\)/.test(color);
+
+    function sample(isPositive) {
+      screen.classList.toggle("no-match", !isPositive);
+      resultCard.classList.toggle("bad-match", !isPositive);
+      resultCard.classList.toggle("positive-compatibility", isPositive);
+      resultIcon.className = "ph result-icon " +
+        (isPositive ? "ph-check-circle" : "ph-x-circle");
+      return read();
+    }
+
+    const negative = sample(false);
+    const affirmative = sample(true);
+    screen.className = oldScreen;
+    resultCard.className = oldCard;
+    resultIcon.className = oldIcon;
+
+    const desired = positive ? affirmative : negative;
+    const other = positive ? negative : affirmative;
+    const contrasting = desired.find((value, index) =>
+      meaningful(value) && value !== other[index]
+    );
+    return contrasting || desired.find(meaningful) ||
+      (positive ? "#268653" : "#f2273f");
+  }
+
+  // Save selected profiles with new menu scans.
+  const gsSaveWithProfiles = saveCapturedMenu;
+  saveCapturedMenu = function (...args) {
+    const success = gsSaveWithProfiles(...args);
+    if (success) {
+      try {
+        const scans = getSavedMenuScans();
+        if (scans[0]) {
+          scans[0].profileNames = selectedUsers().map(u => u.name);
+          localStorage.setItem(MENU_SCAN_STORAGE_KEY, JSON.stringify(scans));
+        }
+        renderRecallList();
+      } catch (error) {
+        console.warn("Could not save scan profiles", error);
+      }
+    }
+    return success;
+  };
+
+  // Match saved-menu card colors to the existing result screen.
+  const gsRenderRecallWithResultColors = renderRecallList;
+  renderRecallList = function (...args) {
+    const result = gsRenderRecallWithResultColors(...args);
+    const scans = getSavedMenuScans();
+
+    recallList.querySelectorAll(".menu-photo-recall").forEach((card, i) => {
+      const scan = scans[i];
+      if (!scan) return;
+
+      const percent = scan.menuAnalysis?.percentage;
+      const valid = Number.isFinite(percent);
+      const color = valid
+        ? gsExistingMatchColor(percent > 70)
+        : "#808080";
+
+      card.style.backgroundColor = color;
+      card.style.borderLeft = `6px solid ${color}`;
+      card.style.color = "#111";
+
+      const title = card.querySelector(".recall-restaurant-name");
+      const score = card.querySelector(".recall-score");
+
+      if (title) title.style.color = "#111";
+
+      if (score) {
+        score.style.color = "#111";
+        score.textContent = valid
+          ? `${percent}% POTENTIAL MATCH`
+          : "Match unavailable";
+      }
+    });
+
+    return result;
+  };
+
+  function gsOpenSavedMenuAsRestaurant(scan) {
+    if (!scan) return;
+
+    const analysis = scan.menuAnalysis;
+
+    if (!Array.isArray(analysis?.items) || !analysis.items.length) {
+      // Older scans without dish data still open their photo.
+      openMenuResults(scan.photo, true);
+      return;
+    }
+
+    gsOpenedScan = scan;
+
+    const storedProfiles = scan.profileNames;
+
+    if (Array.isArray(storedProfiles) && storedProfiles.length) {
+      users.forEach(u => {
+        u.selected = storedProfiles.includes(u.name);
+      });
+    }
+
+    if (!selectedUsers().length) users[0].selected = true;
+
+    state.activeUser = 0;
+    state.profileMenuOpen = false;
+
+    const meals = analysis.items.map(dish => {
+      const text = `${dish.name} ${dish.description || ""}`
+        .replace(
+          /\bvegan\s+(chicken|cheese|beef|fish)\b/gi,
+          "plant substitute"
+        )
+        .replace(
+          /\bcoconut milk\b/gi,
+          "coconut beverage"
+        );
+
+      const meal = {
+        name: dish.name,
+        model: null,
+        scanDescription: dish.description || "",
+        ingredients: []
+      };
+
+      for (const filter of Object.keys(gsScreeningPatterns)) {
+        meal[filter] = !gsScreeningPatterns[filter].test(text);
+      }
+
+      return meal;
+    });
+
+    const entry = {
+      name: scan.name && scan.name !== "Scanned Menu"
+        ? scan.name
+        : "Scanned Restaurant Menu",
+      meals,
+      scannedMenu: true
+    };
+
+    if (gsOpenedScanRestaurantIndex < 0) {
+      gsOpenedScanRestaurantIndex = restaurants.length;
+      restaurants.push(entry);
+    } else {
+      restaurants[gsOpenedScanRestaurantIndex] = entry;
+    }
+
+    state.restaurant = gsOpenedScanRestaurantIndex;
+
+    showScreen("menu");
+    renderMenu();
+  }
+
+  // Open the restaurant-style screen instead of the saved photo.
+  recallList.addEventListener("click", event => {
+    const card = event.target.closest(".menu-photo-recall");
+
+    if (!card || !recallList.contains(card)) return;
+
+    const cards = [
+      ...recallList.querySelectorAll(".menu-photo-recall")
+    ];
+
+    const scan = getSavedMenuScans()[cards.indexOf(card)];
+
+    if (!scan) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    gsOpenSavedMenuAsRestaurant(scan);
+  }, true);
+
+  // Reuse the existing meals screen with scanned descriptions.
+  const gsRenderMenuBeforeSavedScan = renderMenu;
+
+  renderMenu = function (...args) {
+    const result = gsRenderMenuBeforeSavedScan(...args);
+
+    if (
+      state.restaurant !== gsOpenedScanRestaurantIndex ||
+      !gsOpenedScan
+    ) {
+      return result;
+    }
+
+    const analysis = gsOpenedScan.menuAnalysis;
+
+    let notice = screens.menu.querySelector(
+      "#gs-saved-scan-notice"
+    );
+
+    if (!notice) {
+      notice = document.createElement("p");
+      notice.id = "gs-saved-scan-notice";
+
+      notice.style.cssText = `
+        margin: 12px 18px;
+        color: #555;
+        font-size: 13px;
+        line-height: 1.5;
+      `;
+
+      menuGrid.before(notice);
+    }
+
+    notice.textContent =
+      (Number.isFinite(analysis?.percentage)
+        ? `${analysis.percentage}% potential match. `
+        : "Match unavailable. ") +
+      "Only items with no detected conflict are shown for " +
+      "the active profile. Ingredients and cross-contact " +
+      "are unverified.";
+
+    const dishMap = new Map(
+      (analysis?.items || []).map(d => [d.name, d])
+    );
+
+    menuGrid.querySelectorAll(".meal-card").forEach(card => {
+      const dish = dishMap.get(
+        card.querySelector(".meal-name")?.textContent.trim()
+      );
+
+      if (!dish) return;
+
+      const detail = document.createElement("p");
+
+      detail.textContent =
+        dish.description || "Ingredients not listed on menu";
+
+      detail.style.cssText = `
+        padding: 8px 12px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #555;
+      `;
+
+      card.append(detail);
+    });
+
+    return result;
+  };
+
+  // Back arrow returns to Recall instead of restarting a scan.
+  screens.menu.addEventListener("click", event => {
+    if (
+      state.restaurant !== gsOpenedScanRestaurantIndex ||
+      !gsOpenedScan
+    ) return;
+
+    const back = event.target.closest(".gs-global-back");
+    if (!back) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    renderRecallList();
+    showScreen("recall");
+  }, true);
+
+  // END SAVED MENU -> RESTAURANT-STYLE SCREEN
+
+  // ==========================================
+  // MATCH-SCREEN COLORS + NO-3D PLACEHOLDERS
+  // ==========================================
+
+  // Sample the actual styles used by the existing match screen.
+  function gsSampleResultTheme(positive) {
+    const screen = screens.result;
+    const previousScreenClass = screen.className;
+    const previousCardClass = resultCard.className;
+    const previousIconClass = resultIcon.className;
+
+    try {
+      screen.classList.toggle("no-match", !positive);
+      resultCard.classList.toggle("bad-match", !positive);
+      resultIcon.className = "ph result-icon " +
+        (positive ? "ph-check-circle" : "ph-x-circle");
+
+      const candidates = [resultCard, screen, resultIcon];
+
+      return candidates.map(element => {
+        const style = getComputedStyle(element);
+        const before = getComputedStyle(element, "::before");
+
+        return [
+          { background: style.backgroundImage, type: "image" },
+          { background: style.backgroundColor, type: "color" },
+          { background: before.backgroundImage, type: "image" },
+          { background: before.backgroundColor, type: "color" },
+          { background: style.color, type: "text" }
+        ];
+      }).flat();
+
+    } finally {
+      screen.className = previousScreenClass;
+      resultCard.className = previousCardClass;
+      resultIcon.className = previousIconClass;
+    }
+  }
+
+  function gsGetMatchingResultBackground(isPositive) {
+    const yes = gsSampleResultTheme(true);
+    const no = gsSampleResultTheme(false);
+    const wanted = isPositive ? yes : no;
+    const types = ["color", "image", "text"];
+
+    for (const type of types) {
+      for (let i = 0; i < wanted.length; i++) {
+        const item = wanted[i];
+
+        if (
+          item.type !== type ||
+          item.background === no[i]?.background &&
+          item.background === yes[i]?.background
+        ) continue;
+
+        if (
+          !item.background ||
+          item.background === "none" ||
+          item.background === "transparent" ||
+          item.background === "rgba(0, 0, 0, 0)"
+        ) continue;
+
+        return item.background;
+      }
+    }
+
+    return null;
+  }
+
+  const gsRecallBeforeExactResultColors = renderRecallList;
+
+  renderRecallList = function (...args) {
+    const output = gsRecallBeforeExactResultColors(...args);
+    const scans = getSavedMenuScans();
+
+    const red = gsGetMatchingResultBackground(false);
+    const green = gsGetMatchingResultBackground(true);
+
+    recallList.querySelectorAll(".menu-photo-recall")
+      .forEach((card, index) => {
+
+        const score = scans[index]?.menuAnalysis?.percentage;
+
+        if (!Number.isFinite(score)) return;
+
+        const shade = score > 70 ? green : red;
+        if (!shade) return;
+
+        card.style.background = shade;
+        card.style.borderLeft = "0";
+        card.style.color = "#111";
+
+        card.querySelectorAll(
+          ".recall-score, .recall-restaurant-name"
+        ).forEach(label => {
+          label.style.color = "#111";
+        });
+      });
+
+    return output;
+  };
+
+  // ==========================================
+  // PHOTO PLACEHOLDER FOR MISSING GLB MODELS
+  // ==========================================
+
+  const gsNoModelPhoto =
+    BASE + "pexels-asphotography-172491.jpg";
+
+  const gsRenderMenuBeforeNoModelPhotos = renderMenu;
+
+  renderMenu = function (...args) {
+    const output = gsRenderMenuBeforeNoModelPhotos(...args);
+
+    const restaurant = restaurants[state.restaurant];
+    if (!restaurant) return output;
+
+    menuGrid.querySelectorAll(".meal-card")
+      .forEach(card => {
+
+        const mealName = card
+          .querySelector(".meal-name")
+          ?.textContent.trim();
+
+        const meal = restaurant.meals.find(
+          item => item.name === mealName
+        );
+
+        // Preserve every meal with an existing 3D model.
+        if (!meal || meal.model) return;
+
+        const picture = card.querySelector(".meal-picture");
+        if (!picture) return;
+
+        picture.replaceChildren();
+
+        picture.style.position = "relative";
+        picture.style.overflow = "hidden";
+        picture.style.minHeight = "145px";
+        picture.style.background = "#e8e8e8";
+
+        const photo = document.createElement("img");
+
+        photo.src = gsNoModelPhoto;
+        photo.alt = "";
+        photo.loading = "lazy";
+
+        photo.style.cssText = `
+          display: block;
+          width: 100%;
+          height: 100%;
+          min-height: 145px;
+          object-fit: cover;
+        `;
+
+        const message = document.createElement("div");
+
+        message.textContent =
+          "No 3D model currently available";
+
+        message.style.cssText = `
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 14px;
+          text-align: center;
+          background: rgba(0,0,0,.56);
+          color: #fff;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1.3;
+          pointer-events: none;
+        `;
+
+        picture.append(photo, message);
+      });
+
+    return output;
+  };
+
+  // END MATCH-SCREEN COLORS + NO-3D PLACEHOLDERS
+
+  // ==========================================
+  // REVIEW SAVED MENU DISH NAMES
+  // ==========================================
+
+  function gsReviewSavedMenu() {
+    if (!gsOpenedScan) return;
+
+    const scan = gsOpenedScan;
+    const existing = scan.menuAnalysis?.items || [];
+
+    const startingText = existing.map(item =>
+      item.name + " | " + (item.description || "")
+    ).join("\n");
+
+    const edited = window.prompt(
+      "Correct the dishes using one line per meal:\n" +
+      "DISH NAME | INGREDIENT DESCRIPTION\n\n" +
+      "Please include the ingredients shown on the menu.",
+      startingText
+    );
+
+    if (edited === null) return;
+
+    const rows = edited.split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    const profiles = selectedUsers();
+
+    const items = rows.map(line => {
+      const separator = line.indexOf("|");
+
+      const name = (
+        separator < 0
+          ? line
+          : line.slice(0, separator)
+      ).trim();
+
+      const description = (
+        separator < 0
+          ? ""
+          : line.slice(separator + 1)
+      ).trim();
+
+      const combined = (name + " " + description)
+        .replace(
+          /\bvegan\s+(chicken|cheese|beef|fish)\b/gi,
+          "plant substitute"
+        )
+        .replace(
+          /\bcoconut milk\b/gi,
+          "coconut beverage"
+        );
+
+      const conflicts = profiles
+        .filter(user =>
+          user.filters.some(filter =>
+            gsScreeningPatterns[filter]?.test(combined)
+          )
+        )
+        .map(user => user.name);
+
+      return {
+        name,
+        description,
+        conflicts,
+        potentialMatch: conflicts.length === 0,
+        needsVerification: !description
+      };
+    }).filter(item => item.name.length >= 3);
+
+    const complete = items.length >= 2 &&
+      items.every(item => !item.needsVerification);
+
+    const unflagged = items.filter(item =>
+      item.potentialMatch
+    ).length;
+
+    const percentage = complete
+      ? Math.round(100 * unflagged / items.length)
+      : null;
+
+    scan.menuAnalysis = {
+      percentage,
+      count: items.length,
+      flagged: items.length - unflagged,
+      items,
+      note: complete
+        ? `${unflagged} of ${items.length} recognized dishes ` +
+          "have no detected conflicts. Ingredients and " +
+          "cross-contact remain unverified."
+        : "Enter descriptions for every dish before " +
+          "calculating the potential match."
+    };
+
+    scan.recognizedText = items.map(item =>
+      item.name.toUpperCase() + "\n" + item.description
+    ).join("\n");
+
+    scan.menuReviewed = true;
+
+    try {
+      const saved = getSavedMenuScans();
+      const index = saved.findIndex(item =>
+        item.id === scan.id
+      );
+
+      if (index >= 0) {
+        saved[index] = scan;
+
+        localStorage.setItem(
+          MENU_SCAN_STORAGE_KEY,
+          JSON.stringify(saved)
+        );
+      }
+    } catch (error) {
+      console.warn("Could not save menu corrections:", error);
+    }
+
+    gsOpenSavedMenuAsRestaurant(scan);
+  }
+
+  // Add the review button to the existing meals screen.
+  const gsRenderBeforeOCRReview = renderMenu;
+
+  renderMenu = function (...args) {
+    const result = gsRenderBeforeOCRReview(...args);
+
+    if (
+      state.restaurant !== gsOpenedScanRestaurantIndex ||
+      !gsOpenedScan
+    ) {
+      return result;
+    }
+
+    const notice = screens.menu.querySelector(
+      "#gs-saved-scan-notice"
+    );
+
+    if (notice) {
+      // Clear misleading scores until the text is reviewed.
+      if (!gsOpenedScan.menuReviewed) {
+        notice.firstChild.textContent =
+          "OCR dish names are unverified. " +
+          "Review the menu text before relying on " +
+          "the compatibility estimate. ";
+      }
+
+      let button = screens.menu.querySelector(
+        "#gs-review-menu-button"
+      );
+
+      if (!button) {
+        button = document.createElement("button");
+        button.id = "gs-review-menu-button";
+        button.type = "button";
+        button.textContent = "REVIEW MENU TEXT";
+
+        button.style.cssText = `
+          display: inline-block;
+          margin: 8px 0;
+          padding: 10px 14px;
+          background: #53142f;
+          color: white;
+          border: 0;
+          font-weight: 700;
+          cursor: pointer;
+        `;
+
+        button.addEventListener(
+          "click",
+          gsReviewSavedMenu
+        );
+
+        notice.appendChild(button);
+      }
+    }
+
+    // Hide broken-image icons when the placeholder
+    // photo has not been uploaded successfully.
+    menuGrid.querySelectorAll(".meal-picture img")
+      .forEach(img => {
+        if (img.src.includes(
+          "pexels-asphotography-172491.jpg"
+        )) {
+          img.addEventListener("error", () => {
+            img.style.display = "none";
+          }, { once: true });
+        }
+      });
+
+    return result;
+  };
+
+  // END OCR MENU REVIEW
+
+  // ==========================================
+  
+  // ==========================================
+  // FINAL PHOTO OCR V2: ISOLATED + CONSERVATIVE
+  // ==========================================
+
+  function gsPhotoLines(data) {
+    const lines = [];
+
+    for (const block of data?.blocks || []) {
+      for (const paragraph of block.paragraphs || []) {
+        for (const line of paragraph.lines || []) {
+          const words = (line.words || []).filter(
+            w => w.text?.trim()
+          );
+
+          if (!words.length) continue;
+
+          const text = words
+            .map(w => w.text)
+            .join(" ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          const conf = words
+            .map(w => Number(w.confidence))
+            .filter(Number.isFinite);
+
+          const boxes = words
+            .map(w => w.bbox)
+            .filter(Boolean);
+
+          if (!boxes.length) continue;
+
+          lines.push({
+            text,
+            confidence: conf.length
+              ? conf.reduce((a, b) => a + b, 0) /
+                conf.length
+              : 0,
+            x: Math.min(...boxes.map(b => b.x0)),
+            y: Math.min(...boxes.map(b => b.y0)),
+            bottom: Math.max(...boxes.map(b => b.y1)),
+            height:
+              Math.max(...boxes.map(b => b.y1)) -
+              Math.min(...boxes.map(b => b.y0))
+          });
+        }
+      }
+    }
+
+    return lines.sort(
+      (a, b) => a.y - b.y || a.x - b.x
+    );
+  }
+
+  function gsExtractPhotoDishes(lines) {
+    const ignored =
+      /^(?:menu|our menu|chef'?s? selection|maison sauce|starters?|appetizers?|entr[eé]es?|mains?|desserts?|sides?|drinks?|beverages?|specials?|please inform|dietary restrictions|allergies|prices?|taxes|gratuity)(?:\b|\s|$)/i;
+
+    const priced =
+      /(?:\s|^)(?:\$\s*)?\d{1,3}(?:[.,]\d{2})?\s*$/;
+
+    const clean = s =>
+      s.replace(priced, "")
+        .replace(/[.·•\s]+$/, "")
+        .trim();
+
+    const heights = lines
+      .filter(l => l.confidence >= 55)
+      .map(l => l.height)
+      .sort((a, b) => a - b);
+
+    const median =
+      heights[Math.floor(heights.length / 2)] || 14;
+
+    const dishes = [];
+    let current = null;
+
+    for (const line of lines) {
+      const title = clean(line.text);
+
+      const letters =
+        title.match(/[A-Za-zÀ-ÿ]/g) || [];
+
+      const words = title
+        .split(/\s+/)
+        .filter(Boolean);
+
+      const upperRatio = letters.length
+        ? letters.filter(c =>
+            c === c.toUpperCase()
+          ).length / letters.length
+        : 0;
+
+      const isSection =
+        ignored.test(title) ||
+        /^(?:please|ask your server|all prices)/i.test(title);
+
+      if (isSection) {
+        if (current && /^please\b/i.test(title)) {
+          current = null;
+        }
+        continue;
+      }
+
+      const plausible =
+        letters.length >= 7 &&
+        title.length <= 90 &&
+        words.length <= 12 &&
+        (title.match(/[aeiouàèéêëîïôùûüy]/gi) || [])
+          .length >= 2 &&
+        !/[^A-Za-zÀ-ÿ0-9&'’()\-,.\/ ]/.test(title);
+
+      const highConfidence =
+        line.confidence >= 68;
+
+      const looksTitle =
+        upperRatio >= 0.80 ||
+        (
+          priced.test(line.text) &&
+          words.length <= 10
+        ) ||
+        (
+          line.height > median * 1.35 &&
+          words.length <= 8
+        );
+
+      if (
+        plausible &&
+        highConfidence &&
+        looksTitle
+      ) {
+        if (current) dishes.push(current);
+
+        current = {
+          name: title,
+          description: [],
+          titleConfidence: line.confidence,
+          y: line.y
+        };
+
+      } else if (
+        current &&
+        line.confidence >= 52 &&
+        title.length >= 6
+      ) {
+        current.description.push(title);
+      }
+    }
+
+    if (current) dishes.push(current);
+
+    const seen = new Set();
+
+    return dishes.filter(d => {
+      const key = d.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+
+      if (seen.has(key)) return false;
+
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function gsScorePhotoDishes(dishes) {
+    const profiles = selectedUsers();
+
+    const items = dishes.map(d => {
+      const description = d.description.join(" ");
+
+      const phrase = (
+        d.name + " " + description
+      )
+        .replace(
+          /\bvegan\s+(chicken|cheese|beef|fish)\b/gi,
+          "plant substitute"
+        )
+        .replace(
+          /\bcoconut milk\b/gi,
+          "coconut beverage"
+        );
+
+      const conflicts = profiles
+        .filter(p =>
+          (p.filters || []).some(f =>
+            gsScreeningPatterns[f]?.test(phrase)
+          )
+        )
+        .map(p => p.name);
+
+      return {
+        name: d.name,
+        description,
+        conflicts,
+        potentialMatch: conflicts.length === 0,
+        needsVerification:
+          !description || d.titleConfidence < 68
+      };
+    });
+
+    const sufficient =
+      items.length >= 2 &&
+      profiles.length > 0 &&
+      profiles.every(p =>
+        !p.requiresVerification &&
+        p.filters?.length &&
+        p.filters.every(f =>
+          gsScreeningPatterns[f]
+        )
+      ) &&
+      items.every(i => !i.needsVerification);
+
+    const unflagged = items.filter(
+      i => i.potentialMatch
+    ).length;
+
+    return {
+      percentage: sufficient
+        ? Math.round(
+            100 * unflagged / items.length
+          )
+        : null,
+
+      count: items.length,
+      flagged: items.length - unflagged,
+      items,
+
+      note: sufficient
+        ? `${unflagged} of ${items.length} recognized dishes have no detected conflicts. Ingredients and cross-contact remain unverified.`
+        : "Some menu items could not be read confidently. Match unavailable; try a clearer photo."
+    };
+  }
+
+  async function gsScanStillPhoto(source) {
+    // Use a separate OCR worker for the final photo.
+    const worker =
+      await window.Tesseract.createWorker("eng");
+
+    const canvas =
+      document.createElement("canvas");
+
+    const ctx = canvas.getContext("2d", {
+      willReadFrequently: true
+    });
+
+    if (!ctx) {
+      await worker.terminate();
+      throw new Error("Canvas unavailable");
+    }
+
+    const factor = Math.min(
+      2,
+      2200 / source.width
+    );
+
+    canvas.width = Math.round(
+      source.width * factor
+    );
+
+    canvas.height = Math.round(
+      source.height * factor
+    );
+
+    ctx.drawImage(
+      source,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const original = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const candidates = [];
+
+    try {
+      for (const mode of [
+        "color",
+        "grayscale",
+        "invert"
+      ]) {
+        ctx.putImageData(original, 0, 0);
+
+        if (mode !== "color") {
+          const copy = new ImageData(
+            new Uint8ClampedArray(original.data),
+            canvas.width,
+            canvas.height
+          );
+
+          for (
+            let i = 0;
+            i < copy.data.length;
+            i += 4
+          ) {
+            const v =
+              0.299 * copy.data[i] +
+              0.587 * copy.data[i + 1] +
+              0.114 * copy.data[i + 2];
+
+            const contrast = Math.max(
+              0,
+              Math.min(
+                255,
+                (v - 128) * 1.15 + 128
+              )
+            );
+
+            const next = mode === "invert"
+              ? 255 - contrast
+              : contrast;
+
+            copy.data[i] = next;
+            copy.data[i + 1] = next;
+            copy.data[i + 2] = next;
+          }
+
+          ctx.putImageData(copy, 0, 0);
+        }
+
+        await worker.setParameters({
+          tessedit_pageseg_mode:
+            mode === "color" ? "3" : "11"
+        });
+
+        const result = await worker.recognize(
+          canvas,
+          {},
+          {
+            text: true,
+            blocks: true
+          }
+        );
+
+        const lines =
+          gsPhotoLines(result.data);
+
+        const dishes =
+          gsExtractPhotoDishes(lines);
+
+        const analysis =
+          gsScorePhotoDishes(dishes);
+
+        const average = lines.length
+          ? lines.reduce(
+              (s, l) => s + l.confidence,
+              0
+            ) / lines.length
+          : 0;
+
+        candidates.push({
+          text:
+            result.data.text ||
+            lines.map(l => l.text).join("\n"),
+
+          analysis,
+          dishes,
+
+          quality:
+            average +
+            Math.min(lines.length, 30) +
+            dishes.filter(
+              d => d.description.length
+            ).length * 12 -
+            dishes.filter(
+              d => !d.description.length
+            ).length * 15
+        });
+      }
+
+    } finally {
+      await worker.terminate();
+    }
+
+    // Reward dish headings confirmed in
+    // more than one image-processing pass.
+    const normalize = s =>
+      s.toLowerCase()
+        .replace(/[^a-z0-9à-ÿ]/g, "");
+
+    for (const candidate of candidates) {
+      const others = candidates.filter(
+        c => c !== candidate
+      );
+
+      const agreed = candidate.dishes.filter(
+        d => others.some(other =>
+          other.dishes.some(e =>
+            normalize(e.name) ===
+            normalize(d.name)
+          )
+        )
+      ).length;
+
+      candidate.quality += agreed * 30;
+    }
+
+    candidates.sort(
+      (a, b) => b.quality - a.quality
+    );
+
+    const best = candidates[0];
+
+    if (!best) {
+      return {
+        text: "",
+        analysis: gsScorePhotoDishes([])
+      };
+    }
+
+    // Don't calculate a numeric score
+    // when OCR passes disagree completely.
+    const agreement = best.dishes.filter(
+      d => candidates.slice(1).some(other =>
+        other.dishes.some(e =>
+          normalize(e.name) ===
+          normalize(d.name)
+        )
+      )
+    ).length;
+
+    if (agreement < 2) {
+      best.analysis.percentage = null;
+
+      best.analysis.note =
+        "Menu text could not be confirmed across OCR passes. Try better lighting or a steadier image.";
+    }
+
+    return best;
+  }
+
+  // ==========================================
+  // REPLACE FINAL SAVE BUTTON BEHAVIOR
+  // ==========================================
+
+  captureMenuButton.addEventListener(
+    "click",
+    async event => {
+      if (
+        state.screen !== "menuScanner" ||
+        !menuCameraStream ||
+        !menuCameraVideo.videoWidth ||
+        captureMenuButton.disabled
+      ) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      captureMenuButton.disabled = true;
+
+      const photo = menuCaptureCanvas;
+
+      photo.width =
+        menuCameraVideo.videoWidth;
+
+      photo.height =
+        menuCameraVideo.videoHeight;
+
+      photo.getContext("2d").drawImage(
+        menuCameraVideo,
+        0,
+        0
+      );
+
+      menuPhotoCaptured = true;
+
+      capturedMenuPhoto =
+        createMenuPhotoDataURL(
+          photo,
+          1100,
+          0.82
+        );
+
+      // Stop live recognition before final OCR.
+      stopMenuCamera();
+
+      menuCameraStatus.textContent =
+        "Analyzing captured menu...";
+
+      
+        const gsLiveBackup =
+        Number.isFinite(gsBestMenuScan?.analysis?.percentage) &&
+        gsBestMenuScan.analysis.count >= 2
+          ? JSON.parse(JSON.stringify(gsBestMenuScan))
+          : null;
+
+      gsBestMenuScan = null;
+
+
+      try {
+        const recognized =
+          await gsScanStillPhoto(photo);
+
+        if (
+          state.screen !== "menuScanner"
+        ) return;
+
+        gsBestMenuScan = {
+          text: recognized.text,
+          analysis: recognized.analysis,
+
+          warnings: recognized.analysis.items
+            .filter(i => i.conflicts.length)
+            .map(i => ({
+              word: i.name,
+              profiles: i.conflicts
+            }))
+        };
+
+      } catch (error) {
+        console.warn("Final OCR:", error);
+
+        gsBestMenuScan = {
+          text: "",
+          analysis: gsScorePhotoDishes([]),
+          warnings: []
+        };
+      }
+
+      // Restore the live estimate if final OCR could not confirm it.
+      if (
+        !Number.isFinite(gsBestMenuScan?.analysis?.percentage) &&
+        gsLiveBackup
+      ) {
+        gsBestMenuScan = gsLiveBackup;
+
+        gsBestMenuScan.analysis.note =
+          "Provisional result from live OCR. " +
+          "Final photo recognition could not confirm it. " +
+          "Verify ingredients and allergens with the restaurant.";
+      }
+
+      gsMenuAudit.text =
+        gsBestMenuScan.text;
+
+      gsMenuAudit.analysis =
+        gsBestMenuScan.analysis;
+
+      gsMenuAudit.warnings =
+        gsBestMenuScan.warnings;
+
+      lastRecognizedMenuText =
+        gsBestMenuScan.text;
+
+      lastDetectedMenuWarnings =
+        gsBestMenuScan.warnings;
+
+      menuCameraVideo.hidden = true;
+      photo.hidden = false;
+
+      try {
+        if (!saveCapturedMenu()) {
+          throw new Error("Could not save menu");
+        }
+
+      } catch (error) {
+        console.error("Menu save:", error);
+
+        menuCameraStatus.textContent =
+          "Could not save menu. Browser storage may be full.";
+
+        captureMenuButton.disabled = false;
+      }
+    },
+    true
+  );
+
+  // Prevent uncertain OCR from appearing
+  // as fully compatible restaurant meals.
+  const gsOpenBeforeStillPhotoV2 =
+    gsOpenSavedMenuAsRestaurant;
+
+  gsOpenSavedMenuAsRestaurant = function (scan) {
+    if (
+      !Number.isFinite(
+        scan?.menuAnalysis?.percentage
+      )
+    ) {
+      openMenuResults(scan.photo, true);
+
+      gsShowMenuScore(
+        scan.menuAnalysis ||
+        gsScorePhotoDishes([])
+      );
+
+      return;
+    }
+
+    return gsOpenBeforeStillPhotoV2(scan);
+  };
+
+  // END FINAL PHOTO OCR V2
+
+
+  // END MENU SCANNER IMPROVEMENTS
+
+  // Add the Bronx restaurant after the existing
+  // Supabase restaurants finish loading.
+  renderUsers();
+
+  loadAdditionalRestaurants()
+    .catch(error => {
+      console.warn("Additional restaurant loading:", error);
+    })
+
+    
+    .finally(() => {
+      addBronxRestaurant();
+    });
+
+});
+
+
+
