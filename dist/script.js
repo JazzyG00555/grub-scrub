@@ -278,6 +278,11 @@ const RESTAURANT_LOGOS = {
           lon: -73.9819
         },
         demoVegan: false
+      },
+      {
+        name: "VEGAN Latin Kitchen Beyond",
+        location: null,
+        demoVegan: false
       }
     ];
 
@@ -322,9 +327,11 @@ const RESTAURANT_LOGOS = {
         restaurants.push({
           name: config.name,
           
-logo: config.name === "Beyond Sushi"
-? RESTAURANT_LOGOS.beyondSushi
-: RESTAURANT_LOGOS.littleBeet,
+          logo: config.name === "Beyond Sushi"
+          ? RESTAURANT_LOGOS.beyondSushi
+          : config.name === "Little Beet"
+            ? RESTAURANT_LOGOS.littleBeet
+            : RESTAURANT_LOGOS.veganLatinKitchen,
 
           meals: databaseMeals,
           demoFromSupabase: true
@@ -829,6 +836,11 @@ function createRestaurantLogoCard(restaurant) {
     });
   }
 
+  
+  // ==========================================
+  // PREGATHERING: LANDMARK + ADDRESS SEARCH
+  // ==========================================
+
   async function searchAnalyzerLocation() {
     const location = analyzerLocation.value.trim();
     const request = ++analyzerSearchRequest;
@@ -836,67 +848,149 @@ function createRestaurantLogoCard(restaurant) {
     if (!location) {
       analyzerSearchCenter = null;
       analyzerLocationStatus.textContent =
-        "Enter a city or ZIP code first.";
+        "Enter a landmark, venue, address, city, or ZIP code.";
       renderAnalyzerRecommendations();
       return;
     }
 
     analyzerFindButton.disabled = true;
-    analyzerLocationStatus.textContent = "Finding your selected area...";
+    analyzerLocationStatus.textContent =
+      "Finding " + location + "...";
 
     try {
       const url = new URL(
-        "https://geocoding-api.open-meteo.com/v1/search"
+        "https://photon.komoot.io/api/"
       );
-      url.searchParams.set("name", location);
-      url.searchParams.set("count", "5");
-      url.searchParams.set("language", "en");
-      url.searchParams.set("format", "json");
+
+      url.searchParams.set("q", location);
+      url.searchParams.set("limit", "10");
+      url.searchParams.set("lang", "en");
 
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Location lookup failed");
+
+      if (!response.ok) {
+        throw new Error("Location search failed");
+      }
 
       const data = await response.json();
+
       if (request !== analyzerSearchRequest) return;
 
-      if (!data.results?.length) {
+      const results = (data.features || []).filter(
+        feature => {
+          const coordinates =
+            feature.geometry?.coordinates;
+
+          return (
+            Array.isArray(coordinates) &&
+            coordinates.length >= 2 &&
+            coordinates.every(Number.isFinite)
+          );
+        }
+      );
+
+      if (!results.length) {
         analyzerSearchCenter = null;
         analyzerLocationStatus.textContent =
-          "Location not found. Try another city or ZIP code.";
+          "Location not found. Try adding the city and state.";
         renderAnalyzerRecommendations();
         return;
       }
 
-      const place = data.results[0];
+      // Prioritize exact and close place-name matches.
+      const normalize = value =>
+        String(value || "")
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N} ]/gu, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+      const query = normalize(location);
+
+      const ranked = results.map(feature => {
+        const p = feature.properties || {};
+
+        const name = normalize(p.name);
+        const fullAddress = normalize([
+          p.name,
+          p.street,
+          p.housenumber,
+          p.city,
+          p.state,
+          p.country
+        ].filter(Boolean).join(" "));
+
+        let score = 0;
+
+        if (name === query) {
+          score += 100;
+        } else if (
+          name &&
+          (query.includes(name) || name.includes(query))
+        ) {
+          score += 60;
+        }
+
+        if (fullAddress.includes(query)) {
+          score += 40;
+        }
+
+        return { feature, score };
+      });
+
+      ranked.sort((a, b) => b.score - a.score);
+
+      const best = ranked[0].feature;
+      const [lon, lat] = best.geometry.coordinates;
+      const p = best.properties || {};
+
       analyzerSearchCenter = {
-        lat: Number(place.latitude),
-        lon: Number(place.longitude)
+        lat: Number(lat),
+        lon: Number(lon)
       };
 
       analyzerSearchLabel = [
-        place.name,
-        place.admin1,
-        place.country
-      ].filter(Boolean).join(", ");
+        p.name,
+        p.street,
+        p.housenumber,
+        p.city || p.locality,
+        p.state,
+        p.country
+      ]
+        .filter(Boolean)
+        .filter((item, index, array) =>
+          array.indexOf(item) === index
+        )
+        .join(", ");
 
       analyzerLocationStatus.textContent =
-        `Within ${analyzerRadius.value} miles of ` +
-        analyzerSearchLabel + " (straight-line distance).";
+        "Showing Grub Scrub restaurants within " +
+        analyzerRadius.value +
+        " miles of " +
+        analyzerSearchLabel +
+        ". Distances are straight-line estimates.";
 
       renderAnalyzerRecommendations();
+
     } catch (error) {
       if (request !== analyzerSearchRequest) return;
+
+      console.error("Landmark search:", error);
+
       analyzerSearchCenter = null;
+
       analyzerLocationStatus.textContent =
-        "Could not look up this area. Check your connection.";
-      console.error(error);
+        "Location search unavailable. Please try again.";
+
       renderAnalyzerRecommendations();
+
     } finally {
       if (request === analyzerSearchRequest) {
         analyzerFindButton.disabled = false;
       }
     }
   }
+
 
   analyzerSearchForm.addEventListener("submit", event => {
     event.preventDefault();
@@ -1155,6 +1249,38 @@ function createRestaurantLogoCard(restaurant) {
   danboTarget.addEventListener("targetFound", () => {
     if (state.screen === "camera") restaurantDetected(1);
   });
+
+
+  // NEW RESTAURANT LOGO TARGETS
+
+  const additionalLogoTargets = [
+    ["beyondSushiTarget", "Beyond Sushi"],
+    ["littleBeetTarget", "Little Beet"],
+    ["veganLatinTarget", "VEGAN Latin Kitchen Beyond"]
+  ];
+
+  additionalLogoTargets.forEach(([targetId, name]) => {
+    const target = document.getElementById(targetId);
+
+    if (!target) return;
+
+    target.addEventListener("targetFound", () => {
+      if (state.screen !== "camera") return;
+
+      const index = restaurants.findIndex(
+        restaurant => restaurant.name === name
+      );
+
+      if (index === -1) {
+        trackingStatus.textContent =
+          name + " menu data is not available yet.";
+        return;
+      }
+
+      restaurantDetected(index);
+    });
+  });
+
 
   // ==========================================
   // MENU SCANNER

@@ -3,12 +3,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
-
   <meta name="theme-color" content="#000000">
   <title>Grub Scrub</title>
 
@@ -19,7 +17,6 @@
   >
 
   <!-- FOOD PROFILE ONBOARDING CSS -->
-  <!-- Updated version to load the corrected button styling -->
   <link
     rel="stylesheet"
     href="./onboarding.css?v=white-button-fix-20261119-2"
@@ -62,15 +59,12 @@
 <body>
 <main id="app">
 
-  <!-- ======================================
-       HOME SCREEN
-       ====================================== -->
+  <!-- HOME SCREEN -->
   <section
     id="screen-title"
     class="screen normal-screen active"
   >
     <div class="title-content">
-
       <div class="logo-circle">
         <i class="ph ph-fork-knife"></i>
       </div>
@@ -93,17 +87,11 @@
         START
       </button>
 
-      <!--
-        CREATE PROFILE is inserted by onboarding.js.
-        Its styling comes from onboarding.css.
-      -->
-
+      <!-- CREATE PROFILE is inserted by onboarding.js -->
     </div>
   </section>
 
-  <!-- ======================================
-       TODAY'S PLANS
-       ====================================== -->
+  <!-- TODAY'S PLANS -->
   <section
     id="screen-plans"
     class="screen normal-screen"
@@ -129,18 +117,13 @@
     </div>
   </section>
 
-  <!-- ======================================
-       SCANNER CHOICE
-       ====================================== -->
+  <!-- SCANNER CHOICE -->
   <section
     id="screen-scan-choice"
     class="screen normal-screen"
   >
     <div class="wireframe-choice-page">
-
-      <h2>
-        Which item would you like to scan?
-      </h2>
+      <h2>Which item would you like to scan?</h2>
 
       <div class="wireframe-choice-buttons">
         <button
@@ -165,19 +148,15 @@
       >
         BACK
       </button>
-
     </div>
   </section>
 
-  <!-- ======================================
-       FOOD PROFILES
-       ====================================== -->
+  <!-- FOOD PROFILES -->
   <section
     id="screen-users"
     class="screen normal-screen"
   >
     <div class="page profiles-page">
-
       <h2 class="page-title">
         Who's Here &amp; What Can They Munch On?
       </h2>
@@ -186,10 +165,6 @@
         Add the food profiles of the people joining today.
       </p>
 
-      <!--
-        onboarding.js inserts CREATE NEW PROFILE
-        before SELECT ALL inside this row.
-      -->
       <div class="select-all-row">
         <button
           id="addAllButton"
@@ -200,7 +175,7 @@
         </button>
       </div>
 
-      <!-- Jamie, Gus and Brad populated by script.js -->
+      <!-- Food profiles are populated by script.js -->
       <div
         id="userList"
         class="user-list"
@@ -214,19 +189,15 @@
       >
         LET'S GET SCANNING!
       </button>
-
     </div>
   </section>
 
-  <!-- ======================================
-       PREGATHERING MENU ANALYZER
-       ====================================== -->
+  <!-- PREGATHERING MENU ANALYZER -->
   <section
     id="screen-analyzer"
     class="screen normal-screen"
   >
     <div class="analyzer-page">
-
       <header class="analyzer-header">
         <button
           id="analyzerBack"
@@ -241,7 +212,6 @@
 
       <div class="analyzer-content">
         <div class="analyzer-location">
-
           <form
             id="analyzerSearchForm"
             class="analyzer-search-container"
@@ -249,7 +219,7 @@
             <input
               id="analyzerLocation"
               type="search"
-              placeholder="City, ZIP code, or area"
+              placeholder="Landmark, address, city, or ZIP code"
               autocomplete="off"
               aria-label="Search location"
             >
@@ -287,9 +257,7 @@
 
         <div class="analyzer-recommendations-header">
           <h2>Recommendations</h2>
-          <p>
-            Explore restaurants in your selected area
-          </p>
+          <p>Explore restaurants in your selected area</p>
         </div>
 
         <div
@@ -314,15 +282,12 @@
     </div>
   </section>
 
-  <!-- ======================================
-       LIVE MENU SCANNER
-       ====================================== -->
+  <!-- LIVE MENU SCANNER -->
   <section
     id="screen-menu-scanner"
     class="screen camera-screen"
   >
     <div class="menu-scanner-page">
-
       <header class="menu-scanner-header">
         <button
           id="menuScannerBack"
@@ -336,7 +301,6 @@
       </header>
 
       <div class="menu-camera-container">
-
         <video
           id="menuCameraVideo"
           autoplay
@@ -369,7 +333,6 @@
         >
           Point your camera at a restaurant menu.
         </p>
-
       </div>
 
       <div class="menu-scanner-controls">
@@ -381,19 +344,15 @@
           SAVE MENU RESULTS
         </button>
       </div>
-
     </div>
   </section>
 
-  <!-- ======================================
-       SAVED MENU RESULTS
-       ====================================== -->
+  <!-- SAVED MENU RESULTS -->
   <section
     id="screen-menu-results"
     class="screen normal-screen"
   >
     <div class="menu-results-page">
-
       <header class="menu-results-header">
         <button
           id="menuResultsBack"
@@ -410,7 +369,7 @@
           aria-expanded="false"
           aria-controls="gsScanCompatPanel"
         >
-          Filter Flags
+          Meal Sharing Filter
         </button>
       </header>
 
@@ -432,16 +391,11 @@
           aria-valuemax="100"
           aria-valuetext="Not analyzed"
         >
-          <div
-            id="menuResultsProgressFill"
-          ></div>
+          <div id="menuResultsProgressFill"></div>
         </div>
       </div>
 
-      <!--
-        menu-compat.js creates the compatibility panel,
-        individual filters and group results here.
-      -->
+      <!-- menu-compat.js creates the compatibility panel -->
 
       <div class="menu-results-photo-area">
         <img
@@ -466,7 +420,6 @@
       </p>
 
       <div class="menu-results-actions">
-
         <button
           id="retakeMenuResultsButton"
           class="menu-results-retake"
@@ -488,14 +441,11 @@
           class="menu-save-status"
           role="status"
         ></p>
-
       </div>
     </div>
   </section>
 
-  <!-- ======================================
-       LOGO SCANNER
-       ====================================== -->
+  <!-- LOGO SCANNER -->
   <section
     id="screen-camera"
     class="screen camera-screen"
@@ -509,7 +459,6 @@
     ></video>
 
     <header class="camera-header">
-
       <button
         id="logoScannerBack"
         class="logo-scanner-back"
@@ -522,7 +471,6 @@
       <h2 class="camera-title">
         SCAN RESTAURANT LOGO
       </h2>
-
     </header>
 
     <p
@@ -535,21 +483,15 @@
     </p>
   </section>
 
-  <!-- ======================================
-       LOADING SCREEN
-       ====================================== -->
+  <!-- LOADING SCREEN -->
   <section
     id="screen-loading"
     class="screen normal-screen center-screen"
   >
-    <p class="loading-card">
-      IT IS...
-    </p>
+    <p class="loading-card">IT IS...</p>
   </section>
 
-  <!-- ======================================
-       COMPATIBILITY RESULT
-       ====================================== -->
+  <!-- COMPATIBILITY RESULT -->
   <section
     id="screen-result"
     class="screen normal-screen center-screen"
@@ -579,16 +521,13 @@
     </div>
   </section>
 
-  <!-- ======================================
-       RESTAURANT RECALL LIST
-       ====================================== -->
+  <!-- RESTAURANT RECALL LIST -->
   <section
     id="screen-recall"
     class="screen normal-screen"
   >
     <div class="page recall-page">
       <header class="recall-header">
-
         <button
           id="recallBackButton"
           type="button"
@@ -598,6 +537,7 @@
         </button>
 
         <h1>Restaurant Recall List</h1>
+
         <p>
           Previously scanned restaurants and menus
         </p>
@@ -614,19 +554,15 @@
       >
         No restaurants or menus saved yet.
       </p>
-
     </div>
   </section>
 
-  <!-- ======================================
-       RESTAURANT MENU
-       ====================================== -->
+  <!-- RESTAURANT MENU -->
   <section
     id="screen-menu"
     class="screen normal-screen"
   >
     <div class="page menu-page">
-
       <header class="restaurant-top-row">
         <h2
           id="restaurantName"
@@ -654,7 +590,6 @@
 
       <div class="menu-user-header">
         <div class="menu-user-row">
-
           <h3
             id="activeUserName"
             class="active-user-name"
@@ -671,10 +606,7 @@
         </div>
 
         <div class="menu-summary">
-          <strong id="availabilityCount">
-            4/4
-          </strong>
-
+          <strong id="availabilityCount">4/4</strong>
           <p id="optionsMessage">
             meal options available
           </p>
@@ -690,7 +622,6 @@
         id="menuGrid"
         class="menu-grid"
       ></div>
-
     </div>
 
     <!-- ORIGINAL PROJECT 2 PROFILE WHEEL -->
@@ -725,15 +656,12 @@
     </nav>
   </section>
 
-  <!-- ======================================
-       INTERACTIVE 3D MEAL DETAILS
-       ====================================== -->
+  <!-- INTERACTIVE 3D MEAL DETAILS -->
   <section
     id="screen-dish"
     class="screen dish-screen"
   >
     <header class="dish-header">
-
       <button
         id="backToMenu"
         class="back-button"
@@ -821,11 +749,12 @@
 </main>
 
 <!-- ======================================
-     MINDAR LOGO TARGETS
+     MINDAR: FIVE RESTAURANT LOGO TARGETS
      ====================================== -->
+
 <a-scene
   id="arScene"
-  mindar-image="imageTargetSrc: https://raw.githubusercontent.com/JazzyG00555/grub-scrub-ar/main/targets%20(1).mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no;"
+  mindar-image="imageTargetSrc: ./targets-five.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no;"
   color-space="sRGB"
   renderer="colorManagement: true; alpha: true"
   vr-mode-ui="enabled: false"
@@ -838,14 +767,34 @@
     look-controls="enabled: false"
   ></a-camera>
 
+  <!-- 0: P.S. Kitchen -->
   <a-entity
     id="psTarget"
+    mindar-image-target="targetIndex: 0"
+  ></a-entity>
+
+  <!-- 1: Ramen DANBO -->
+  <a-entity
+    id="danboTarget"
     mindar-image-target="targetIndex: 1"
   ></a-entity>
 
+  <!-- 2: Beyond Sushi -->
   <a-entity
-    id="danboTarget"
-    mindar-image-target="targetIndex: 0"
+    id="beyondSushiTarget"
+    mindar-image-target="targetIndex: 2"
+  ></a-entity>
+
+  <!-- 3: Little Beet -->
+  <a-entity
+    id="littleBeetTarget"
+    mindar-image-target="targetIndex: 3"
+  ></a-entity>
+
+  <!-- 4: VEGAN Latin Kitchen Beyond -->
+  <a-entity
+    id="veganLatinTarget"
+    mindar-image-target="targetIndex: 4"
   ></a-entity>
 </a-scene>
 
@@ -854,40 +803,25 @@
      ====================================== -->
 
 <!-- SUPABASE INGREDIENT DATABASE -->
-
 <script src="./meal-db.js?v=restaurants-2"></script>
 
-
-<!-- FOUR-STEP FOOD PROFILE ONBOARDING -->
+<!-- FOOD PROFILE ONBOARDING -->
 <script src="./onboarding.js?v=home-button-fix-4"></script>
 
-<!--
-  CLEAR DEMO RECALL DATA BEFORE APP INITIALIZES.
-  Supabase records are not deleted.
--->
+<!-- EXISTING DEMO RECALL RESET -->
 <script>
   try {
-    localStorage.removeItem(
-      "grub-scrub-recall-v1"
-    );
-
-    localStorage.removeItem(
-      "grub-scrub-menu-scans-v1"
-    );
+    localStorage.removeItem("grub-scrub-recall-v1");
+    localStorage.removeItem("grub-scrub-menu-scans-v1");
   } catch (error) {
-    console.warn(
-      "Could not clear Recall List:",
-      error
-    );
+    console.warn("Could not clear Recall List:", error);
   }
 </script>
 
 <!-- EXISTING GRUB SCRUB APPLICATION -->
-
 <script src="./script.js?v=restaurants-2"></script>
 
-
-<!-- LIVE MENU COMPATIBILITY + FILTER FLAGS -->
+<!-- LIVE MENU COMPATIBILITY + FILTER -->
 <script
   src="./menu-live-ui.js?v=gs-five-fixes-20261119"
 ></script>
@@ -895,7 +829,7 @@
 <!-- SAVED MENU COMPATIBILITY -->
 <script src="./menu-compat.js"></script>
 
-<!-- EXISTING SUPABASE TEST -->
+<!-- SUPABASE TEST -->
 <script
   type="module"
   src="./supabase-test.js"
