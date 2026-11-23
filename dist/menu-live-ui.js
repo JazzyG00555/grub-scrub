@@ -43,6 +43,7 @@
 
   let people = [];
   let selectedNames = new Set();
+  let selectionInitialized = false;
   let lastText = "";
   let filterOpen = false;
 
@@ -83,12 +84,16 @@
       )
     );
 
-    // Initially select every participating person.
-    if (!selectedNames.size && latest.length) {
-      selectedNames = new Set(
-        latest.map(person => person.name)
-      );
-    }
+   
+  // Select participating people only on initial setup.
+  // Never automatically reselect unchecked profiles.
+  if (!selectionInitialized && latest.length > 0) {
+    selectedNames = new Set(
+      latest.map(person => person.name)
+    );
+    selectionInitialized = true;
+  }
+
 
     people = latest;
   }
@@ -481,6 +486,9 @@
         }
 
         renderScore();
+        document.dispatchEvent(
+          new CustomEvent("grub-live-profile-filter-change")
+        );
       });
 
       label.append(checkbox, name);

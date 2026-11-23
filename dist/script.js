@@ -4703,7 +4703,10 @@ restaurants.push(bronxRestaurant);
 
   // Analyze complete dishes, including their descriptions.
   gsAnalyzeRecognizedMenu = function (text) {
-    const profiles = selectedUsers();
+    const profiles = selectedUsers().filter(person =>
+      !window.GrubLiveScan ||
+      window.GrubLiveScan.includesUser(person.name)
+    );
 
     const lines = String(text || "")
       .split(/\r?\n/)
@@ -4984,7 +4987,11 @@ restaurants.push(bronxRestaurant);
       }
 
       const profiles = selectedUsers().filter(p =>
-        dish.conflicts.includes(p.name)
+        dish.conflicts.includes(p.name) &&
+        (
+          !window.GrubLiveScan ||
+          window.GrubLiveScan.includesUser(p.name)
+        )
       );
 
       if (!profiles.length) continue;
@@ -5164,6 +5171,27 @@ restaurants.push(bronxRestaurant);
   // ==========================================
 
   let gsBestMenuScan = null;
+
+  document.addEventListener(
+    "grub-live-profile-filter-change",
+    () => {
+      if (state.screen !== "menuScanner") return;
+
+      clearMenuARFlags();
+
+      gsBestMenuScan = null;
+
+      const analysis = gsAnalyzeRecognizedMenu(
+        gsMenuAudit.text || ""
+      );
+
+      gsMenuAudit.analysis = analysis;
+      gsMenuAudit.warnings = [];
+      lastDetectedMenuWarnings = [];
+
+      gsShowMenuScore(analysis);
+    }
+  );
 
   // Keep the most complete valid scan while the camera runs.
   const gsPreviousFlagRenderer = renderMenuARFlags;
