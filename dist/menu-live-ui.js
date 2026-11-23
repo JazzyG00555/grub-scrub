@@ -271,7 +271,7 @@
         aria-expanded="false"
         aria-controls="gsLiveFilterPanel"
       >
-        Filter Flags
+        Meal Sharing Filter
       </button>
 
       <span id="gsLiveGroupCaption">
@@ -602,9 +602,19 @@
   // OPEN / CLOSE FILTER FLAGS
   // -----------------------------------------
 
-  filterButton.addEventListener("click", () => {
+  
+  filterButton.addEventListener("click", event => {
+    event.preventDefault();
+
     filterOpen = !filterOpen;
     filterPanel.hidden = !filterOpen;
+
+    // Keep the actual panel visibility in sync.
+    filterPanel.style.setProperty(
+      "display",
+      filterOpen ? "block" : "none",
+      "important"
+    );
 
     filterButton.setAttribute(
       "aria-expanded",

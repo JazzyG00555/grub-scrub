@@ -728,9 +728,26 @@
     if (currentMenuId !== match.id) {
       currentMenuId = match.id;
       activeIds = [];
-      dishes = extractDishes(
-        match.recognizedText || ""
-      );
+      
+      // Prefer structured dishes from the newer OCR scanner.
+      const savedItems = match.menuAnalysis?.items;
+
+      dishes = Array.isArray(savedItems) &&
+        savedItems.length
+          ? savedItems
+              .filter(item => item.name)
+              .map(item => ({
+                name: item.name,
+                description: item.description || "",
+                text: [
+                  item.name,
+                  item.description || ""
+                ].join(" ")
+              }))
+          : extractDishes(
+              match.recognizedText || ""
+            );
+
     }
 
     people = selectedProfiles();
