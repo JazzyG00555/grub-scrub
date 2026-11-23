@@ -6131,6 +6131,11 @@ restaurants.push(bronxRestaurant);
     gsOpenSavedMenuAsRestaurant(scan);
   }
 
+  // Disable the manual menu review popup.
+gsReviewSavedMenu = function () {
+  return;
+};
+
   // Add the review button to the existing meals screen.
   const gsRenderBeforeOCRReview = renderMenu;
 
@@ -6166,6 +6171,7 @@ restaurants.push(bronxRestaurant);
         button.id = "gs-review-menu-button";
         button.type = "button";
         button.textContent = "REVIEW MENU TEXT";
+button.hidden = true;
 
         button.style.cssText = `
           display: inline-block;
@@ -6183,7 +6189,7 @@ restaurants.push(bronxRestaurant);
           gsReviewSavedMenu
         );
 
-        notice.appendChild(button);
+        // Manual review button disabled.
       }
     }
 
