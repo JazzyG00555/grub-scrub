@@ -487,6 +487,77 @@ const RESTAURANT_LOGOS = {
   }
 
   function showScreen(name) {
+
+  // ONE-SCREEN RESTAURANT DISCOVERY
+  // Keep old navigation links pointing to the new screen.
+  if (name === "scanChoice") name = "plans";
+
+
+  if (name === "plans" && !screens.plans.dataset.discoveryReady) {
+    const page = screens.plans.querySelector(".wireframe-choice-page");
+
+    page.innerHTML = `
+      <h2>How Would You Like to Discover Food Today?</h2>
+
+      <div class="gs-discovery-options">
+        <div class="gs-discovery-choice">
+          <button id="gsDiscoverLogo" class="gs-discovery-button" type="button">
+            <i class="ph ph-camera" aria-hidden="true"></i>
+            <span>SCAN LOGO</span>
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+          <p class="gs-discovery-description">Scan a restaurant’s logo to see what looks good!</p>
+        </div>
+
+        <div class="gs-discovery-choice">
+          <button id="gsDiscoverMenu" class="gs-discovery-button" type="button">
+            <i class="ph ph-list-bullets" aria-hidden="true"></i>
+            <span>SCAN MENU</span>
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+          <p class="gs-discovery-description">Scan a menu to see who can eat what!</p>
+        </div>
+
+        <div class="gs-discovery-choice">
+          <button id="gsDiscoverArea" class="gs-discovery-button" type="button">
+            <i class="ph ph-map-pin" aria-hidden="true"></i>
+            <span>SEARCH AREA</span>
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+          <p class="gs-discovery-description">Let’s search and see what’s around!</p>
+        </div>
+      </div>
+    `;
+
+    function selectDiscoveryFlow(type) {
+      state.selectedScanType = type;
+      state.activeUser = 0;
+      renderUsers();
+      showScreen("users");
+    }
+
+    page.querySelector("#gsDiscoverLogo")
+      .addEventListener("click", () => selectDiscoveryFlow("logo"));
+
+    page.querySelector("#gsDiscoverMenu")
+      .addEventListener("click", () => selectDiscoveryFlow("menu"));
+
+    page.querySelector("#gsDiscoverArea")
+      .addEventListener("click", () => selectDiscoveryFlow("analyzer"));
+
+    screens.plans.dataset.discoveryReady = "true";
+  }
+
+  // Move the existing search button to the left of the search bar.
+  // Keep the same form, search function and distance dropdown.
+  if (
+    name === "analyzer" &&
+    analyzerSearchForm.firstElementChild !== analyzerFindButton
+  ) {
+    analyzerSearchForm.prepend(analyzerFindButton);
+  }
+
+
     if (!screens[name]) {
       console.error("Missing screen:", name);
       return;
@@ -2849,27 +2920,57 @@ try {
   }
 
   
+ 
   function gsGetSavedPosition(meal, ingredient) {
-    const restaurant =
-      restaurants[state.restaurant].name;
-
+    const restaurant = restaurants[state.restaurant].name;
     const key = gsHotspotKey(meal, ingredient);
 
-    // A locally edited position takes precedence
-    // until you publish the approved version.
-    const localPosition = gsSavedHotspots[key];
+    const saved = gsSavedHotspots[key];
+    if (saved?.position && saved?.normal) return saved;
 
-    if (localPosition) {
-      return localPosition;
+    const approved = window.GSMealDB?.getPosition(
+      restaurant, meal.name, ingredient
+    );
+
+    if (approved?.position && approved?.normal) {
+      return approved;
     }
 
-    // Otherwise use the approved shared position
-    // loaded from Supabase.
-    return window.GSMealDB?.getPosition(
-      restaurant,
-      meal.name,
-      ingredient
-    ) || null;
+    // Initial visual anchors for the rice bowl.
+    // Converted into 3D positions automatically.
+    const referencePoints = {
+      "Sweet Potato & Red Rice Bowl": {
+        "Sweet potato": [0.46, 0.37],
+        "Red rice": [0.44, 0.64]
+      }
+    };
+
+    const screenPoint =
+      referencePoints[meal.name]?.[ingredient];
+
+    if (!screenPoint || !detailViewer.loaded) {
+      return null;
+    }
+
+    if (
+      typeof detailViewer.positionAndNormalFromPoint !== "function"
+    ) {
+      return null;
+    }
+
+    const rect = detailViewer.getBoundingClientRect();
+
+    if (!rect.width || !rect.height) return null;
+
+    const point = detailViewer.positionAndNormalFromPoint(
+      screenPoint[0] * rect.width,
+      screenPoint[1] * rect.height
+    );
+
+    return point ? {
+      position: point.position.toString(),
+      normal: point.normal.toString()
+    } : null;
   }
 
 
@@ -2921,21 +3022,88 @@ try {
     hideHotspot();
   }
 
-  function gsShowPositionedLabel(label, coordinates) {
-    if (!coordinates) return;
+  
+function gsShowPositionedLabel(label, coordinates) {
+  if (!coordinates) return;
 
-    hotspotLabel.textContent = label;
-    hotspot.classList.remove("label-left");
+  hotspotLabel.textContent = label;
+  hotspot.classList.remove("label-left");
 
-    detailViewer.updateHotspot({
-      name: "hotspot-ingredient",
-      position: coordinates.position,
-      normal: coordinates.normal
-    });
+  detailViewer.updateHotspot({
+    name: "hotspot-ingredient",
+    position: coordinates.position,
+    normal: coordinates.normal
+  });
 
-    hotspot.classList.remove("is-hidden");
-    hotspot.setAttribute("aria-hidden", "false");
+  hotspot.classList.remove("is-hidden");
+  hotspot.setAttribute("aria-hidden", "false");
+
+  gsKeepLabelVisible();
+}
+
+/* PREVENT 3D INGREDIENT LABEL CLIPPING */
+
+
+let gsLabelFrame = null;
+
+function gsKeepLabelVisible() {
+  if (hotspot.classList.contains("is-hidden")) return;
+
+  if (gsLabelFrame !== null) {
+    cancelAnimationFrame(gsLabelFrame);
   }
+
+  gsLabelFrame = requestAnimationFrame(() => {
+    gsLabelFrame = null;
+
+    const viewer = detailViewer.getBoundingClientRect();
+    const margin = 12;
+
+    // Reset previous adjustments.
+    hotspot.classList.remove("gs-label-flip");
+    hotspotLabel.style.setProperty("--gs-label-shift-x", "0px");
+    hotspotLabel.style.setProperty("--gs-label-shift-y", "0px");
+
+    let label = hotspotLabel.getBoundingClientRect();
+
+    // Put the label on the left if the right side is crowded.
+    if (label.right > viewer.right - margin) {
+      hotspot.classList.add("gs-label-flip");
+      label = hotspotLabel.getBoundingClientRect();
+    }
+
+    // Keep the complete label inside the 3D viewer.
+    const shiftX = Math.max(
+      viewer.left + margin - label.left,
+      Math.min(0, viewer.right - margin - label.right)
+    );
+
+    const shiftY = Math.max(
+      viewer.top + margin - label.top,
+      Math.min(0, viewer.bottom - margin - label.bottom)
+    );
+
+    hotspotLabel.style.setProperty(
+      "--gs-label-shift-x",
+      `${shiftX}px`
+    );
+
+    hotspotLabel.style.setProperty(
+      "--gs-label-shift-y",
+      `${shiftY}px`
+    );
+  });
+}
+
+detailViewer.addEventListener(
+  "camera-change",
+  gsKeepLabelVisible
+);
+
+window.addEventListener(
+  "resize",
+  gsKeepLabelVisible
+);
 
   // ------------------------------------------
   
@@ -3022,25 +3190,34 @@ try {
     hideHotspot();
 
     const saved = gsGetSavedPosition(gsCurrentMeal, label);
-    const coordinates = saved || gsFindVisibleFoodPoint();
+    const coordinates = saved || null;
+
 
     if (coordinates) {
       try {
         gsShowPositionedLabel(label, coordinates);
 
-        gsIngredientNote.textContent = saved
-          ? "Label displayed. Tap the food to reposition it."
-          : "Preview shown. Tap the correct ingredient on the food to save its location.";
+        
+gsIngredientNote.textContent =
+"Ingredient label displayed on the 3D model.";
+
       } catch (error) {
         console.error("Could not display label:", error);
 
         gsIngredientNote.textContent =
           "Tap the food to position this label.";
       }
-    } else {
-      gsIngredientNote.textContent =
-        "Tap the ingredient's location on the 3D model to place its label.";
-    }
+   
+} else {
+  const setupMode =
+    new URLSearchParams(window.location.search)
+      .get("gsLabelAdmin") === "1";
+
+  gsIngredientNote.textContent = setupMode
+    ? "Tap the correct ingredient on the 3D model to save its position."
+    : "This ingredient's 3D label is not positioned yet.";
+}
+
 
     gsWaitingForPosition = true;
   }
@@ -3131,11 +3308,15 @@ try {
       ingredientButtons.appendChild(message);
     }
 
-    gsIngredientNote.textContent =
-      "Select an ingredient, then tap its " +
-      "location on the 3D model. " +
-      "Demo ingredients are not verified " +
-      "restaurant allergen information.";
+    
+const gsSetupMode =
+new URLSearchParams(window.location.search)
+  .get("gsLabelAdmin") === "1";
+
+gsIngredientNote.textContent = gsSetupMode
+? "SETUP MODE: Select an ingredient, then tap its location on the 3D model."
+: "Select an ingredient below to display its label on the 3D model. Demo ingredients are not verified restaurant allergen information.";
+
 
     showScreen("dish");
 
@@ -3178,89 +3359,93 @@ try {
   // Ignore dragging so normal 3D rotation
   // still works. Short taps position a label.
 
-  detailViewer.addEventListener(
-    "pointerdown",
-    event => {
-      gsPointerStart = {
-        x: event.clientX,
-        y: event.clientY
-      };
+ 
+  // POSITION LABELS ON THE ACTUAL 3D FOOD
+  // Setup mode only. House Salad remains unchanged.
+
+  document.addEventListener("pointerdown", event => {
+    if (!event.composedPath().includes(detailViewer)) {
+      return;
     }
-  );
 
-  detailViewer.addEventListener(
-    "pointerup",
-    event => {
-      if (
-        !gsCurrentMeal ||
-        gsCurrentMeal.heroAR ||
-        !gsSelectedLabel ||
-        !detailViewer.loaded ||
-        !gsPointerStart
-      ) {
-        gsPointerStart = null;
-        return;
-      }
+    gsPointerStart = {
+      x: event.clientX,
+      y: event.clientY
+    };
+  }, true);
 
-      const distance = Math.hypot(
-        event.clientX - gsPointerStart.x,
-        event.clientY - gsPointerStart.y
-      );
+  document.addEventListener("pointerup", event => {
+    const setupMode =
+      new URLSearchParams(window.location.search)
+        .get("gsLabelAdmin") === "1";
 
-      gsPointerStart = null;
+    if (!setupMode || !gsCurrentMeal ||
+        gsCurrentMeal.heroAR || !gsSelectedLabel) {
+      return;
+    }
 
-      // Dragging rotates the model.
-      if (distance > 12) return;
+    const rect = detailViewer.getBoundingClientRect();
 
-      if (
-        typeof detailViewer
-          .positionAndNormalFromPoint !== "function"
-      ) {
-        gsIngredientNote.textContent =
-          "3D positioning is unavailable.";
-        return;
-      }
+    const insideViewer =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
 
-      
-      // Get the position relative to the 3D viewer.
-      const rect = detailViewer.getBoundingClientRect();
+    if (!insideViewer) return;
 
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+    if (!gsPointerStart) {
+      gsIngredientNote.textContent =
+        "3D click detected, but pointer start is missing.";
+      return;
+    }
 
+    const distance = Math.hypot(
+      event.clientX - gsPointerStart.x,
+      event.clientY - gsPointerStart.y
+    );
+
+    gsPointerStart = null;
+
+    if (distance > 12) return;
+
+    if (!detailViewer.loaded) {
+      gsIngredientNote.textContent =
+        "3D model is not loaded.";
+      return;
+    }
+
+    try {
       const point = detailViewer.positionAndNormalFromPoint(
-        x,
-        y
+        event.clientX - rect.left,
+        event.clientY - rect.top
       );
-  
-      if (!point) {
+
+      if (!point?.position || !point?.normal) {
         gsIngredientNote.textContent =
-          "Tap directly on the food model, " +
-          "not the empty background.";
+          "No 3D surface detected at this location.";
         return;
       }
 
-      gsSavePosition(
-        gsCurrentMeal,
-        gsSelectedLabel,
-        point
-      );
+      gsSavePosition(gsCurrentMeal, gsSelectedLabel, point);
 
       gsWaitingForPosition = false;
 
-      gsShowPositionedLabel(
-        gsSelectedLabel,
-        {
-          position: point.position.toString(),
-          normal: point.normal.toString()
-        }
-      );
+      gsShowPositionedLabel(gsSelectedLabel, {
+        position: point.position.toString(),
+        normal: point.normal.toString()
+      });
 
       gsIngredientNote.textContent =
-        "Label positioned! You can rotate the " +
-        "model or tap another spot to move it.";
+        "Label positioned successfully!";
+    } catch (error) {
+      console.error("3D positioning error:", error);
+
+      gsIngredientNote.textContent =
+        "3D positioning failed. Check the console.";
     }
-  );
+  }, true);
+
 
   // ------------------------------------------
   // MAKE ALL MEAL CARDS OPEN DETAILS

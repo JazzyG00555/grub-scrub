@@ -13,13 +13,13 @@
   <!-- MAIN GRUB SCRUB CSS -->
   <link
     rel="stylesheet"
-    href="./style.css?v=gs-five-fixes-20261119"
+    href="./style.css?v=profile-back-camera-fix-20261123"
   >
 
   <!-- FOOD PROFILE ONBOARDING CSS -->
   <link
     rel="stylesheet"
-    href="./onboarding.css?v=white-button-fix-20261119-2"
+    href="./onboarding.css?v=onboarding-nov25-final"
   >
 
   <!-- PHOSPHOR ICONS -->
@@ -76,7 +76,7 @@
       </h1>
 
       <p class="tagline">
-        Find meals for everyone at the table!
+        Find Meals For Everyone At The Table!
       </p>
 
       <button
@@ -806,7 +806,7 @@
 <script src="./meal-db.js?v=restaurants-2"></script>
 
 <!-- FOOD PROFILE ONBOARDING -->
-<script src="./onboarding.js?v=home-button-fix-4"></script>
+<script src="./onboarding.js?v=onboarding-nov25-final"></script>
 
 <!-- EXISTING DEMO RECALL RESET -->
 <script>
@@ -819,7 +819,7 @@
 </script>
 
 <!-- EXISTING GRUB SCRUB APPLICATION -->
-<script src="./script.js?v=restaurants-2"></script>
+<script src="./script.js?v=hotspot-debug-20261124-1"></script>
 
 <!-- LIVE MENU COMPATIBILITY + FILTER -->
 <script
@@ -835,5 +835,49 @@
   src="./supabase-test.js"
 ></script>
 
+
+<script>
+  (() => {
+    const video = document.getElementById("menuCameraVideo");
+    const container = document.querySelector(".menu-camera-container");
+    const guide = document.querySelector(".menu-camera-guide");
+  
+    if (!video || !container || !guide) return;
+  
+    function alignMenuFrame() {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+  
+      if (!cw || !ch || !vw || !vh) {
+        guide.style.display = "none";
+        return;
+      }
+  
+      const scale = Math.min(cw / vw, ch / vh);
+      const width = vw * scale;
+      const height = vh * scale;
+  
+      guide.style.display = "block";
+      guide.style.inset = "auto";
+      guide.style.left = `${(cw - width) / 2}px`;
+      guide.style.top = `${(ch - height) / 2}px`;
+      guide.style.width = `${width}px`;
+      guide.style.height = `${height}px`;
+    }
+  
+    video.addEventListener("loadedmetadata", alignMenuFrame);
+    video.addEventListener("resize", alignMenuFrame);
+    window.addEventListener("resize", alignMenuFrame);
+  
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(alignMenuFrame).observe(container);
+    }
+  
+    alignMenuFrame();
+  })();
+  </script>
+  
 </body>
 </html>

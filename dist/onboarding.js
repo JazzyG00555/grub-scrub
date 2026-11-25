@@ -243,7 +243,7 @@
           <span id="gsObPhotoPreview" class="gs-ob-photo-preview">
             ${photoMarkup()}
           </span>
-          <span>Add profile picture</span>
+          <span>Add Profile Picture</span>
         </label>
         <input
           id="gsObImage"
@@ -254,7 +254,7 @@
       </div>
 
       <label class="gs-ob-field-label" for="gsObName">
-        Name
+        Profile Name
       </label>
 
       <input
@@ -317,11 +317,11 @@
   function thirdStep() {
     return `
       <label class="gs-ob-question" for="gsObMinMeals">
-        How many meal matches minimum to be compatible?
+        How Many Meal Matches Minimum to be Compatible?
       </label>
 
       <select id="gsObMinMeals" class="gs-ob-select">
-        ${Array.from({length: 10}, (_, index) => index + 1)
+        ${Array.from({length: 5}, (_, index) => index + 1)
           .map(number => `
             <option value="${number}"
               ${number === Number(profile.minMeals)
@@ -336,7 +336,7 @@
         class="gs-ob-question gs-ob-dislikes"
         for="gsObDislikes"
       >
-        Any foods you dislike?
+        Any Foods You Dislike?
       </label>
 
       <textarea
@@ -682,11 +682,11 @@
     );
 
     button.style.setProperty(
-      "border", "2px solid #b65c91", "important"
+      "border", "2px solid #591536", "important"
     );
 
     button.style.setProperty(
-      "border-radius", "0", "important"
+      "border-radius", "17px", "important"
     );
 
     button.addEventListener("click", () => open());

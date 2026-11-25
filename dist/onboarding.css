@@ -1,7 +1,7 @@
 
 /* ==========================================
    GRUB SCRUB - FOOD PROFILE ONBOARDING
-   Figma-inspired four-step layout
+   Complete cleaned stylesheet
    ========================================== */
 
    body.gs-onboarding-open {
@@ -95,7 +95,7 @@
   .gs-ob-photo-section {
     display: flex;
     justify-content: center;
-    margin: 35px 0 30px;
+    margin: 70px 0 30px;
   }
   
   .gs-ob-photo-label {
@@ -117,7 +117,7 @@
     height: 112px;
     overflow: hidden;
     border: 2px solid #591536;
-    border-radius: 10px;
+    border-radius: 50%;
     background: #f4f4f4;
   }
   
@@ -170,6 +170,7 @@
   
   /* ==========================================
      STEP 2 - DIETARY RESTRICTIONS
+     Original layout preserved
      ========================================== */
   
   .gs-ob-scroll-content {
@@ -237,6 +238,7 @@
   
   /* ==========================================
      STEP 3 - COMPATIBILITY AND DISLIKES
+     Cleaned dropdown spacing
      ========================================== */
   
   .gs-ob-question {
@@ -251,11 +253,30 @@
   
   .gs-ob-select {
     max-width: 260px;
-    margin-bottom: 38px;
   }
   
-  .gs-ob-dislikes {
-    margin-bottom: 13px;
+  /* Question above the dropdown */
+  
+  #gsOnboarding .gs-ob-content > label[for="gsObMinMeals"] {
+    margin: 2px 0 10px;
+  }
+  
+  /* Dropdown: only 12px beneath it */
+  
+  
+/* Onboarding screen 3: more spacing below dropdown */
+#gsOnboarding #gsObMinMeals {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 0 30px;
+}
+
+  
+  /* Question beneath dropdown */
+  
+  #gsOnboarding .gs-ob-content > label.gs-ob-dislikes {
+    margin: 0 0 13px;
   }
   
   .gs-ob-textarea {
@@ -326,7 +347,7 @@
   }
   
   /* ==========================================
-     SHARED NAVIGATION BUTTONS
+     SHARED BACK AND NEXT BUTTONS
      ========================================== */
   
   .gs-ob-actions {
@@ -370,7 +391,6 @@
      CREATE PROFILE LAUNCH BUTTONS
      ========================================== */
   
-  /* Default Create Profile launch styling */
   .gs-ob-launch {
     display: block;
     min-height: 42px;
@@ -392,25 +412,17 @@
     color: #591536;
   }
   
-  /* ==========================================
-     FIX: HOME PAGE CREATE PROFILE BUTTON
-     WHITE FILL + PINK STROKE
-     START BUTTON IS NOT CHANGED
-     ========================================== */
+  /* Home Create Profile: white with burgundy text and border */
   
   body #screen-title .title-content button.gs-ob-launch {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-  
     background: #ffffff !important;
-    background-color: #ffffff !important;
     color: #591536 !important;
-  
-    border: 2px solid #b65c91 !important;
-    border-radius: 0 !important;
-  
-    box-shadow: none !important;
+    border: 2px solid #591536 !important;
+    border-radius: 17px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.13) !important;
     text-transform: uppercase !important;
   }
   
@@ -438,35 +450,75 @@
     }
   }
   
+  /* ==========================================
+     HOME SCREEN BUTTON DIMENSIONS
+     ========================================== */
+  
+  #screen-title #startButton,
+  #screen-title .title-content button.gs-ob-launch {
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+    min-height: 48px !important;
+  
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  
+    box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* START: original pink */
+  
+  #screen-title #startButton {
+    background: #b65c91 !important;
+    color: white !important;
+    border: 2px solid #b65c91 !important;
+  }
+  
+  /* CREATE PROFILE: white with burgundy outline */
+  
+  #screen-title .title-content button.gs-ob-launch {
+    background: white !important;
+    color: #591536 !important;
+    border: 2px solid #591536 !important;
+  }
+  
+  /* Onboarding: dropdown arrow spacing */
+#gsObMinMeals {
+  -webkit-appearance: none !important;
+  appearance: none !important;
 
-/* HOME SCREEN: MATCH BUTTON WIDTHS */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
 
-#screen-title #startButton,
-#screen-title .title-content button.gs-ob-launch {
-  width: 220px !important;
-  min-width: 220px !important;
-  max-width: 220px !important;
-  min-height: 48px !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 16px 16px !important;
 
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  box-sizing: border-box !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  padding-right: 40px !important;
 }
 
-/* START: original pink styling */
-#screen-title #startButton {
-  background: #b65c91 !important;
-  color: white !important;
-  border: 2px solid #b65c91 !important;
+
+/* ==========================================
+   ONBOARDING STEP 3: MATCH FIELD WIDTHS
+   ========================================== */
+
+/* Both question titles */
+#gsOnboarding .gs-ob-content > label[for="gsObMinMeals"],
+#gsOnboarding .gs-ob-content > label[for="gsObDislikes"] {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 
-/* CREATE PROFILE: white fill, pink outline */
-#screen-title .title-content button.gs-ob-launch {
-  background: white !important;
-  color: #591536 !important;
-  border: 2px solid #b65c91 !important;
+/* Both input boxes */
+#gsOnboarding #gsObMinMeals,
+#gsOnboarding #gsObDislikes {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
 }
