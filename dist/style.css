@@ -3084,3 +3084,392 @@
     }
   }
   
+
+/* ==========================================
+   DISCOVERY: COMPACT ARROW-ONLY CAROUSEL
+   ========================================== */
+
+#screen-plans .gs-discovery-carousel-frame {
+  position: relative;
+  width: min(100%, 450px);
+  margin: 26px auto 0;
+}
+
+#screen-plans .gs-discovery-options {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  max-width: none !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 10px 0 18px !important;
+  overflow: hidden !important;
+  scroll-snap-type: none !important;
+  touch-action: pan-y !important;
+}
+
+#screen-plans .gs-discovery-choice {
+  position: relative !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  touch-action: pan-y !important;
+}
+
+/* Less empty space inside cards */
+#screen-plans .gs-discovery-button {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: 58px minmax(0, 1fr) 48px !important;
+  width: 100% !important;
+  height: clamp(285px, 80vw, 345px) !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  padding: 12px !important;
+  gap: 0 !important;
+  border-radius: 27px !important;
+}
+
+/* Bigger card title */
+#screen-plans .gs-discovery-button span {
+  grid-row: 1 !important;
+  grid-column: 1 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  font-size: 23px !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+}
+
+/* Large icons, fixed size on every screen */
+#screen-plans .gs-discovery-button i:first-child {
+  grid-row: 2 !important;
+  grid-column: 1 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  font-size: 110px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+/* Larger, single-line description */
+#screen-plans .gs-discovery-description {
+  position: absolute !important;
+  top: auto !important;
+  bottom: 25px !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  color: white !important;
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Burgundy circular navigation arrows */
+#screen-plans .gs-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #591536;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,.22);
+  transform: translateY(-50%);
+}
+
+#screen-plans .gs-carousel-arrow i {
+  font-size: 25px;
+  color: white;
+}
+
+#screen-plans .gs-carousel-prev { left: 5px; }
+#screen-plans .gs-carousel-next { right: 5px; }
+
+#screen-plans .gs-carousel-arrow:disabled {
+  opacity: .32;
+  cursor: default;
+}
+
+/* Phone layout: title beside the back arrow */
+@media (max-width: 480px) {
+  #screen-plans .wireframe-choice-page {
+    padding: calc(20px + env(safe-area-inset-top))
+      12px 30px !important;
+  }
+
+  #screen-plans .wireframe-choice-page > h2 {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 10px 0 62px !important;
+    margin: 0 !important;
+    font-size: clamp(21px, 5.8vw, 26px) !important;
+    line-height: 1.18 !important;
+    text-align: left !important;
+  }
+
+  #screen-plans .wireframe-choice-page > h2::after {
+    margin: 12px 0 0 !important;
+    max-width: none !important;
+    font-size: 14px !important;
+    text-align: left !important;
+  }
+
+  #screen-plans .gs-discovery-carousel-frame {
+    width: 100%;
+    margin-top: 25px;
+  }
+
+  #screen-plans .gs-discovery-button {
+    height: clamp(285px, 80vw, 340px) !important;
+    padding: 10px !important;
+  }
+
+  #screen-plans .gs-discovery-button span {
+    font-size: 23px !important;
+  }
+
+  #screen-plans .gs-discovery-button i:first-child {
+    font-size: 110px !important;
+  }
+
+  #screen-plans .gs-discovery-description {
+    bottom: 24px !important;
+    font-size: clamp(12px, 3.4vw, 14px) !important;
+  }
+}
+
+
+/* LIVE SEARCH AREA */
+
+#screen-analyzer #gsUseMyLocation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 48px;
+  margin: 12px 0 16px;
+  border: 2px solid #591536;
+  border-radius: 999px;
+  background: white;
+  color: #591536;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+}
+
+#screen-analyzer #gsUseMyLocation i {
+  font-size: 20px;
+}
+
+#screen-analyzer #gsUseMyLocation:disabled {
+  opacity: .5;
+}
+
+#screen-analyzer .gs-live-restaurant-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1e8ee !important;
+  color: #591536;
+}
+
+#screen-analyzer .gs-live-restaurant-image i {
+  font-size: 54px;
+}
+
+/* ==========================================
+   DISCOVERY CAROUSEL MOBILE FIX
+   makes cards smaller so they don't overlap arrows
+   ========================================== */
+
+   #screen-plans .gs-discovery-carousel-frame {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    margin: 28px auto 0;
+    padding: 0 54px; /* creates space for left/right arrows */
+    box-sizing: border-box;
+  }
+  
+  #screen-plans .gs-discovery-options {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  #screen-plans .gs-discovery-choice {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  #screen-plans .gs-discovery-button {
+    width: 100% !important;
+    height: 230px !important;          /* smaller card */
+    min-height: 230px !important;
+    padding: 12px 14px 16px !important; /* less inner padding */
+    border-radius: 24px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto 1fr auto !important;
+    align-items: center !important;
+    justify-items: center !important;
+    gap: 8px !important;               /* less space between title/icon/tagline */
+    box-sizing: border-box !important;
+  }
+  
+  #screen-plans .gs-discovery-button span {
+    align-self: end !important;
+    justify-self: center !important;
+    margin: 0 !important;
+    font-size: 19px !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+  }
+  
+  #screen-plans .gs-discovery-button i:first-child {
+    align-self: center !important;
+    justify-self: center !important;
+    margin: 0 !important;
+    font-size: 88px !important; /* keep large but not oversized */
+    line-height: 1 !important;
+  }
+  
+  #screen-plans .gs-discovery-description {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: white !important;
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    white-space: nowrap !important; /* keep on one line */
+    align-self: start !important;
+    justify-self: center !important;
+  }
+  
+  #screen-plans .gs-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #591536;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    z-index: 5;
+  }
+  
+  #screen-plans .gs-carousel-arrow i {
+    font-size: 24px !important;
+    color: white !important;
+    line-height: 1 !important;
+  }
+  
+  #screen-plans .gs-carousel-prev {
+    left: 6px;
+  }
+  
+  #screen-plans .gs-carousel-next {
+    right: 6px;
+  }
+  
+  #screen-plans .gs-carousel-arrow:disabled {
+    opacity: 0.35;
+  }
+  
+  /* extra mobile tightening */
+  @media (max-width: 480px) {
+    #screen-plans .gs-discovery-carousel-frame {
+      max-width: 100%;
+      padding: 0 50px;
+      margin-top: 24px;
+    }
+  
+    #screen-plans .gs-discovery-button {
+      height: 220px !important;
+      min-height: 220px !important;
+      padding: 10px 12px 14px !important;
+      gap: 6px !important;
+    }
+  
+    #screen-plans .gs-discovery-button span {
+      font-size: 18px !important;
+    }
+  
+    #screen-plans .gs-discovery-button i:first-child {
+      font-size: 82px !important;
+    }
+  
+    #screen-plans .gs-discovery-description {
+      font-size: 12px !important;
+    }
+  
+    #screen-plans .gs-carousel-arrow {
+      width: 40px;
+      height: 40px;
+    }
+  
+    #screen-plans .gs-carousel-arrow i {
+      font-size: 22px !important;
+    }
+  }
+
+
+/* FINAL DISCOVERY CARD CORRECTIONS */
+
+/* Keep descriptions inside the pink cards */
+#screen-plans .gs-discovery-description {
+  position: absolute !important;
+  top: auto !important;
+  bottom: 16px !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 8px !important;
+
+  color: white !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
+
+/* Restore large icons without changing card size */
+#screen-plans .gs-discovery-button i:first-child {
+  font-size: 110px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 480px) {
+  #screen-plans .gs-discovery-button i:first-child {
+    font-size: 110px !important;
+  }
+}

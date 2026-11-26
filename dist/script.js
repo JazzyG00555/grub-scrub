@@ -96,6 +96,46 @@ const RESTAURANT_LOGOS = {
   // FOOD PROFILES
   // ==========================================
 
+  // Default avatar for missing or broken profile photos
+  const gsDefaultAvatar =
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="49" fill="#A7A7A7"/>
+        <circle cx="50" cy="49" r="18" fill="#F4F4F4"/>
+        <path d="M16 94 C20 75 32 66 50 66
+                 C68 66 80 75 84 94 Z"
+              fill="#F4F4F4"/>
+      </svg>
+    `);
+
+  function gsFixMissingAvatar(container) {
+    const img = container.querySelector(
+      ".profile-photo img, .profile-nav-image"
+    );
+
+    if (!img) return;
+
+    const useFallback = () => {
+      img.src = gsDefaultAvatar;
+    };
+
+    img.addEventListener("error", useFallback, {
+      once: true
+    });
+
+    const source = img.getAttribute("src");
+
+    if (
+      !source ||
+      source === "undefined" ||
+      source === "null"
+    ) {
+      useFallback();
+    }
+  }
+
   const users = [
     {
       name: "Jamie",
@@ -503,7 +543,7 @@ const RESTAURANT_LOGOS = {
     const page = screens.plans.querySelector(".wireframe-choice-page");
 
     page.innerHTML = `
-      <h2>How Would You Like to Discover Food Today?</h2>
+      <h2>Ready to Discover Your Next Meal?</h2>
 
       <div class="gs-discovery-options">
         <div class="gs-discovery-choice">
@@ -534,6 +574,84 @@ const RESTAURANT_LOGOS = {
         </div>
       </div>
     `;
+
+
+    // Discovery carousel: arrow-button navigation
+    const discoveryRail =
+      page.querySelector(".gs-discovery-options");
+
+    const discoveryFrame = document.createElement("div");
+    discoveryFrame.className = "gs-discovery-carousel-frame";
+
+    discoveryRail.before(discoveryFrame);
+    discoveryFrame.appendChild(discoveryRail);
+
+    const discoverySlides = [
+      ...discoveryRail.querySelectorAll(".gs-discovery-choice")
+    ];
+
+    // Short descriptions that remain on one line
+    const shortDescriptions = [
+      "Scan a logo to explore meals",
+      "See who can eat what",
+      "Discover restaurants nearby"
+    ];
+
+    discoverySlides.forEach((slide, index) => {
+      slide.querySelector(".gs-discovery-description")
+        .textContent = shortDescriptions[index];
+    });
+
+    function makeCarouselArrow(direction, label) {
+      const arrow = document.createElement("button");
+      arrow.type = "button";
+      arrow.className =
+        "gs-carousel-arrow gs-carousel-" + direction;
+      arrow.setAttribute("aria-label", label);
+      arrow.innerHTML = direction === "prev"
+        ? '<i class="ph ph-caret-left" aria-hidden="true"></i>'
+        : '<i class="ph ph-caret-right" aria-hidden="true"></i>';
+      return arrow;
+    }
+
+    const previousArrow = makeCarouselArrow(
+      "prev", "Previous discovery option"
+    );
+    const nextArrow = makeCarouselArrow(
+      "next", "Next discovery option"
+    );
+
+    discoveryFrame.prepend(previousArrow);
+    discoveryFrame.appendChild(nextArrow);
+
+    let discoveryIndex = 0;
+
+    function showDiscoverySlide(index) {
+      discoveryIndex = Math.max(
+        0,
+        Math.min(discoverySlides.length - 1, index)
+      );
+
+      discoveryRail.scrollTo({
+        left: discoveryIndex * discoveryRail.clientWidth,
+        behavior: "smooth"
+      });
+
+      previousArrow.disabled = discoveryIndex === 0;
+      nextArrow.disabled =
+        discoveryIndex === discoverySlides.length - 1;
+    }
+
+    previousArrow.addEventListener("click", () => {
+      showDiscoverySlide(discoveryIndex - 1);
+    });
+
+    nextArrow.addEventListener("click", () => {
+      showDiscoverySlide(discoveryIndex + 1);
+    });
+
+    showDiscoverySlide(0);
+
 
     function selectDiscoveryFlow(type) {
       state.selectedScanType = type;
@@ -697,6 +815,8 @@ const RESTAURANT_LOGOS = {
           </div>
         </div>
       `;
+      gsFixMissingAvatar(left);
+      
 
       const button = document.createElement("button");
       button.type = "button";
@@ -1047,7 +1167,7 @@ function createRestaurantLogoCard(restaurant) {
         analyzerSearchLabel +
         ". Distances are straight-line estimates.";
 
-      renderAnalyzerRecommendations();
+        renderAnalyzerRecommendations();
 
     } catch (error) {
       if (request !== analyzerSearchRequest) return;
@@ -1083,19 +1203,86 @@ function createRestaurantLogoCard(restaurant) {
     renderAnalyzerRecommendations();
   });
 
-  analyzerRadius.addEventListener("change", () => {
-    if (analyzerSearchCenter) {
-      analyzerLocationStatus.textContent =
-        `Within ${analyzerRadius.value} miles of ` +
-        analyzerSearchLabel + " (straight-line distance).";
-    }
-    renderAnalyzerRecommendations();
-  });
-
   analyzerBack.addEventListener("click", () => {
     renderUsers();
     showScreen("users");
   });
+
+
+  // ==========================================
+  // PHONE LOCATION - ORIGINAL SEARCH PRESERVED
+  // ==========================================
+
+  const gsUseMyLocation = document.createElement("button");
+
+  gsUseMyLocation.type = "button";
+  gsUseMyLocation.id = "gsUseMyLocation";
+  gsUseMyLocation.innerHTML =
+    '<i class="ph ph-navigation-arrow"></i> USE MY LOCATION';
+
+  analyzerSearchForm.insertAdjacentElement(
+    "afterend",
+    gsUseMyLocation
+  );
+
+  gsUseMyLocation.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      analyzerLocationStatus.textContent =
+        "Location not supported. Search by address instead.";
+      return;
+    }
+
+    gsUseMyLocation.disabled = true;
+    analyzerLocationStatus.textContent =
+      "Finding your location...";
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        ++analyzerSearchRequest;
+
+        analyzerSearchCenter = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        };
+
+        analyzerSearchLabel = "your current location";
+        analyzerLocation.value = "";
+        gsUseMyLocation.disabled = false;
+
+        analyzerLocationStatus.textContent =
+          `Showing demo restaurants within ${analyzerRadius.value} miles of your location.`;
+
+        renderAnalyzerRecommendations();
+      },
+
+      error => {
+        gsUseMyLocation.disabled = false;
+
+        analyzerLocationStatus.textContent =
+          error.code === 1
+            ? "Location permission denied. Search by address instead."
+            : "Could not find your location. Try searching by address.";
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
+  });
+
+  // Update restaurant results when the radius changes.
+  analyzerRadius.addEventListener("change", () => {
+    if (analyzerSearchCenter) {
+      analyzerLocationStatus.textContent =
+        `Showing demo restaurants within ${analyzerRadius.value} miles of ${analyzerSearchLabel}.`;
+    }
+
+    renderAnalyzerRecommendations();
+  });
+
+  
 
   // ==========================================
   // RESULTS FLOW
@@ -2506,7 +2693,7 @@ button.style.backgroundColor = includedInGroup
           }"></i>
         </span>
       `;
-
+      gsFixMissingAvatar(button);
       
 button.addEventListener("click", () => {
   // Prevent a swipe from triggering a selection.
