@@ -536,7 +536,21 @@
           BACK
         </button>
 
-        <h1>Restaurant Recall List</h1>
+        
+<div class="gs-recall-heading-row">
+  <h1>Recent Restaurants</h1>
+
+  <select
+    id="gsRecallFilter"
+    aria-label="Filter recent restaurants"
+  >
+    <option value="all">All</option>
+    <option value="menu">Menu</option>
+    <option value="logo">Logo</option>
+    <option value="search">Search</option>
+  </select>
+</div>
+
 
         <p>
           Previously scanned restaurants and menus
@@ -584,7 +598,7 @@
           class="scan-again-button"
           type="button"
         >
-          RECALL LIST
+          RECENT RESTAURANTS
         </button>
       </header>
 

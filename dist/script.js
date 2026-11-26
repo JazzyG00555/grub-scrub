@@ -78,12 +78,18 @@ const RESTAURANT_LOGOS = {
     const button = event.target.closest("button");
     if (!button || button.disabled) return;
     unlockAudio();
+    
     playSound(
       button.classList.contains("user-add-button") ||
-      button.id === "addAllButton"
+      button.id === "addAllButton" ||
+      (
+        button.classList.contains("profile-button") &&
+        state.profileMenuOpen
+      )
         ? "profile"
         : "click"
     );
+
   }, true);
 
   // ==========================================
@@ -1574,7 +1580,7 @@ try {
     menuCaptureCanvas.hidden = true;
     menuCameraVideo.hidden = false;
     captureMenuButton.disabled = true;
-    captureMenuButton.textContent = "SAVE MENU RESULTS";
+    captureMenuButton.textContent = "PHOTOGRAPH RESULTS";
     menuCameraStatus.textContent = "Starting camera...";
 
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -1942,58 +1948,6 @@ try {
     return true;
   }
 
-  captureMenuButton.addEventListener("click", () => {
-    if (
-      !menuCameraStream ||
-      !menuCameraVideo.videoWidth ||
-      !menuCameraVideo.videoHeight
-    ) {
-      menuCameraStatus.textContent = "Camera is not ready yet.";
-      return;
-    }
-
-    captureMenuButton.disabled = true;
-    const canvas = menuCaptureCanvas;
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      captureMenuButton.disabled = false;
-      return;
-    }
-
-    canvas.width = menuCameraVideo.videoWidth;
-    canvas.height = menuCameraVideo.videoHeight;
-    context.drawImage(
-      menuCameraVideo, 0, 0, canvas.width, canvas.height
-    );
-
-    capturedMenuPhoto = createMenuPhotoDataURL(
-      canvas, 1100, 0.82
-    );
-
-    if (!capturedMenuPhoto) {
-      captureMenuButton.disabled = false;
-      return;
-    }
-
-    menuPhotoCaptured = true;
-    stopMenuCamera();
-
-    menuCameraVideo.hidden = true;
-    menuCaptureCanvas.hidden = false;
-
-    try {
-      if (!saveCapturedMenu()) {
-        throw new Error("Could not save menu");
-      }
-    } catch (error) {
-      console.error("Menu save:", error);
-      menuCameraStatus.textContent =
-        "Could not save menu. Browser storage may be full.";
-      captureMenuButton.disabled = false;
-    }
-  });
-
   menuScannerBack.addEventListener("click", () => {
     stopMenuCamera();
     renderUsers();
@@ -2038,17 +1992,6 @@ try {
     } else {
       showScreen("menuScanner");
       await startMenuCamera();
-    }
-  });
-
-  saveMenuResultsButton.addEventListener("click", () => {
-    try {
-      if (!saveCapturedMenu()) {
-        menuSaveStatus.textContent = "Please scan a menu first.";
-      }
-    } catch (error) {
-      console.error(error);
-      menuSaveStatus.textContent = "Could not save menu.";
     }
   });
 
@@ -2266,6 +2209,33 @@ try {
   // RESTAURANT MENU
   // ==========================================
 
+  
+  // ==========================================
+  // MULTI-PROFILE ROTARY MEAL FILTER
+  // ==========================================
+
+  // null = original single-profile behavior.
+  // A Set = profiles actively selected on the disc.
+  let gsDiscGroup = null;
+
+  function gsDiscGroupUsers() {
+    const guests = selectedUsers();
+
+    if (gsDiscGroup === null) {
+      const current = activeUser();
+      return current ? [current] : [];
+    }
+
+    // Remove anyone no longer selected for the gathering.
+    for (const person of gsDiscGroup) {
+      if (!guests.includes(person)) {
+        gsDiscGroup.delete(person);
+      }
+    }
+
+    return [...gsDiscGroup];
+  }
+
   function renderMenu() {
     const restaurant = restaurants[state.restaurant];
     const user = activeUser();
@@ -2276,16 +2246,41 @@ try {
       return;
     }
 
-    const meals = available(restaurant, user);
+    const group = gsDiscGroupUsers();
+
+    // A meal must satisfy EVERY selected profile.
+    const meals = group.length
+      ? restaurant.meals.filter(meal =>
+          group.every(person => fits(meal, person))
+        )
+      : [];
+
     restaurantName.textContent = restaurant.name;
-    activeUserName.textContent = user.name;
+
+    activeUserName.textContent = group.length
+      ? group.map(person => person.name).join(" + ")
+      : "No profiles selected";
+
     activeUserRestrictions.textContent =
-      user.restrictions.join(" • ");
+      group.length === 1
+        ? group[0].restrictions.join(" • ")
+        : group.length > 1
+          ? "Meals suitable for everyone selected"
+          : "Tap profiles in the wheel to select them";
+
     availabilityCount.textContent =
       `${meals.length}/${restaurant.meals.length}`;
-    optionsMessage.textContent = meals.length
-      ? "meal options available"
-      : "no meal options available";
+
+    optionsMessage.textContent = !group.length
+      ? "select profiles in the wheel"
+      : group.length > 1
+        ? (meals.length
+            ? "shared meal options available"
+            : "no shared meal options available")
+        : (meals.length
+            ? "meal options available"
+            : "no meal options available");
+
 
     const version = ++state.menuVersion;
     const entries = [];
@@ -2368,6 +2363,17 @@ try {
   // PROJECT 2 PROFILE WHEEL RESTORATION
   // ==========================================
 
+
+  // ==========================================
+  // ROTARY PROFILE WHEEL
+  // Three profiles visible at a time
+  // ==========================================
+
+  let gsRotaryOffset = 0;
+  let gsRotaryGesture = null;
+  let gsRotaryAnimating = false;
+  let gsIgnoreProfileClickUntil = 0;
+
   function renderProfileDisc() {
     profileButtons.replaceChildren();
 
@@ -2376,7 +2382,15 @@ try {
       state.profileMenuOpen
     );
 
+    // Allow dragging around the open wheel.
+    profileDisc.style.pointerEvents =
+      state.profileMenuOpen ? "auto" : "none";
+
+    profileDisc.style.touchAction =
+      state.profileMenuOpen ? "none" : "auto";
+
     const restaurant = restaurants[state.restaurant];
+
     const ordered = selectedUsers().map((user, index) => ({
       user,
       index
@@ -2391,28 +2405,68 @@ try {
       )
     ].filter(Boolean);
 
-    // Original Project 2 positions.
+    // Reset the rotation when the wheel closes.
+    if (!state.profileMenuOpen) {
+      gsRotaryOffset = 0;
+    }
+
+    if (arranged.length) {
+      gsRotaryOffset =
+        (gsRotaryOffset + arranged.length) %
+        arranged.length;
+    }
+
+    // Preserve your three original avatar positions.
     const slots = [
       { left: "25px", top: "11px" },
       { right: "2px", top: "2px" },
       { left: "2px", bottom: "2px" }
     ];
 
-    arranged.forEach((entry, slot) => {
+    // Show a maximum of three profiles.
+    const visible = state.profileMenuOpen
+      ? Array.from(
+          { length: Math.min(3, arranged.length) },
+          (_, i) => arranged[
+            (gsRotaryOffset + i) % arranged.length
+          ]
+        )
+      : [active].filter(Boolean);
+
+    visible.forEach((entry, slot) => {
       const user = entry.user;
-      const isActive = entry.index === state.activeUser;
+
+      const isSelected =
+        entry.index === state.activeUser;
+
       const compatible =
         available(restaurant, user).length > 0;
-
-      // Closed wheel: only the active portrait.
-      if (!state.profileMenuOpen && !isActive) return;
 
       const button = document.createElement("button");
       button.type = "button";
 
-      button.className = isActive
-        ? "profile-button active current"
-        : "profile-button small";
+      // The first visible profile keeps the
+      // larger circle from your original design.
+      button.className =
+        (!state.profileMenuOpen || slot === 0)
+          ? "profile-button active current"
+          : "profile-button small";
+
+
+      // Pink = selected for shared-meal filtering.
+      // Burgundy = not selected.
+      const includedInGroup = gsDiscGroup === null
+      ? isSelected
+      : gsDiscGroup.has(user);
+    
+button.style.backgroundColor = includedInGroup
+? "var(--wheel-pink, var(--pink, #b65c91))"
+: "var(--wheel-burgundy, var(--burgundy, #591536))";
+
+    button.setAttribute(
+      "aria-pressed",
+      String(includedInGroup)
+    );
 
       if (state.profileMenuOpen) {
         Object.assign(button.style, slots[slot]);
@@ -2421,8 +2475,16 @@ try {
         button.style.bottom = "4px";
       }
 
+      button.style.touchAction = "none";
+
       button.setAttribute("aria-label", user.name);
 
+      if (isSelected) {
+        button.setAttribute("aria-current", "true");
+      }
+
+      // Preserve the original profile picture
+      // and compatibility indicator.
       button.innerHTML = `
         <span class="profile-main-icon ${
           compatible
@@ -2445,26 +2507,235 @@ try {
         </span>
       `;
 
-      button.addEventListener("click", () => {
-        if (!state.profileMenuOpen) {
-          // First tap expands the original wheel.
-          state.profileMenuOpen = true;
-          renderProfileDisc();
-          return;
-        }
+      
+button.addEventListener("click", () => {
+  // Prevent a swipe from triggering a selection.
+  if (Date.now() < gsIgnoreProfileClickUntil) {
+    return;
+  }
 
-        // Selecting a profile collapses the wheel.
-        state.activeUser = entry.index;
-        state.profileMenuOpen = false;
-        renderMenu();
-      });
+  // First tap opens the rotary wheel.
+  if (!state.profileMenuOpen) {
+    state.profileMenuOpen = true;
+    renderProfileDisc();
+    return;
+  }
+
+  // Start with the currently active person.
+  if (gsDiscGroup === null) {
+    gsDiscGroup = new Set(gsDiscGroupUsers());
+  }
+
+  // Toggle this person independently.
+  if (gsDiscGroup.has(user)) {
+    gsDiscGroup.delete(user);
+  } else {
+    gsDiscGroup.add(user);
+  }
+
+  // Update shared meals and keep the wheel open.
+  renderMenu();
+});
+
 
       profileButtons.appendChild(button);
     });
 
+    // Keep the green + button fixed in place.
     addProfileButton.style.display =
       state.profileMenuOpen ? "flex" : "none";
+
+    profileDisc.setAttribute(
+      "aria-label",
+      state.profileMenuOpen && arranged.length > 3
+        ? "Profile wheel. Swipe to rotate through profiles."
+        : "Profile wheel"
+    );
   }
+
+  // ==========================================
+  // ROTARY ANIMATION
+  // ==========================================
+
+  function gsRotateProfileDisc(direction) {
+    const count = selectedUsers().length;
+
+    if (
+      count <= 3 ||
+      !state.profileMenuOpen ||
+      gsRotaryAnimating
+    ) {
+      return;
+    }
+
+    const advance = () => {
+      gsRotaryOffset =
+        (gsRotaryOffset + direction + count) % count;
+
+      renderProfileDisc();
+    };
+
+    // Respect reduced-motion preferences.
+    if (
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+    ) {
+      advance();
+      return;
+    }
+
+    gsRotaryAnimating = true;
+
+    const turn = direction > 0 ? -28 : 28;
+
+    const outgoing = profileButtons.animate(
+      [
+        {
+          transform: "rotate(0deg)",
+          opacity: 1
+        },
+        {
+          transform: `rotate(${turn}deg)`,
+          opacity: 0.08
+        }
+      ],
+      {
+        duration: 170,
+        easing: "ease-in",
+        fill: "forwards"
+      }
+    );
+
+    outgoing.finished.then(() => {
+      advance();
+      outgoing.cancel();
+
+      const incoming = profileButtons.animate(
+        [
+          {
+            transform: `rotate(${-turn}deg)`,
+            opacity: 0.08
+          },
+          {
+            transform: "rotate(0deg)",
+            opacity: 1
+          }
+        ],
+        {
+          duration: 180,
+          easing: "ease-out"
+        }
+      );
+
+      incoming.finished.then(
+        () => { gsRotaryAnimating = false; },
+        () => { gsRotaryAnimating = false; }
+      );
+
+    }).catch(() => {
+      gsRotaryAnimating = false;
+    });
+  }
+
+  // ==========================================
+  // TOUCH AND MOUSE DRAG SUPPORT
+  // ==========================================
+
+  profileDisc.addEventListener(
+    "pointerdown",
+    event => {
+      if (
+        !state.profileMenuOpen ||
+        selectedUsers().length <= 3 ||
+        gsRotaryAnimating ||
+        event.target.closest?.("#addProfileButton")
+      ) {
+        return;
+      }
+
+      gsRotaryGesture = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        captured: false
+      };
+    }
+  );
+
+  profileDisc.addEventListener(
+    "pointermove",
+    event => {
+      const gesture = gsRotaryGesture;
+
+      if (
+        !gesture ||
+        gesture.id !== event.pointerId ||
+        gesture.captured
+      ) {
+        return;
+      }
+
+      const distance = Math.hypot(
+        event.clientX - gesture.x,
+        event.clientY - gesture.y
+      );
+
+      if (distance > 12) {
+        gesture.captured = true;
+
+        try {
+          profileDisc.setPointerCapture(
+            event.pointerId
+          );
+        } catch (_) {
+          // Dragging can still finish without capture.
+        }
+      }
+    }
+  );
+
+  profileDisc.addEventListener(
+    "pointerup",
+    event => {
+      const gesture = gsRotaryGesture;
+
+      if (
+        !gesture ||
+        gesture.id !== event.pointerId
+      ) {
+        return;
+      }
+
+      gsRotaryGesture = null;
+
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+
+      if (Math.hypot(dx, dy) < 32) {
+        return;
+      }
+
+      // Prevent a swipe from triggering a profile tap.
+      gsIgnoreProfileClickUntil =
+        Date.now() + 500;
+
+      const movement =
+        Math.abs(dx) >= Math.abs(dy) ? dx : dy;
+
+      gsRotateProfileDisc(
+        movement < 0 ? 1 : -1
+      );
+    }
+  );
+
+  profileDisc.addEventListener(
+    "pointercancel",
+    () => {
+      gsRotaryGesture = null;
+    }
+  );
+
 
   addProfileButton.addEventListener("click", () => {
     state.profileMenuOpen = false;
@@ -4448,10 +4719,13 @@ restaurants.push(bronxRestaurant);
       `;
 
       // Profile photo.
-      const photo = document.createElement("img");
+      
+const photo = document.createElement("img");
 
-      photo.src = item.profile.image;
-      photo.alt = "";
+photo.crossOrigin = "anonymous";
+photo.src = item.profile.image;
+photo.alt = "";
+
 
       photo.style.cssText = `
         width: 27px;
@@ -5251,10 +5525,13 @@ restaurants.push(bronxRestaurant);
 
       // Add all affected profile photos beside the flag.
       for (const profile of profiles) {
-        const img = document.createElement("img");
+        
+const img = document.createElement("img");
 
-        img.src = profile.image;
-        img.alt = "";
+img.crossOrigin = "anonymous";
+img.src = profile.image;
+img.alt = "";
+
 
         img.style.cssText = `
           width: 27px;
@@ -6841,82 +7118,277 @@ button.hidden = true;
   // REPLACE FINAL SAVE BUTTON BEHAVIOR
   // ==========================================
 
+ 
+  // ==========================================
+  // TWO-STEP MENU PHOTO REVIEW AND SAVE
+  // ==========================================
+
+  let gsReviewRawMenuCanvas = null;
+  let gsReviewLiveBackup = null;
+
+  function gsDrawReviewFlags(canvas) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const overlayRect =
+      menuARFlagLayer.getBoundingClientRect();
+
+    const bounds = getMenuVideoBounds(
+      canvas.width,
+      canvas.height
+    );
+
+    if (!bounds.scale) return;
+
+    const unit = 1 / bounds.scale;
+
+    const badges = [
+      ...menuARFlagLayer.querySelectorAll(
+        ".menu-ar-warning"
+      )
+    ];
+
+    for (const badge of badges) {
+      if (
+        getComputedStyle(badge).visibility === "hidden"
+      ) continue;
+
+      const rect = badge.getBoundingClientRect();
+
+      if (!rect.width || !rect.height) continue;
+
+      const x =
+        (rect.left - overlayRect.left - bounds.left) *
+        unit;
+
+      const y =
+        (rect.top - overlayRect.top - bounds.top) *
+        unit;
+
+      const w = rect.width * unit;
+      const h = rect.height * unit;
+
+      // Dark badge background.
+      ctx.fillStyle = "rgba(15,15,15,0.9)";
+      ctx.beginPath();
+
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(x, y, w, h, 10 * unit);
+      } else {
+        ctx.rect(x, y, w, h);
+      }
+
+      ctx.fill();
+
+      // White flagpole.
+      ctx.fillStyle = "white";
+      ctx.fillRect(
+        x + 9 * unit,
+        y + 6 * unit,
+        2 * unit,
+        22 * unit
+      );
+
+      // Red warning flag.
+      ctx.fillStyle = "#f2273f";
+      ctx.beginPath();
+      ctx.moveTo(x + 11 * unit, y + 6 * unit);
+      ctx.lineTo(x + 27 * unit, y + 6 * unit);
+      ctx.lineTo(x + 23 * unit, y + 13 * unit);
+      ctx.lineTo(x + 27 * unit, y + 20 * unit);
+      ctx.lineTo(x + 11 * unit, y + 20 * unit);
+      ctx.closePath();
+      ctx.fill();
+
+     
+      // Draw the affected users' circular profile pictures.
+      const photos = [...badge.querySelectorAll("img")]
+        .filter(img => img.complete && img.naturalWidth > 0);
+
+      const count = photos.length;
+
+      if (count) {
+        const availableWidth = Math.max(20, w / unit - 36);
+        const size = Math.min(
+          27,
+          availableWidth / (1 + 0.6 * (count - 1))
+        );
+
+        const step = size * 0.6;
+        const totalWidth = size + step * (count - 1);
+        const startX = x + w - (6 + totalWidth) * unit;
+
+        photos.forEach((photo, index) => {
+          const px = startX + index * step * unit;
+          const py = y + (h - size * unit) / 2;
+          const radius = size * unit / 2;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(
+            px + radius,
+            py + radius,
+            radius,
+            0,
+            Math.PI * 2
+          );
+          ctx.clip();
+
+          ctx.drawImage(
+            photo,
+            px,
+            py,
+            size * unit,
+            size * unit
+          );
+
+          ctx.restore();
+
+          ctx.beginPath();
+          ctx.arc(
+            px + radius,
+            py + radius,
+            radius,
+            0,
+            Math.PI * 2
+          );
+          ctx.strokeStyle = "white";
+          ctx.lineWidth = 2 * unit;
+          ctx.stroke();
+        });
+      }
+    }
+  }
+
+  // STEP 1: TAKE A PICTURE
+
   captureMenuButton.addEventListener(
     "click",
-    async event => {
+    event => {
       if (
         state.screen !== "menuScanner" ||
         !menuCameraStream ||
         !menuCameraVideo.videoWidth ||
+        !menuCameraVideo.videoHeight ||
         captureMenuButton.disabled
       ) return;
 
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      captureMenuButton.disabled = true;
+      // Capture an unmarked image for accurate OCR.
+      const raw = document.createElement("canvas");
 
-      const photo = menuCaptureCanvas;
+      raw.width = menuCameraVideo.videoWidth;
+      raw.height = menuCameraVideo.videoHeight;
 
-      photo.width =
-        menuCameraVideo.videoWidth;
+      const rawCtx = raw.getContext("2d");
+      const previewCtx =
+        menuCaptureCanvas.getContext("2d");
 
-      photo.height =
-        menuCameraVideo.videoHeight;
+      if (!rawCtx || !previewCtx) return;
 
-      photo.getContext("2d").drawImage(
+      rawCtx.drawImage(
         menuCameraVideo,
         0,
-        0
+        0,
+        raw.width,
+        raw.height
       );
 
-      menuPhotoCaptured = true;
+      // Create the photograph users will see and save.
+      menuCaptureCanvas.width = raw.width;
+      menuCaptureCanvas.height = raw.height;
 
-      capturedMenuPhoto =
-        createMenuPhotoDataURL(
-          photo,
-          1100,
-          0.82
-        );
+      previewCtx.drawImage(raw, 0, 0);
 
-      // Stop live recognition before final OCR.
-      stopMenuCamera();
+      // Add visible red flags before the camera stops.
+      gsDrawReviewFlags(menuCaptureCanvas);
 
-      menuCameraStatus.textContent =
-        "Analyzing captured menu...";
+      capturedMenuPhoto = createMenuPhotoDataURL(
+        menuCaptureCanvas,
+        1100,
+        0.82
+      );
 
-      
-        const gsLiveBackup =
-        Number.isFinite(gsBestMenuScan?.analysis?.percentage) &&
+      if (!capturedMenuPhoto) return;
+
+      gsReviewRawMenuCanvas = raw;
+
+      gsReviewLiveBackup =
+        Number.isFinite(
+          gsBestMenuScan?.analysis?.percentage
+        ) &&
         gsBestMenuScan.analysis.count >= 2
           ? JSON.parse(JSON.stringify(gsBestMenuScan))
           : null;
 
+      menuPhotoCaptured = true;
+
+      // Existing camera cleanup remains unchanged.
+      stopMenuCamera();
+
+      menuCameraVideo.hidden = true;
+      menuCaptureCanvas.hidden = false;
+
+      // Open the existing photo review screen.
+      openMenuResults(capturedMenuPhoto, false);
+
+      menuResultsMatchLabel.textContent =
+        "Photo captured. Review before analyzing.";
+
+      saveMenuResultsButton.disabled = false;
+
+      saveMenuResultsButton.textContent =
+        "SAVE RESULTS FOR REFERENCE";
+    },
+    true
+  );
+
+  // STEP 2: FIND COMPATIBILITY AND SAVE
+
+  saveMenuResultsButton.addEventListener(
+    "click",
+    async event => {
+      if (
+        state.screen !== "menuResults" ||
+        state.menuResultFromRecall ||
+        !menuPhotoCaptured ||
+        !gsReviewRawMenuCanvas
+      ) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      saveMenuResultsButton.disabled = true;
+
+      menuSaveStatus.textContent =
+        "Checking compatibility and saving...";
+
       gsBestMenuScan = null;
 
-
       try {
-        const recognized =
-          await gsScanStillPhoto(photo);
+        const recognized = await gsScanStillPhoto(
+          gsReviewRawMenuCanvas
+        );
 
-        if (
-          state.screen !== "menuScanner"
-        ) return;
+        if (state.screen !== "menuResults") return;
 
         gsBestMenuScan = {
           text: recognized.text,
           analysis: recognized.analysis,
-
-          warnings: recognized.analysis.items
-            .filter(i => i.conflicts.length)
-            .map(i => ({
-              word: i.name,
-              profiles: i.conflicts
+          warnings: (
+            recognized.analysis?.items || []
+          )
+            .filter(item => item.conflicts.length)
+            .map(item => ({
+              word: item.name,
+              profiles: item.conflicts
             }))
         };
 
       } catch (error) {
-        console.warn("Final OCR:", error);
+        console.warn("Final menu OCR:", error);
 
         gsBestMenuScan = {
           text: "",
@@ -6925,53 +7397,61 @@ button.hidden = true;
         };
       }
 
-      // Restore the live estimate if final OCR could not confirm it.
-      if (
-        !Number.isFinite(gsBestMenuScan?.analysis?.percentage) &&
-        gsLiveBackup
-      ) {
-        gsBestMenuScan = gsLiveBackup;
+      // Save only when the captured photo produces
+      // a sufficiently verified compatibility result.
+      const photoAnalysis = gsBestMenuScan?.analysis;
 
-        gsBestMenuScan.analysis.note =
-          "Provisional result from live OCR. " +
-          "Final photo recognition could not confirm it. " +
-          "Verify ingredients and allergens with the restaurant.";
+      const readableMenu =
+        Number.isFinite(photoAnalysis?.percentage) &&
+        photoAnalysis.count >= 2 &&
+        Array.isArray(photoAnalysis.items) &&
+        photoAnalysis.items.length >= 2 &&
+        photoAnalysis.items.every(item =>
+          item.name?.trim() &&
+          item.description?.trim() &&
+          !item.needsVerification
+        );
+
+      if (!readableMenu) {
+        gsBestMenuScan = null;
+
+        menuSaveStatus.textContent =
+          "Grub Scrub could not reliably read the menu. " +
+          "Nothing has been saved. Please retake " +
+          "a clearer photo.";
+
+        // Leave only Retake Photo available.
+        saveMenuResultsButton.hidden = true;
+        return;
       }
 
-      gsMenuAudit.text =
-        gsBestMenuScan.text;
+      gsMenuAudit.text = gsBestMenuScan.text;
+      gsMenuAudit.analysis = gsBestMenuScan.analysis;
+      gsMenuAudit.warnings = gsBestMenuScan.warnings;
 
-      gsMenuAudit.analysis =
-        gsBestMenuScan.analysis;
-
-      gsMenuAudit.warnings =
-        gsBestMenuScan.warnings;
-
-      lastRecognizedMenuText =
-        gsBestMenuScan.text;
-
+      lastRecognizedMenuText = gsBestMenuScan.text;
       lastDetectedMenuWarnings =
         gsBestMenuScan.warnings;
-
-      menuCameraVideo.hidden = true;
-      photo.hidden = false;
 
       try {
         if (!saveCapturedMenu()) {
           throw new Error("Could not save menu");
         }
 
+        gsReviewRawMenuCanvas = null;
+
       } catch (error) {
         console.error("Menu save:", error);
 
-        menuCameraStatus.textContent =
-          "Could not save menu. Browser storage may be full.";
+        menuSaveStatus.textContent =
+          "Could not save menu. Please try again.";
 
-        captureMenuButton.disabled = false;
+        saveMenuResultsButton.disabled = false;
       }
     },
     true
   );
+
 
   // Prevent uncertain OCR from appearing
   // as fully compatible restaurant meals.
