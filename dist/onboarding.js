@@ -105,14 +105,16 @@
     `).join("");
   }
 
-  function generateAvatar(name) {
-    const initial = (name.trim()[0] || "?").toUpperCase();
-    return `
-      <span class="gs-ob-avatar-fallback">
-        ${escapeHTML(initial)}
-      </span>
-    `;
-  }
+  
+function generateAvatar(name) {
+  return `
+    <img
+      src="./grub-scrub-default-profile.png"
+      alt="Default profile picture"
+    >
+  `;
+}
+
 
   function photoMarkup() {
     return profile.image
@@ -179,7 +181,8 @@
     return {
       id: source.id,
       name: source.name,
-      image: source.image,
+      image: source.image || "./grub-scrub-default-profile.png",
+
       restrictions: restrictions.length
         ? restrictions
         : ["No dietary restrictions"],

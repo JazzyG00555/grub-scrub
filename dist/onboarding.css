@@ -1,270 +1,251 @@
 
-/* ==========================================
-   GRUB SCRUB - FOOD PROFILE ONBOARDING
-   Complete cleaned stylesheet
-   ========================================== */
+/* GRUB SCRUB: COMPLETE ONBOARDING CSS */
 
-   body.gs-onboarding-open {
-    overflow: hidden;
-  }
-  
-  #gsOnboarding {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: #ffffff;
-    color: #171717;
-    font-family: Arial, Helvetica, sans-serif;
-  }
-  
-  #gsOnboarding[hidden] {
-    display: none !important;
-  }
-  
-  .gs-ob-screen {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 520px;
-    height: 100dvh;
-    margin: 0 auto;
-    padding:
-      max(46px, env(safe-area-inset-top))
-      24px
-      max(32px, env(safe-area-inset-bottom));
-    background: white;
-  }
-  
-  .gs-ob-top {
-    position: relative;
-    flex: 0 0 auto;
-  }
-  
-  .gs-ob-top h2 {
-    margin: 16px 0 24px;
-    color: #111;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: left;
-  }
-  
-  .gs-ob-close {
-    position: absolute;
-    top: -26px;
-    right: 0;
-    width: 36px;
-    height: 36px;
-    border: 0;
-    background: transparent;
-    color: #591536;
-    font-size: 28px;
-    line-height: 1;
-  }
-  
-  .gs-ob-progress {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    width: 100%;
-    margin-bottom: 28px;
-  }
-  
-  .gs-ob-progress span {
-    display: block;
-    height: 3px;
-    background: #c999b3;
-  }
-  
-  .gs-ob-progress span.current {
-    background: #591536;
-  }
-  
-  .gs-ob-content {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 4px 0 24px;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* ==========================================
-     STEP 1 - NAME AND PHOTO
-     ========================================== */
-  
-  .gs-ob-photo-section {
-    display: flex;
-    justify-content: center;
-    margin: 70px 0 30px;
-  }
-  
-  .gs-ob-photo-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    color: #111;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  
-  .gs-ob-photo-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 112px;
-    height: 112px;
-    overflow: hidden;
-    border: 2px solid #591536;
-    border-radius: 50%;
-    background: #f4f4f4;
-  }
-  
-  .gs-ob-photo-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .gs-ob-avatar-fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    color: #591536;
-    font-size: 42px;
-    font-weight: 700;
-  }
-  
-  .gs-ob-field-label {
-    display: block;
-    margin: 0 0 8px;
-    color: #333;
-    font-size: 13px;
-    font-weight: 700;
-  }
-  
-  .gs-ob-text-input,
-  .gs-ob-select,
-  .gs-ob-textarea {
-    display: block;
-    width: 100%;
-    min-height: 43px;
-    padding: 12px;
-    border: 1px solid #d0d0d0;
-    border-radius: 3px;
-    background: white;
-    color: #151515;
-    font-size: 14px;
-    font-family: inherit;
-  }
-  
-  .gs-ob-text-input:focus,
-  .gs-ob-select:focus,
-  .gs-ob-textarea:focus {
-    border-color: #591536;
-    outline: 2px solid rgba(89, 21, 54, 0.12);
-  }
-  
-  /* ==========================================
-     STEP 2 - DIETARY RESTRICTIONS
-     Original layout preserved
-     ========================================== */
-  
-  .gs-ob-scroll-content {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-  }
-  
-  .gs-ob-fieldset {
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-  
-  .gs-ob-fieldset legend {
-    margin-bottom: 12px;
-    color: #111;
-    font-size: 16px;
-    font-weight: 700;
-  }
-  
-  .gs-ob-choices {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-  
-  .gs-ob-choice {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    min-height: 39px;
-    padding: 8px 10px;
-    border: 1px solid #dddddd;
-    border-radius: 3px;
-    color: #222;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  
-  .gs-ob-choice:has(input:checked) {
-    border-color: #a85a88;
-    background: #f9eff5;
-  }
-  
-  .gs-ob-choice input {
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    accent-color: #591536;
-    flex-shrink: 0;
-  }
-  
-  .gs-ob-choice span {
-    overflow-wrap: anywhere;
-  }
-  
-  .gs-ob-note {
-    margin: 16px 0 0;
-    color: #747474;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  
-  /* ==========================================
-     STEP 3 - COMPATIBILITY AND DISLIKES
-     Cleaned dropdown spacing
-     ========================================== */
-  
-  .gs-ob-question {
-    display: block;
-    max-width: 340px;
-    margin: 2px 0 17px;
-    color: #111;
-    font-size: 16px;
-    line-height: 1.3;
-    font-weight: 700;
-  }
-  
-  .gs-ob-select {
-    max-width: 260px;
-  }
-  
-  /* Question above the dropdown */
-  
-  #gsOnboarding .gs-ob-content > label[for="gsObMinMeals"] {
-    margin: 2px 0 10px;
-  }
-  
-  /* Dropdown: only 12px beneath it */
-  
-  
-/* Onboarding screen 3: more spacing below dropdown */
+body.gs-onboarding-open {
+  overflow: hidden;
+}
+
+#gsOnboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #ffffff;
+  color: #171717;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#gsOnboarding[hidden] {
+  display: none !important;
+}
+
+.gs-ob-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  height: 100dvh;
+  margin: 0 auto;
+  padding: max(46px, env(safe-area-inset-top)) 24px
+    max(32px, env(safe-area-inset-bottom));
+  background: white;
+}
+
+.gs-ob-top {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.gs-ob-top h2 {
+  margin: 16px 0 24px;
+  color: #111;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.gs-ob-close {
+  position: absolute;
+  top: -26px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #591536;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.gs-ob-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.gs-ob-progress span {
+  display: block;
+  height: 3px;
+  background: #c999b3;
+}
+
+.gs-ob-progress span.current {
+  background: #591536;
+}
+
+.gs-ob-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 0 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* STEP 1: NAME AND PHOTO */
+
+.gs-ob-photo-section {
+  display: flex;
+  justify-content: center;
+  margin: 70px 0 30px;
+}
+
+.gs-ob-photo-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gs-ob-photo-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 112px;
+  height: 112px;
+  overflow: hidden;
+  border: 2px solid #591536;
+  border-radius: 50%;
+  background: #f4f4f4;
+}
+
+.gs-ob-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gs-ob-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #591536;
+  font-size: 42px;
+  font-weight: 700;
+}
+
+.gs-ob-field-label {
+  display: block;
+  margin: 0 0 8px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gs-ob-text-input,
+.gs-ob-select,
+.gs-ob-textarea {
+  display: block;
+  width: 100%;
+  min-height: 43px;
+  padding: 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  background: white;
+  color: #151515;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.gs-ob-text-input:focus,
+.gs-ob-select:focus,
+.gs-ob-textarea:focus {
+  border-color: #591536;
+  outline: 2px solid rgba(89,21,54,.12);
+}
+
+/* STEP 2: DIETARY RESTRICTIONS */
+
+.gs-ob-scroll-content {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.gs-ob-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gs-ob-fieldset legend {
+  margin-bottom: 12px;
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.gs-ob-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px;
+}
+
+.gs-ob-choice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  color: #222;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.gs-ob-choice:has(input:checked) {
+  border-color: #a85a88;
+  background: #f9eff5;
+}
+
+.gs-ob-choice input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #591536;
+  flex-shrink: 0;
+}
+
+.gs-ob-choice span {
+  overflow-wrap: anywhere;
+}
+
+.gs-ob-note {
+  margin: 16px 0 0;
+  color: #747474;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* STEP 3: COMPATIBILITY AND DISLIKES */
+
+.gs-ob-question {
+  display: block;
+  max-width: 340px;
+  margin: 2px 0 17px;
+  color: #111;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.gs-ob-select {
+  max-width: 260px;
+}
+
+#gsOnboarding .gs-ob-content > label[for="gsObMinMeals"] {
+  margin: 2px 0 10px;
+}
+
 #gsOnboarding #gsObMinMeals {
   display: block;
   width: 100%;
@@ -272,240 +253,206 @@
   margin: 0 0 30px;
 }
 
-  
-  /* Question beneath dropdown */
-  
-  #gsOnboarding .gs-ob-content > label.gs-ob-dislikes {
-    margin: 0 0 13px;
+#gsOnboarding .gs-ob-content > label.gs-ob-dislikes {
+  margin: 0 0 13px;
+}
+
+.gs-ob-textarea {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* STEP 4: FINAL RESULTS */
+
+.gs-ob-review h3 {
+  margin: 0 0 21px;
+  color: #111;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.gs-ob-summary-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: #591536;
+  font-size: 16px;
+}
+
+.gs-ob-summary-name img,
+.gs-ob-summary-name .gs-ob-avatar-fallback {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1e6ed;
+  font-size: 21px;
+}
+
+.gs-ob-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 19px;
+}
+
+.gs-ob-review-row strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gs-ob-review-value {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gs-ob-edit {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #591536;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+/* SHARED BACK AND NEXT BUTTONS */
+
+.gs-ob-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 12px;
+  background: white;
+}
+
+.gs-ob-actions button {
+  min-height: 49px;
+  padding: 10px;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gs-ob-back {
+  border: 2px solid #a85a88;
+  background: white;
+  color: #111;
+}
+
+.gs-ob-next {
+  border: 2px solid #a85a88;
+  background: #a85a88;
+  color: white;
+}
+
+.gs-ob-error {
+  min-height: 16px;
+  margin: 0 0 5px;
+  color: #b01e39;
+  font-size: 12px;
+}
+
+/* CREATE PROFILE LAUNCH BUTTONS */
+
+.gs-ob-launch {
+  display: block;
+  min-height: 42px;
+  margin: 14px auto 0;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 0;
+  background: #b65c91;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.gs-ob-launch-inline {
+  margin: 10px 0 18px;
+  border: 2px solid #591536;
+  background: white;
+  color: #591536;
+}
+
+body #screen-title .title-content button.gs-ob-launch {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+  color: #591536 !important;
+  border: 2px solid #591536 !important;
+  border-radius: 17px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.13) !important;
+  text-transform: uppercase !important;
+}
+
+@media (max-width: 380px) {
+  .gs-ob-screen {
+    padding-left: 18px;
+    padding-right: 18px;
   }
-  
-  .gs-ob-textarea {
-    min-height: 130px;
-    resize: vertical;
-    line-height: 1.5;
+  .gs-ob-choices {
+    gap: 6px;
   }
-  
-  /* ==========================================
-     STEP 4 - FINAL RESULTS
-     ========================================== */
-  
-  .gs-ob-review h3 {
-    margin: 0 0 21px;
-    color: #111;
-    font-size: 18px;
-    font-weight: 700;
+  .gs-ob-choice {
+    padding: 7px;
+    font-size: 11px;
   }
-  
-  .gs-ob-summary-name {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    color: #591536;
-    font-size: 16px;
+  .gs-ob-top h2 {
+    font-size: 17px;
   }
-  
-  .gs-ob-summary-name img,
-  .gs-ob-summary-name .gs-ob-avatar-fallback {
-    width: 50px;
-    height: 50px;
-    flex: 0 0 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #f1e6ed;
-    font-size: 21px;
-  }
-  
-  .gs-ob-review-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 19px;
-  }
-  
-  .gs-ob-review-row strong {
-    display: block;
-    margin-bottom: 7px;
-    font-size: 14px;
-    font-weight: 700;
-  }
-  
-  .gs-ob-review-value {
-    color: #666;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  
-  .gs-ob-edit {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #591536;
-    font-size: 12px;
-    text-decoration: underline;
-  }
-  
-  /* ==========================================
-     SHARED BACK AND NEXT BUTTONS
-     ========================================== */
-  
-  .gs-ob-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    flex: 0 0 auto;
-    margin-top: auto;
-    padding-top: 12px;
-    background: white;
-  }
-  
-  .gs-ob-actions button {
-    min-height: 49px;
-    padding: 10px;
-    border-radius: 0;
-    font-size: 14px;
-    font-weight: 700;
-  }
-  
-  .gs-ob-back {
-    border: 2px solid #a85a88;
-    background: white;
-    color: #111;
-  }
-  
-  .gs-ob-next {
-    border: 2px solid #a85a88;
-    background: #a85a88;
-    color: white;
-  }
-  
-  .gs-ob-error {
-    min-height: 16px;
-    margin: 0 0 5px;
-    color: #b01e39;
-    font-size: 12px;
-  }
-  
-  /* ==========================================
-     CREATE PROFILE LAUNCH BUTTONS
-     ========================================== */
-  
-  .gs-ob-launch {
-    display: block;
-    min-height: 42px;
-    margin: 14px auto 0;
-    padding: 11px 18px;
-    border: 0;
-    border-radius: 0;
-    background: #b65c91;
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  
-  .gs-ob-launch-inline {
-    margin: 10px 0 18px;
-    border: 2px solid #591536;
-    background: white;
-    color: #591536;
-  }
-  
-  /* Home Create Profile: white with burgundy text and border */
-  
-  body #screen-title .title-content button.gs-ob-launch {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: #ffffff !important;
-    color: #591536 !important;
-    border: 2px solid #591536 !important;
-    border-radius: 17px !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.13) !important;
-    text-transform: uppercase !important;
-  }
-  
-  /* ==========================================
-     MOBILE
-     ========================================== */
-  
-  @media (max-width: 380px) {
-    .gs-ob-screen {
-      padding-left: 18px;
-      padding-right: 18px;
-    }
-  
-    .gs-ob-choices {
-      gap: 6px;
-    }
-  
-    .gs-ob-choice {
-      padding: 7px;
-      font-size: 11px;
-    }
-  
-    .gs-ob-top h2 {
-      font-size: 17px;
-    }
-  }
-  
-  /* ==========================================
-     HOME SCREEN BUTTON DIMENSIONS
-     ========================================== */
-  
-  #screen-title #startButton,
-  #screen-title .title-content button.gs-ob-launch {
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 220px !important;
-    min-height: 48px !important;
-  
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  
-    box-sizing: border-box !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  
-  /* START: original pink */
-  
-  #screen-title #startButton {
-    background: #b65c91 !important;
-    color: white !important;
-    border: 2px solid #b65c91 !important;
-  }
-  
-  /* CREATE PROFILE: white with burgundy outline */
-  
-  #screen-title .title-content button.gs-ob-launch {
-    background: white !important;
-    color: #591536 !important;
-    border: 2px solid #591536 !important;
-  }
-  
-  /* Onboarding: dropdown arrow spacing */
+}
+
+/* HOME SCREEN BUTTON DIMENSIONS */
+
+#screen-title #startButton,
+#screen-title .title-content button.gs-ob-launch {
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#screen-title #startButton {
+  background: #b65c91 !important;
+  color: white !important;
+  border: 2px solid #b65c91 !important;
+}
+
+#screen-title .title-content button.gs-ob-launch {
+  background: white !important;
+  color: #591536 !important;
+  border: 2px solid #591536 !important;
+}
+
+/* ONBOARDING DROPDOWN */
+
 #gsObMinMeals {
   -webkit-appearance: none !important;
   appearance: none !important;
-
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
-
   background-repeat: no-repeat !important;
   background-position: right 14px center !important;
   background-size: 16px 16px !important;
-
   padding-right: 40px !important;
 }
 
-
-/* ==========================================
-   ONBOARDING STEP 3: MATCH FIELD WIDTHS
-   ========================================== */
-
-/* Both question titles */
 #gsOnboarding .gs-ob-content > label[for="gsObMinMeals"],
 #gsOnboarding .gs-ob-content > label[for="gsObDislikes"] {
   display: block;
@@ -514,11 +461,18 @@
   box-sizing: border-box;
 }
 
-/* Both input boxes */
 #gsOnboarding #gsObMinMeals,
 #gsOnboarding #gsObDislikes {
   display: block;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
+}
+
+/* THE GRAY DEFAULT AVATAR IS EMBEDDED BELOW.
+   NO PNG FILE IS NEEDED.
+   UPLOADED PHOTOGRAPHS ARE UNAFFECTED. */
+
+img[src$="grub-scrub-default-profile.png"] {
+  content: url("data:image/webp;base64,UklGRqADAABXRUJQVlA4IJQDAABwIgCdASq0ALQAPm02kUakIyGhLHZIoIANiWlu/Hx7KxnZ1x/rvu7n4J1o47Vst6qledKnD26jeo9YbWCM8YAIo9PTs0HYqUShsW5SngT3Z1gC3iGsJg5SAvvm0w2OXT5i31rCVUhHgeFHC2DbGK6x+Mz+2HTKtx2mZSFPsxw+sKupouFFTZpfc90Hp4st0MBQa51sDsEQ7x9FDsnsCjGJVhFtareVjvTonCfKDETDFj//oaDuZoyqCOzYxy8vY1Xt0bgm7u/HsLRfA0M9srUI6XkuJrJczrr1bWUKz3qFiJOKUq1+oatHQecvZCVMVolt3K2F4dAOBgZRLexEq9RmD8wSdGnXvaXngN4XAjy/yqDXevLfYG+wN9gIAAD+x7JOttM5MhKfQmx+cAXi+jh7CVYDRJgzwUmXuisrPQUEIcsCPrjADloi4/WxXqbb0dkdtcrDLyDh58f7YuwiPqTBEuvgnqKN/I4BIbn5G0F0RO/lHyJE3JY3T7dmGiG3ddpM0Yb3liNayb/vo9XYxD/ImvlaFFv9Q+XvqGyO8XvNOshbV3NFOqIsdLMycTHnHkXcMbMmtAlnKPvDZD4OcxNVGPCCiR9hCLIT2qQ4LypIRhKInVuq/z+4wdIB2W5LuvRedZo8F609d54OWMc34yhQr9qJDiP5z6aptUy9QyGOuwXTCPZij5g90WSn6XOZJ/CF+MkHMXnA9XKKnq6p5ZmI0tajIh0gDPtuvSTs/7VqRAHghyu/IQmuYiT4bjwF/d+wNz1N4cHgVKjOpSvBavL6RF4x00BeJ1dOOhWnszf7AwUxyC6OV4/lsjqc0+ex0wxv4FDP8vd81GuJgBJT4Hj8NfaBh8OmsISBv/TiExT3boMqoK+IVs8gF/Lygr6vvT/bhBxB364G1fUIjybn3RC8odMUfNhBBLh0WEjGBOPk0L0VZIBTq9eDyawFnEYSl2twa97rLmOVydf0VkuOYCsZipCN5mJCGJdI9SVLc+0nlj1adx0s5dyp3zqossfGj86VGEY8mp1SRTjQqY/VRQEVdo8auThCXIY1N7fAqQN52JJUoDCmsrC7E4k4Dy/Sog4vabCYGceyEY/JihqzvanJqKNPTauq9KChV1N5J/0/cLA0WoP8rlajwds9qQB4mwgxKwfIwhFTXvrjzU+/bEPNy5GSvw2nNTONG7KCSJClGv2KyOTWAASEz1Z97rH5oWAAAAAA") !important;
 }

@@ -1213,17 +1213,94 @@ function createRestaurantLogoCard(restaurant) {
   // PHONE LOCATION - ORIGINAL SEARCH PRESERVED
   // ==========================================
 
+  
+  // Move the search instructions beneath the page title.
+  const gsAnalyzerHeader = screens.analyzer.querySelector(
+    ".analyzer-header"
+  );
+
+  const gsAnalyzerTagline = document.createElement("p");
+
+  gsAnalyzerTagline.textContent =
+    analyzerLocationStatus.textContent.trim() ||
+    "Enter a location and tap the search icon.";
+
+  gsAnalyzerHeader.querySelector("h1").after(gsAnalyzerTagline);
+
+  // Keep this area available for live search messages.
+  analyzerLocationStatus.textContent = "";
+
+  Object.assign(gsAnalyzerHeader.style, {
+    flexDirection: "column",
+    gap: "6px",
+    paddingLeft: "60px",
+    paddingRight: "60px"
+  });
+
+  Object.assign(gsAnalyzerTagline.style, {
+    margin: "0",
+    fontSize: "12px",
+    lineHeight: "1.4",
+    color: "#591536",
+    textAlign: "center"
+  });
+
+  // Move the current-location button to the top-right.
   const gsUseMyLocation = document.createElement("button");
 
   gsUseMyLocation.type = "button";
   gsUseMyLocation.id = "gsUseMyLocation";
   gsUseMyLocation.innerHTML =
-    '<i class="ph ph-navigation-arrow"></i> USE MY LOCATION';
+    '<i class="ph ph-navigation-arrow" aria-hidden="true"></i>';
 
-  analyzerSearchForm.insertAdjacentElement(
-    "afterend",
-    gsUseMyLocation
+  gsUseMyLocation.setAttribute(
+    "aria-label",
+    "Use my current location"
   );
+
+  gsUseMyLocation.title = "Use my current location";
+
+  gsAnalyzerHeader.appendChild(gsUseMyLocation);
+
+  Object.assign(gsUseMyLocation.style, {
+    position: "absolute",
+    top: "calc(24px + env(safe-area-inset-top))",
+    right: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "44px",
+    height: "44px",
+    minHeight: "44px",
+    margin: "0",
+    padding: "0",
+    border: "2px solid #591536",
+    borderRadius: "50%",
+    background: "#fff",
+    color: "#591536",
+    boxShadow: "0 4px 10px rgba(0,0,0,.1)",
+    zIndex: "5"
+  });
+// 1. Use the Phosphor map-pin icon.
+gsUseMyLocation.innerHTML =
+  '</i><span>MY LOCATION</span><i class="ph ph-map-pin" aria-hidden="true">';
+
+Object.assign(gsUseMyLocation.style, {
+  width: "auto",
+  minWidth: "44px",
+  padding: "0 10px",
+  gap: "5px",
+  borderRadius: "24px",
+  fontSize: "11px",
+  fontWeight: "700",
+  whiteSpace: "nowrap"
+});
+
+// 2. Restore the tagline's original gray color.
+gsAnalyzerTagline.style.color = "#777";
+
+// 3. Hide the text beneath the search bar.
+analyzerLocationStatus.style.display = "none";
 
   gsUseMyLocation.addEventListener("click", () => {
     if (!navigator.geolocation) {
@@ -2748,7 +2825,7 @@ button.addEventListener("click", () => {
     const count = selectedUsers().length;
 
     if (
-      count <= 3 ||
+      count <= 1 ||
       !state.profileMenuOpen ||
       gsRotaryAnimating
     ) {
@@ -2834,7 +2911,7 @@ button.addEventListener("click", () => {
     event => {
       if (
         !state.profileMenuOpen ||
-        selectedUsers().length <= 3 ||
+        selectedUsers().length <= 1 ||
         gsRotaryAnimating ||
         event.target.closest?.("#addProfileButton")
       ) {
@@ -2929,6 +3006,454 @@ button.addEventListener("click", () => {
     renderUsers();
     showScreen("users");
   });
+
+
+
+  
+
+
+  // ==========================================
+  // ORIGINAL ROTARY DISC + COLLAPSED PROFILE BAR
+  // ==========================================
+
+  // Keep the original rotary renderer and positions.
+  const gsOriginalProfileRender = renderProfileDisc;
+
+  const gsProfileBar = document.createElement("button");
+  gsProfileBar.type = "button";
+  gsProfileBar.className = "gs-profile-bar";
+  gsProfileBar.setAttribute(
+    "aria-label",
+    "Open selected food profiles"
+  );
+
+  // First-use swipe tooltip.
+  const gsSwipeHint = document.createElement("div");
+  gsSwipeHint.className = "gs-rotary-swipe-hint";
+  gsSwipeHint.setAttribute("role", "tooltip");
+
+  const gsSwipeHintText = document.createElement("span");
+  gsSwipeHintText.textContent =
+    "↻ Swipe around the dial to browse profiles";
+
+  const gsSwipeHintDismiss = document.createElement("button");
+  gsSwipeHintDismiss.type = "button";
+  gsSwipeHintDismiss.className = "gs-rotary-hint-dismiss";
+  gsSwipeHintDismiss.textContent = "×";
+  gsSwipeHintDismiss.setAttribute(
+    "aria-label",
+    "Dismiss swipe tip"
+  );
+
+  gsSwipeHint.append(
+    gsSwipeHintText,
+    gsSwipeHintDismiss
+  );
+
+  profileDisc.classList.add("gs-profile-enhanced");
+  profileDisc.append(gsProfileBar, gsSwipeHint);
+
+  
+  // Show the swipe tooltip again on every full page reload.
+  let gsSwipeHintSeen = false;
+
+  function gsDismissSwipeHint() {
+    gsSwipeHintSeen = true;
+    gsSwipeHint.hidden = true;
+  }
+
+
+  gsSwipeHintDismiss.addEventListener(
+    "pointerdown",
+    event => event.stopPropagation()
+  );
+
+  gsSwipeHintDismiss.addEventListener(
+    "click",
+    gsDismissSwipeHint
+  );
+
+  // Open the real rotary wheel.
+  gsProfileBar.addEventListener("click", () => {
+    state.profileMenuOpen = true;
+    gsRotaryOffset = 0;
+    renderProfileDisc();
+  });
+
+  // Preserve the original wheel renderer.
+  renderProfileDisc = function () {
+    gsOriginalProfileRender();
+
+    const opened = state.profileMenuOpen;
+
+    // Allow the collapsed bar to be tapped.
+    profileDisc.style.pointerEvents = "auto";
+
+    gsProfileBar.hidden = opened;
+
+    // The original rotary wheel rotates when there
+    // are more than three available profiles.
+    gsSwipeHint.hidden = gsSwipeHintSeen;
+
+    if (opened) {
+      // Keep all original absolute positions, classes,
+      // green/red indicators, and swipe gestures.
+      // Only slightly enlarge selected SMALL circles.
+      profileButtons
+        .querySelectorAll(".profile-button")
+        .forEach(button => {
+          const selected =
+            button.getAttribute("aria-pressed") === "true";
+
+          button.classList.toggle(
+            "gs-profile-selected",
+            selected
+          );
+        });
+
+      return;
+    }
+
+    // Rebuild the closed horizontal profile-photo bar.
+    const selected = gsDiscGroupUsers();
+
+    const photos = document.createElement("span");
+    photos.className = "gs-profile-bar-photos";
+
+    selected.slice(0, 4).forEach(user => {
+      const img = document.createElement("img");
+
+      img.src = user.image || gsDefaultAvatar;
+      img.alt = user.name;
+
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = gsDefaultAvatar;
+      };
+
+      photos.appendChild(img);
+    });
+
+    if (selected.length > 4) {
+      const more = document.createElement("span");
+      more.className = "gs-profile-more";
+      more.textContent = `+${selected.length - 4}`;
+      photos.appendChild(more);
+    }
+
+    const label = document.createElement("span");
+    label.className = "gs-profile-bar-label";
+
+    label.textContent = selected.length
+  ? ""
+  : "Select profiles";
+
+    const caret = document.createElement("i");
+    caret.className = "ph ph-caret-up";
+    caret.setAttribute("aria-hidden", "true");
+
+    gsProfileBar.replaceChildren(
+      photos,
+      label,
+      caret
+    );
+  };
+
+  // Close the wheel by tapping outside it.
+  document.addEventListener("pointerdown", event => {
+    if (
+      state.screen !== "menu" ||
+      !state.profileMenuOpen ||
+      profileDisc.contains(event.target)
+    ) {
+      return;
+    }
+
+    state.profileMenuOpen = false;
+    renderProfileDisc();
+  });
+
+  // Hide the tooltip after the user swipes.
+  let gsSwipeStart = null;
+
+  profileDisc.addEventListener("pointerdown", event => {
+    if (
+      !state.profileMenuOpen ||
+      gsSwipeHintSeen ||
+      selectedUsers().length <= 1
+    ) {
+      return;
+    }
+
+    gsSwipeStart = {
+      x: event.clientX,
+      y: event.clientY
+    };
+  });
+
+  profileDisc.addEventListener("pointerup", event => {
+    if (!gsSwipeStart) return;
+
+    const distance = Math.hypot(
+      event.clientX - gsSwipeStart.x,
+      event.clientY - gsSwipeStart.y
+    );
+
+    gsSwipeStart = null;
+
+    if (distance > 32) {
+      gsDismissSwipeHint();
+    }
+  });
+
+  profileDisc.addEventListener("pointercancel", () => {
+    gsSwipeStart = null;
+  });
+
+  // ==========================================
+  // CLOSED BAR + TOOLTIP STYLING
+  // ==========================================
+
+  const gsProfileStyles = document.createElement("style");
+
+  gsProfileStyles.textContent = `
+
+    /* Closed state matches your approved image */
+    #screen-menu
+    #profileDisc.gs-profile-enhanced:not(.open) {
+      width: min(250px, calc(100vw - 20px)) !important;
+      height: 60px !important;
+      right: max(8px, env(safe-area-inset-right)) !important;
+      pointer-events: auto !important;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced:not(.open)
+    .profile-buttons {
+      display: none !important;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      width: 100%;
+      height: 60px;
+      padding: 7px 13px;
+
+      border: 2px solid #591536;
+      border-radius: 999px;
+
+      background: white;
+      color: #591536;
+
+      box-shadow: 0 5px 13px rgba(0,0,0,.17);
+
+      font-size: 13px;
+      font-weight: 700;
+      pointer-events: auto;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar-photos {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar-photos img {
+      width: 37px;
+      height: 37px;
+
+      object-fit: cover;
+      border: 2px solid white;
+      border-radius: 50%;
+
+      background: #ddd;
+      margin-left: -9px;
+
+      box-shadow: 0 0 0 1px #9e528a;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar-photos img:first-child {
+      margin-left: 0;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar-label {
+      flex: 1;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-more {
+      margin-left: 5px;
+    }
+/* Automatically fit the closed bar to its contents */
+#screen-menu #profileDisc.gs-profile-enhanced:not(.open) {
+  width: max-content !important;
+  max-width: calc(100vw - 20px);
+}
+
+#screen-menu #profileDisc.gs-profile-enhanced:not(.open)
+.gs-profile-bar {
+  width: max-content;
+}
+
+#screen-menu #profileDisc.gs-profile-enhanced
+.gs-profile-bar-label:empty {
+  display: none;
+}
+    /* Preserve the original circular rotary wheel.
+       No grid, arrows, or manual position overrides. */
+
+   
+    /* All selected circles have the same smaller size */
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button.gs-profile-selected {
+  width: 74px !important;
+  height: 74px !important;
+  z-index: 6;
+}
+
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button.gs-profile-selected .profile-main-icon {
+  width: 58px !important;
+  height: 58px !important;
+}
+
+   /* Selected profiles grow, regardless of wheel position */
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button[aria-pressed="true"] {
+  width: 74px !important;
+  height: 74px !important;
+  z-index: 6;
+}
+
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button[aria-pressed="true"] .profile-main-icon {
+  width: 58px !important;
+  height: 58px !important;
+}
+
+/* Unselected profiles shrink */
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button[aria-pressed="false"] {
+  width: 62px !important;
+  height: 62px !important;
+}
+
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button[aria-pressed="false"] .profile-main-icon {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+/* Give every selected profile the same checkmark size */
+#screen-menu #profileDisc.gs-profile-enhanced.open
+.profile-button[aria-pressed="true"] .profile-status-icon {
+  width: 23px !important;
+  height: 23px !important;
+  right: 1px !important;
+  bottom: 3px !important;
+}
+
+    /* Swipe tooltip */
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-rotary-swipe-hint {
+      position: absolute;
+      z-index: 30;
+
+      right: 0;
+      top: -66px;
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      width: max-content;
+      max-width: min(260px, calc(100vw - 32px));
+
+      padding: 11px 12px;
+
+      border: 1px solid #591536;
+      border-radius: 12px;
+
+      background: white;
+      color: #591536;
+
+      box-shadow: 0 5px 15px rgba(0,0,0,.14);
+
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.3;
+
+      pointer-events: auto;
+    }
+
+    /* Little pointer toward the rotary disc */
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-rotary-swipe-hint::after {
+      content: "";
+      position: absolute;
+
+      right: 25px;
+      bottom: -7px;
+
+      width: 12px;
+      height: 12px;
+
+      background: white;
+      border-right: 1px solid #591536;
+      border-bottom: 1px solid #591536;
+
+      transform: rotate(45deg);
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-rotary-hint-dismiss {
+      flex-shrink: 0;
+
+      width: 24px;
+      height: 24px;
+      padding: 0;
+
+      border: 0;
+      border-radius: 50%;
+
+      background: #f1e8ee;
+      color: #591536;
+
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-profile-bar[hidden],
+    #screen-menu
+    #profileDisc.gs-profile-enhanced
+    .gs-rotary-swipe-hint[hidden] {
+      display: none !important;
+    }
+  `;
+
+  document.head.appendChild(gsProfileStyles);
 
   // ==========================================
   // SCAN AGAIN

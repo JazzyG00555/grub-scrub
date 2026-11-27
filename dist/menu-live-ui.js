@@ -677,6 +677,160 @@
     attributeFilter: ["class"]
   });
 
+  // ==========================================
+  // MEAL SHARING FILTER: VISUAL REDESIGN
+  // ==========================================
+
+  const gsFilterStyle = document.createElement("style");
+
+  gsFilterStyle.textContent = `
+    /* White filter button with burgundy outline */
+    #screen-menu-scanner #gsLiveFilterButton {
+      background: #fff !important;
+      color: #591536 !important;
+      border: 2px solid #591536 !important;
+      border-radius: 999px !important;
+      font-weight: 700 !important;
+      min-height: 44px;
+    }
+
+    /* Burgundy filter panel */
+    #screen-menu-scanner #gsLiveFilterPanel {
+      background: #591536 !important;
+      color: white !important;
+      border: 1px solid #b65c91 !important;
+      border-radius: 16px;
+      padding: 18px !important;
+      max-height: 55dvh;
+      overflow-y: auto;
+    }
+
+    #screen-menu-scanner .gs-live-filter-title {
+      font-size: 19px;
+      margin: 0 0 6px !important;
+    }
+
+    /* Two instructions close together */
+    #screen-menu-scanner .gs-filter-instruction {
+      color: white !important;
+      font-size: 13px;
+      line-height: 1.4;
+      margin: 3px 0 !important;
+    }
+
+    #screen-menu-scanner #gsLivePeople {
+      margin-top: 14px;
+    }
+
+    /* Profile rows */
+    #screen-menu-scanner .gs-live-person {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 0;
+      min-height: 50px;
+      color: white;
+      font-size: 16px;
+    }
+
+    /* Profile photos */
+    #screen-menu-scanner .gs-filter-avatar {
+      width: 42px;
+      height: 42px;
+      border: 2px solid white;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* Pink checkboxes with white square outlines */
+    #screen-menu-scanner .gs-live-person input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      margin: 0;
+      border: 2px solid white;
+      border-radius: 4px;
+      background: transparent;
+      flex: 0 0 26px;
+      cursor: pointer;
+    }
+
+    #screen-menu-scanner .gs-live-person input:checked {
+      background: #b65c91;
+    }
+
+    #screen-menu-scanner .gs-live-person input:checked::after {
+      content: "✓";
+      color: white;
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    /* The empty-state message now lives under the title */
+    #screen-menu-scanner #gsLiveBreakdown > .gs-live-note {
+      display: none !important;
+    }
+
+    #screen-menu-scanner #gsLiveBreakdown {
+      margin-top: 4px;
+    }
+  `;
+
+  document.head.appendChild(gsFilterStyle);
+
+  // Place both instructional lines under "Show flags for:"
+  const gsIntro = filterPanel.querySelector(
+    ":scope > .gs-live-note"
+  );
+
+  const gsPrompt = document.createElement("p");
+  gsPrompt.className = "gs-live-note gs-filter-instruction";
+  gsPrompt.textContent =
+    "Point at a readable menu with dish names and prices to see individual results.";
+
+  if (gsIntro) {
+    gsIntro.classList.add("gs-filter-instruction");
+    gsIntro.after(gsPrompt);
+  } else {
+    filterPanel.querySelector(".gs-live-filter-title")?.after(gsPrompt);
+  }
+
+  // Add the existing Food Profile photos beside their names.
+  const gsOriginalRenderPeople = renderPeople;
+
+  renderPeople = function (...args) {
+    gsOriginalRenderPeople(...args);
+
+    const cards = [
+      ...document.querySelectorAll("#userList .user-card")
+    ];
+
+    for (const row of peopleContainer.querySelectorAll(".gs-live-person")) {
+      const name = row.querySelector("span");
+      if (!name) continue;
+
+      const profileCard = cards.find(card =>
+        card.querySelector(".user-name")?.textContent.trim() ===
+        name.textContent.trim()
+      );
+
+      const image = profileCard?.querySelector(".profile-photo img");
+      if (!image?.src) continue;
+
+      const avatar = document.createElement("img");
+      avatar.className = "gs-filter-avatar";
+      avatar.src = image.src;
+      avatar.alt = "";
+
+      name.before(avatar);
+    }
+  };
+
   syncPeople();
   renderPeople();
   renderScore();
