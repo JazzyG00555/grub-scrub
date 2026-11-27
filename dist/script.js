@@ -1281,20 +1281,35 @@ function createRestaurantLogoCard(restaurant) {
     boxShadow: "0 4px 10px rgba(0,0,0,.1)",
     zIndex: "5"
   });
-// 1. Use the Phosphor map-pin icon.
-gsUseMyLocation.innerHTML =
-  '</i><span>MY LOCATION</span><i class="ph ph-map-pin" aria-hidden="true">';
 
-Object.assign(gsUseMyLocation.style, {
-  width: "auto",
-  minWidth: "44px",
-  padding: "0 10px",
-  gap: "5px",
-  borderRadius: "24px",
-  fontSize: "11px",
-  fontWeight: "700",
-  whiteSpace: "nowrap"
-});
+  // Top-right location button: pin icon only.
+  gsUseMyLocation.innerHTML =
+    '<i class="ph ph-map-pin" aria-hidden="true"></i>';
+
+  // Keep the button in the top-right on mobile.
+  const gsPinStyle = {
+    position: "absolute",
+    top: "calc(20px + env(safe-area-inset-top))",
+    right: "16px",
+    bottom: "auto",
+    left: "auto",
+    width: "44px",
+    minWidth: "44px",
+    height: "44px",
+    minHeight: "44px",
+    margin: "0",
+    padding: "0",
+    borderRadius: "50%"
+  };
+
+  Object.entries(gsPinStyle).forEach(([property, value]) => {
+    gsUseMyLocation.style.setProperty(
+      property.replace(/[A-Z]/g, letter => "-" + letter.toLowerCase()),
+      value,
+      "important"
+    );
+  });
+
 
 // 2. Restore the tagline's original gray color.
 gsAnalyzerTagline.style.color = "#777";
